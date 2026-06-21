@@ -1,0 +1,10 @@
+# Robots.txt – for local/dev. In production, serve /robots.txt and /sitemap.xml from your backend (or proxy to it).
+# Backend provides dynamic robots at GET /robots.txt with correct Sitemap URL.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /auth
+Sitemap: https://brpl.net/sitemap.xml
