@@ -10,7 +10,6 @@ const Header = () => {
     const settings = siteSettings as any;
     const [isDesktop, setIsDesktop] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [navLinks, setNavLinks] = useState<any[]>([]);
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
     const toggleSubmenu = (label: string) => {
@@ -42,7 +41,7 @@ const Header = () => {
         path: "/blog",
         isActive: true,
         isExternal: false,
-        subLinks: [
+        children: [
             { label: "Blog", path: "/blog" },
             { label: "News", path: "/news" },
         ],
@@ -60,7 +59,7 @@ const Header = () => {
             path: "/partners",
             isActive: true,
             isExternal: false,
-            subLinks: [
+            children: [
                 { label: "BRPL Partner", path: "/partners" },
                 { label: "BRPL Sponsors", path: "/types-of-partners" },
             ],
@@ -70,29 +69,11 @@ const Header = () => {
         { label: "Contact Us", path: "/contact-us", isActive: true, isExternal: false },
     ];
 
-    useEffect(() => {
-        const fetchNavLinks = async () => {
-            try {
-                const api = (await import("@/apihelper/api")).default;
-                const response = await api.get('/nav-links');
-                if (response.data && response.data.length > 0) {
-                    const links = response.data.map((link: any) => {
-                        if ((link.path === "/blog" || link.label === "Blog") && !link.subLinks) {
-                            return { ...blogDropdownLink, _id: link._id };
-                        }
-                        return link;
-                    });
-                    setNavLinks(links);
-                } else {
-                    setNavLinks(contextNavLinks && contextNavLinks.length > 0 ? contextNavLinks : staticNavLinks);
-                }
-            } catch (error) {
-                console.error("Failed to fetch nav links", error);
-                setNavLinks(contextNavLinks && contextNavLinks.length > 0 ? contextNavLinks : staticNavLinks);
-            }
-        };
-        fetchNavLinks();
-    }, [contextNavLinks]);
+    const navLinks = (contextNavLinks && contextNavLinks.length > 0 ? contextNavLinks : staticNavLinks).map((l: any) => ({
+        ...l,
+        isActive: true,
+        isExternal: l.isExternal ?? false,
+    }));
 
     return (
         <header className="sticky top-0 z-[100] font-sans shadow-md bg-[#111a45] text-white">
@@ -163,14 +144,14 @@ const Header = () => {
                 {/* Desktop Navigation */}
                 <nav className="hidden lg:flex items-center gap-8 text-[15px] font-semibold tracking-wide ml-auto">
                     {navLinks.filter(link => link.isActive).map((link) => (
-                        link.subLinks ? (
+                        (link.children || link.subLinks) ? (
                             <div key={link._id || link.label} className="relative group">
                                 <button className="hover:text-yellow-400 transition-colors py-1 flex items-center gap-1">
                                     {link.label}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6" /></svg>
                                 </button>
                                 <div className="absolute top-full left-0 w-48 bg-[#111a45] shadow-xl border-t-2 border-yellow-400 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top pt-2">
-                                    {link.subLinks.map((sub: any) => (
+                                    {(link.children || link.subLinks).map((sub: any) => (
                                         <Link key={sub.label} href={sub.path} className="block px-4 py-3 hover:bg-white/10 text-sm">{sub.label}</Link>
                                     ))}
                                 </div>
@@ -213,7 +194,7 @@ const Header = () => {
                 <div className="lg:hidden absolute top-full left-0 w-full bg-[#111a45] shadow-xl border-t border-white/10 z-50 px-6 py-4 overflow-y-auto max-h-[calc(100vh-110px)]">
                     <nav className="flex flex-col text-left">
                         {navLinks.filter(link => link.isActive).map((link) => (
-                            link.subLinks ? (
+                            (link.children || link.subLinks) ? (
                                 <div key={link._id || link.label} className="border-b border-white/20 last:border-0">
                                     <button
                                         className="w-full flex justify-between items-center py-4 text-white text-[16px] font-medium focus:outline-none focus:ring-0"
@@ -224,7 +205,7 @@ const Header = () => {
                                     </button>
                                     <div className={`overflow-hidden transition-all duration-300 ${expandedMenus[link.label] ? "max-h-screen opacity-100" : "max-h-0 opacity-0"}`}>
                                         <div className="pl-4 pb-4 border-l border-white/10 ml-1">
-                                            {link.subLinks.map((sub: any) => (
+                                            {(link.children || link.subLinks).map((sub: any) => (
                                                 <Link
                                                     key={sub.label}
                                                     href={sub.path}

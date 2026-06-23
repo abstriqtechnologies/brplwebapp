@@ -299,6 +299,25 @@ export async function getAllCollections() { return cachedCollections(); }
 
 // ---------- Build ----------
 
+function projectSocials(socials: Record<string, string | undefined> | undefined): SocialLink[] {
+    if (!socials) return DEFAULT_SOCIAL_LINKS;
+    const map: Record<string, { name: string; image: string }> = {
+        facebook: { name: "Facebook", image: "/facebook.webp" },
+        twitter: { name: "Twitter", image: "/twiter.webp" },
+        instagram: { name: "Instagram", image: "/instagram.webp" },
+        youtube: { name: "YouTube", image: "/youtube.webp" },
+        linkedin: { name: "LinkedIn", image: "/linkedin.webp" },
+        whatsapp: { name: "WhatsApp", image: "/whatsapp.webp" },
+    };
+    const result: SocialLink[] = [];
+    for (const [key, url] of Object.entries(socials)) {
+        if (!url) continue;
+        const m = map[key];
+        if (m) result.push({ name: m.name, url, image: m.image });
+    }
+    return result.length > 0 ? result : DEFAULT_SOCIAL_LINKS;
+}
+
 async function build(): Promise<SiteContext> {
     if (!CMS_LIVE) return defaults();
 
@@ -344,7 +363,7 @@ async function build(): Promise<SiteContext> {
         pageBanners,
         collections,
         pages: pages as any,
-        socialLinks: DEFAULT_SOCIAL_LINKS,
+        socialLinks: projectSocials(settings.socials),
         navLinks: Array.isArray(settings.navbarLinks) && settings.navbarLinks.length > 0
             ? settings.navbarLinks
             : d.navLinks,
