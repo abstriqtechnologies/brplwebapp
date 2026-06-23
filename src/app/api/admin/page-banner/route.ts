@@ -2,6 +2,7 @@ import { z } from "zod";
 import { connectDB } from "@/lib/mongodb";
 import PageBanner from "@/models/PageBanner";
 import { requireAdminDb, ok, fail, notFound, serverError } from "@/lib/adminApi";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
             parsed.data,
             { upsert: true, new: true }
         ).lean();
+        revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     } catch (err) {
         return serverError(err);
@@ -71,6 +73,7 @@ export async function PATCH(req: Request) {
         await connectDB();
         const doc = await PageBanner.findByIdAndUpdate(id, rest, { new: true }).lean();
         if (!doc) return notFound();
+        revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ ...doc, _id: doc._id.toString() });
     } catch (err) {
         return serverError(err);
@@ -87,6 +90,7 @@ export async function DELETE(req: Request) {
         await connectDB();
         const r = await PageBanner.findByIdAndDelete(id).lean();
         if (!r) return notFound();
+        revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ success: true });
     } catch (err) {
         return serverError(err);

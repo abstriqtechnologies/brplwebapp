@@ -2,6 +2,7 @@ import { z } from "zod";
 import { connectDB } from "@/lib/mongodb";
 import LegalPage from "@/models/LegalPage";
 import { requireAdminDb, ok, fail, notFound, serverError } from "@/lib/adminApi";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,6 +60,7 @@ export async function PATCH(req: Request, { params }: { params: { type: string }
             { upsert: true, new: true }
         ).lean();
         if (!doc) return notFound();
+        revalidateSite(TAGS.LEGAL);
         return ok({ ...doc, _id: doc._id.toString() });
     } catch (err) {
         return serverError(err);

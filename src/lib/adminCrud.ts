@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectDB } from "@/lib/mongodb";
 import { requireAdminDb, ok, fail, notFound, serverError, hasRole } from "@/lib/adminApi";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 import type { Model } from "mongoose";
 
 /**
@@ -60,6 +61,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
         await connectDB();
         const Model = getModel();
         const doc = await Model.create(parsed.data);
+        revalidateSite(TAGS.COLLECTIONS);
         return ok({ ...doc.toObject(), _id: doc._id.toString() });
     }
 
@@ -88,6 +90,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
             .findByIdAndUpdate(params.id, parsed.data, { new: true })
             .lean();
         if (!doc) return notFound();
+        revalidateSite(TAGS.COLLECTIONS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     }
 
@@ -101,6 +104,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
         await connectDB();
         const doc = await getModel().findByIdAndDelete(params.id).lean();
         if (!doc) return notFound();
+        revalidateSite(TAGS.COLLECTIONS);
         return ok({ success: true });
     }
 

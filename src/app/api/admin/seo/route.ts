@@ -2,6 +2,7 @@ import { z } from "zod";
 import { connectDB } from "@/lib/mongodb";
 import SeoMeta from "@/models/SeoMeta";
 import { requireAdminDb, ok, fail, notFound, serverError } from "@/lib/adminApi";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
             parsed.data,
             { upsert: true, new: true }
         ).lean();
+        revalidateSite(TAGS.SEO);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     } catch (err) {
         return serverError(err);
@@ -67,6 +69,7 @@ export async function PATCH(req: Request) {
         await connectDB();
         const doc = await SeoMeta.findByIdAndUpdate(id, rest, { new: true }).lean();
         if (!doc) return notFound();
+        revalidateSite(TAGS.SEO);
         return ok({ ...doc, _id: doc._id.toString() });
     } catch (err) {
         return serverError(err);
@@ -83,6 +86,7 @@ export async function DELETE(req: Request) {
         await connectDB();
         const r = await SeoMeta.findByIdAndDelete(id).lean();
         if (!r) return notFound();
+        revalidateSite(TAGS.SEO);
         return ok({ success: true });
     } catch (err) {
         return serverError(err);

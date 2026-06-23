@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import RegistrationCms from "@/models/RegistrationCms";
 import { requireAdminDb, ok, fail, serverError } from "@/lib/adminApi";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -76,6 +77,7 @@ export async function PATCH(req: Request, { params }: { params: { section: strin
             { $set: update },
             { new: true, upsert: true }
         ).lean();
+        revalidateSite(TAGS.REGISTRATION);
         return ok({ section, data: (doc as any)[field] });
     } catch (err) {
         return serverError(err);

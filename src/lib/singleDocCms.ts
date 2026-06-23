@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import { requireAdminDb, ok, fail, notFound, serverError } from "@/lib/adminApi";
+import { revalidateSite, TAGS, type SiteTag } from "@/lib/revalidate";
 import type { Model } from "mongoose";
 
 /**
@@ -8,7 +9,8 @@ import type { Model } from "mongoose";
  */
 export function buildSingleDocHandlers<T>(
     getModel: () => Model<T>,
-    defaultDoc: () => Partial<T> = () => ({}) as Partial<T>
+    defaultDoc: () => Partial<T> = () => ({}) as Partial<T>,
+    revalidateTag: SiteTag = TAGS.ALL
 ) {
     async function GET() {
         const session = await requireAdminDb();
@@ -33,10 +35,12 @@ export function buildSingleDocHandlers<T>(
         const existingDoc = await Model.findOne({});
         if (!existingDoc) {
             const created = await Model.create({ ...defaultDoc(), ...body } as any);
+            revalidateSite(revalidateTag);
             return ok({ ...created.toObject(), _id: created._id.toString() });
         }
         Object.assign(existingDoc, body);
         await existingDoc.save();
+        revalidateSite(revalidateTag);
         return ok({ ...existingDoc.toObject(), _id: existingDoc._id.toString() });
     }
 

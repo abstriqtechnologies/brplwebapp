@@ -1,6 +1,7 @@
 import SiteSettings from "@/models/SiteSettings";
 import { requireAdminDb, ok, serverError } from "@/lib/adminApi";
 import { connectDB } from "@/lib/mongodb";
+import { revalidateSite, TAGS } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,12 +41,14 @@ export async function PATCH(req: Request) {
                 siteName: "Beyond Reach Premier League",
                 ...body,
             });
+            revalidateSite(TAGS.SETTINGS);
             return ok({ ...created.toObject(), _id: created._id.toString() });
         }
         for (const k of ["contactEmail", "contactPhone", "address", "socials"]) {
             if (k in body) (doc as any)[k] = (body as any)[k];
         }
         await doc.save();
+        revalidateSite(TAGS.SETTINGS);
         return ok({ ...doc.toObject(), _id: doc._id.toString() });
     } catch (err) {
         return serverError(err);
