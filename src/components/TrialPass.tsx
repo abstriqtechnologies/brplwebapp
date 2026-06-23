@@ -20,9 +20,15 @@ const isExternalUrl = (url: string) =>
     typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 
 const TrialPass = ({ user }: TrialPassProps) => {
-    const fullName = user ? (`${user.fname || ''} ${user.lname || ''}`.trim() || 'Sushil Sharma') : 'Sushil Sharma';
-    const profileImage = user?.profileImage || DEFAULT_AVATAR;
-    const barcodeValue = String(user?.userId || user?._id || '1234567890123');
+    // Support both our {name} shape and the legacy {fname, lname} shape
+    const derivedName = user
+        ? (user.name?.trim() ||
+           `${user.fname || ''} ${user.lname || ''}`.trim() ||
+           'Player')
+        : 'Player';
+    const fullName = derivedName;
+    const profileImage = user?.profileImage || user?.avatar || DEFAULT_AVATAR;
+    const barcodeValue = String(user?.userId || user?._id || user?.id || '0000000000000');
 
     // Display: URL or base64. Use base64 when possible so download (html-to-image) works.
     const [imgSrc, setImgSrc] = useState<string>(DEFAULT_AVATAR);
