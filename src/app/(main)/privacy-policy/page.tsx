@@ -14,6 +14,8 @@ export default async function PrivacyPolicy() {
         getLegal(),
     ]);
 
+    const privacyContent = (legal?.privacy?.content || "").trim();
+
     const renderStaticContent = () => (
         <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Privacy Policy</h1>
@@ -129,7 +131,14 @@ export default async function PrivacyPolicy() {
 
                 <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
                     <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
-                        {renderStaticContent()}
+                        {privacyContent ? (
+                            <section>
+                                <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">{legal?.privacy?.title || "Privacy Policy"}</h1>
+                                <SafeHtml html={decodeHtmlEntities(privacyContent)} className="prose prose-slate max-w-none text-slate-600 leading-relaxed" />
+                            </section>
+                        ) : (
+                            renderStaticContent()
+                        )}
                     </div>
                 </div>
             </div>
