@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteContext } from "@/components/SiteContextProvider";
 
 const DATA_ATTR = "data-custom-body-script";
 
@@ -10,11 +10,12 @@ const DATA_ATTR = "data-custom-body-script";
  * Note: dynamically-created <noscript> can render raw text in SPA apps, so we skip it.
  */
 export function CustomBodyScripts() {
-    const { settings } = useSiteSettings();
+    const { siteSettings } = useSiteContext();
+    const s = siteSettings as any;
     const injectedRef = useRef<string>("");
 
     useEffect(() => {
-        const raw = settings.customBodyScripts?.trim() || "";
+        const raw = s.customBodyScripts?.trim() || "";
 
         const existing = document.body.querySelectorAll(`[${DATA_ATTR}="true"]`);
         existing.forEach((el) => el.remove());
@@ -57,7 +58,7 @@ export function CustomBodyScripts() {
             });
             injectedRef.current = "";
         };
-    }, [settings.customBodyScripts]);
+    }, [s.customBodyScripts]);
 
     return null;
 }

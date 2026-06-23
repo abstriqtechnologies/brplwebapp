@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteContext } from "@/components/SiteContextProvider";
 
 const DATA_ATTR = "data-custom-head-script";
 
@@ -10,11 +10,12 @@ const DATA_ATTR = "data-custom-head-script";
  * Scripts are parsed from the stored HTML string and appended so they execute.
  */
 export function CustomHeadScripts() {
-    const { settings } = useSiteSettings();
+    const { siteSettings } = useSiteContext();
+    const s = siteSettings as any;
     const injectedRef = useRef<string>("");
 
     useEffect(() => {
-        const raw = settings.customHeadScripts?.trim() || "";
+        const raw = s.customHeadScripts?.trim() || "";
 
         // Remove any previously injected scripts/elements
         const existing = document.head.querySelectorAll(`[${DATA_ATTR}="true"]`);
@@ -57,7 +58,7 @@ export function CustomHeadScripts() {
             });
             injectedRef.current = "";
         };
-    }, [settings.customHeadScripts]);
+    }, [s.customHeadScripts]);
 
     return null;
 }

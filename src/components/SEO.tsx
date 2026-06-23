@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useState, useEffect, useRef } from 'react';
 import { getSeoMetaByPath } from '@/apihelper/seo';
 import { buildBreadcrumbSchema } from '@/components/SchemaMarkup';
+import { useSiteContext } from "@/components/SiteContextProvider";
 
 interface SEOProps {
     title: string;
@@ -15,11 +16,17 @@ interface SEOProps {
 }
 
 const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }: SEOProps) => {
-    const siteTitle = 'Beyond Reach Premier League';
+    const { siteSettings } = useSiteContext();
+    const s = siteSettings as any;
+    const siteTitle = s.siteName || 'Beyond Reach Premier League';
 
-    const [dynamicTitle, setDynamicTitle] = useState(`${title} | ${siteTitle}`);
-    const [dynamicDesc, setDynamicDesc] = useState(description);
-    const [dynamicKeywords, setDynamicKeywords] = useState(keywords || '');
+    const fallbackTitle = s.homeSeoTitle || title;
+    const fallbackDescription = s.homeSeoDescription || description;
+    const fallbackKeywords = s.homeSeoKeywords || keywords;
+
+    const [dynamicTitle, setDynamicTitle] = useState(`${fallbackTitle} | ${siteTitle}`);
+    const [dynamicDesc, setDynamicDesc] = useState(fallbackDescription);
+    const [dynamicKeywords, setDynamicKeywords] = useState(fallbackKeywords || '');
     const [ogTitle, setOgTitle] = useState<string | null>(null);
     const [ogDescription, setOgDescription] = useState<string | null>(null);
     const [ogImage, setOgImage] = useState<string | null>(null);
@@ -41,22 +48,22 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
                     setOgImage(data.ogImage?.trim() || null);
                     setCustomBodyScripts(data.customBodyScripts?.trim() || "");
                 } else {
-                    setDynamicTitle(`${title} | ${siteTitle}`);
-                    setDynamicDesc(description);
-                    setDynamicKeywords(keywords || '');
+                    setDynamicTitle(`${fallbackTitle} | ${siteTitle}`);
+                    setDynamicDesc(fallbackDescription);
+                    setDynamicKeywords(fallbackKeywords || '');
                     setOgTitle(null);
                     setOgDescription(null);
-                    setOgImage(null);
-                    setCustomBodyScripts("");
+                    setOgImage(s.ogImage?.trim() || null);
+                    setCustomBodyScripts(s.customBodyScripts?.trim() || "");
                 }
             } catch {
-                setDynamicTitle(`${title} | ${siteTitle}`);
-                setDynamicDesc(description);
-                setDynamicKeywords(keywords || '');
+                setDynamicTitle(`${fallbackTitle} | ${siteTitle}`);
+                setDynamicDesc(fallbackDescription);
+                setDynamicKeywords(fallbackKeywords || '');
                 setOgTitle(null);
                 setOgDescription(null);
-                setOgImage(null);
-                setCustomBodyScripts("");
+                setOgImage(s.ogImage?.trim() || null);
+                setCustomBodyScripts(s.customBodyScripts?.trim() || "");
             }
         };
 
@@ -108,7 +115,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
         };
     }, [customBodyScripts]);
 
-    const defaultImage = typeof window !== 'undefined' ? `${window.location.origin}/logo.webp` : '/logo.webp';
+    const defaultImage = s.ogImage || (typeof window !== 'undefined' ? `${window.location.origin}/logo.webp` : '/logo.webp');
     const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
     const breadcrumbSchema = buildBreadcrumbSchema(pathname, breadcrumbCurrentName);

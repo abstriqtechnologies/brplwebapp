@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { Phone, Mail, LogIn, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteContext } from "@/components/SiteContextProvider";
 import { getImageUrl } from "@/utils/imageHelper";
 
 const Header = () => {
-    const { settings } = useSiteSettings();
+    const { siteSettings, socialLinks, navLinks: contextNavLinks } = useSiteContext();
+    const settings = siteSettings as any;
     const [isDesktop, setIsDesktop] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [navLinks, setNavLinks] = useState<any[]>([]);
@@ -47,7 +48,7 @@ const Header = () => {
         ],
     };
 
-    const defaultNavLinks = [
+    const staticNavLinks = [
         { label: "Home", path: "/", isActive: true, isExternal: false },
         { label: "About Us", path: "/about-us", isActive: true, isExternal: false },
         { label: "Teams", path: "/teams", isActive: true, isExternal: false },
@@ -83,15 +84,15 @@ const Header = () => {
                     });
                     setNavLinks(links);
                 } else {
-                    setNavLinks(defaultNavLinks);
+                    setNavLinks(contextNavLinks && contextNavLinks.length > 0 ? contextNavLinks : staticNavLinks);
                 }
             } catch (error) {
                 console.error("Failed to fetch nav links", error);
-                setNavLinks(defaultNavLinks);
+                setNavLinks(contextNavLinks && contextNavLinks.length > 0 ? contextNavLinks : staticNavLinks);
             }
         };
         fetchNavLinks();
-    }, []);
+    }, [contextNavLinks]);
 
     return (
         <header className="sticky top-0 z-[100] font-sans shadow-md bg-[#111a45] text-white">
@@ -99,7 +100,7 @@ const Header = () => {
             <div className="hidden lg:flex absolute top-0 bottom-0 left-0 z-30 items-center pl-12">
                 <Link href="/" className="flex items-center">
                     <img
-                        src="/logo.webp"
+                        src={settings.logoUrl || "/logo.webp"}
                         alt="BRPL Logo"
                         className="h-[80px] w-auto object-contain drop-shadow-lg"
                     />
@@ -138,7 +139,7 @@ const Header = () => {
                         <div className="h-4 w-px bg-slate-300" />
 
                         <div className="flex items-center gap-3 md:gap-4">
-                            {settings.socialLinks.filter((l) => l.url).map((link) => (
+                            {socialLinks.filter((l: any) => l.url).map((link: any) => (
                                 <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity" aria-label={link.name}>
                                     <img src={socialImageSrc(link.image)} alt={link.name} className="w-5 h-5 object-contain" loading="lazy" decoding="async" />
                                 </a>
@@ -153,7 +154,7 @@ const Header = () => {
                 {/* Mobile Logo (Visible only on mobile/tablet) */}
                 <Link href="/" className="flex items-center z-30 lg:hidden">
                     <img
-                        src="/logo.webp"
+                        src={settings.logoUrl || "/logo.webp"}
                         alt="BRPL Logo"
                         className="h-[60px] w-auto object-contain drop-shadow-lg"
                     />

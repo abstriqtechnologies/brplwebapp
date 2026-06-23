@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSettings } from "@/components/SiteContextProvider";
 
 const FloatingWhatsAppButton = () => {
-    const { settings } = useSiteSettings();
+    const settings = useSiteSettings() as any;
     const waNumber = settings.whatsappNumber?.replace(/\D/g, "") || "918130955866";
     const waUrl = `https://wa.me/${waNumber}`;
 
