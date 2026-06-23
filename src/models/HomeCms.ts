@@ -17,6 +17,20 @@ export interface IWhoWeArePoint {
     order?: number;
 }
 
+export interface ITrustBarItem {
+    label: string;
+    value: string;
+    icon?: string;
+    order?: number;
+}
+
+export interface IBroadcastingPartner {
+    name: string;
+    logo: string;
+    website?: string;
+    order?: number;
+}
+
 export interface IHomeCms extends Document {
     _id: mongoose.Types.ObjectId;
 
@@ -30,9 +44,9 @@ export interface IHomeCms extends Document {
         points?: IWhoWeArePoint[];
     };
 
-    trustBar: { label: string; value: string; icon?: string; order?: number }[];
+    trustBar: ITrustBarItem[];
 
-    broadcastingPartners: { name: string; logo: string; website?: string; order?: number }[];
+    broadcastingPartners: IBroadcastingPartner[];
 
     createdAt: Date;
     updatedAt: Date;
