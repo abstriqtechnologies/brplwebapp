@@ -82,6 +82,7 @@ const ALL_ITEMS: NavItem[] = [
     { icon: Newspaper, label: "Blog", path: "/admin/blog" },
     { icon: Newspaper, label: "News Articles", path: "/admin/news" },
     { icon: Settings, label: "Settings", path: "/admin/settings" },
+    { icon: FileText, label: "Site Pages", path: "/admin/site-pages" },
     {
         icon: Newspaper,
         label: "Registration Page",
@@ -121,6 +122,7 @@ function getFilteredItems(role: RoleName | undefined): NavItem[] {
         "Blog",
         "News Articles",
         "Registration Page",
+        "Site Pages",
     ]);
     return ALL_ITEMS.filter((it) => cmsLabels.has(it.label));
 }

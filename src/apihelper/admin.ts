@@ -176,6 +176,11 @@ export const updateHomeSection = (section: string, body: any) =>
 export const getRegistrationPage = () => api.get("/api/admin/registration-page");
 export const updateRegistrationPage = (body: any) => api.patch("/api/admin/registration-page", body);
 
+// Site pages (per-page CMS content)
+export const getSitePage = (key: string) => api.get(`/api/admin/site-pages/${encodeURIComponent(key)}`);
+export const updateSitePage = (key: string, body: any) =>
+    api.patch(`/api/admin/site-pages/${encodeURIComponent(key)}`, body);
+
 export const getRegistrationSection = (section: string) =>
     api.get(`/api/admin/registration/${section}`);
 export const updateRegistrationSection = (section: string, body: any) =>

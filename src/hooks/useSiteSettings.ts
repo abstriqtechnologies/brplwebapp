@@ -50,6 +50,7 @@ const FALLBACK: SiteSettings = {
 export function useSiteSettings() {
     let ctx: ReturnType<typeof useSiteContext> | null = null;
     try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         ctx = useSiteContext();
     } catch {
         return { settings: FALLBACK, loading: false };
