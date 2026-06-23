@@ -59,7 +59,7 @@ export type SiteContext = {
         blogs: any[];
         news: any[];
     };
-    pages: Record<SitePageKey, any>;
+    pages: Partial<Record<SitePageKey, any>>;
     socialLinks: SocialLink[];
     navLinks: NavbarLink[];
     footerLinks: FooterLinkGroup[];
@@ -273,8 +273,18 @@ export async function getSiteContext(): Promise<SiteContext> {
 }
 
 export async function getSiteContextSlice<K extends keyof SiteContext>(slice: K): Promise<SiteContext[K]> {
-    const all = await cachedAll();
-    return all[slice];
+    switch (slice) {
+        case "siteSettings": return (await cachedSettings()) as SiteContext[K];
+        case "home": return { banners: (await cachedHome()).banners || [], whoWeAre: (await cachedHome()).whoWeAre || {}, trustBar: (await cachedHome()).trustBar || [], broadcastingPartners: (await cachedHome()).broadcastingPartners || [] } as any;
+        case "about": return (await cachedAbout()) as any;
+        case "registration": return (await cachedRegistration()) as any;
+        case "legal": return (await cachedLegal()) as any;
+        case "seo": return (await cachedSeo()) as SiteContext[K];
+        case "pageBanners": return (await cachedPageBanners()) as SiteContext[K];
+        case "collections": return (await cachedCollections()) as SiteContext[K];
+        case "pages": return (await cachedPages()) as SiteContext[K];
+        default: return (await cachedAll())[slice];
+    }
 }
 
 export async function getSettings() { return cachedSettings(); }
@@ -335,8 +345,12 @@ async function build(): Promise<SiteContext> {
         collections,
         pages: pages as any,
         socialLinks: DEFAULT_SOCIAL_LINKS,
-        navLinks: settings.navbarLinks && settings.navbarLinks.length > 0 ? settings.navbarLinks : d.navLinks,
-        footerLinks: settings.footerLinks && settings.footerLinks.length > 0 ? settings.footerLinks : d.footerLinks,
+        navLinks: Array.isArray(settings.navbarLinks) && settings.navbarLinks.length > 0
+            ? settings.navbarLinks
+            : d.navLinks,
+        footerLinks: Array.isArray(settings.footerLinks) && settings.footerLinks.length > 0
+            ? settings.footerLinks
+            : d.footerLinks,
         featureFlag: d.featureFlag,
     };
 }
