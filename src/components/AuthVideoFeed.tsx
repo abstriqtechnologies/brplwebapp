@@ -9,25 +9,25 @@ import { getImageUrl } from "@/utils/imageHelper";
 const FALLBACK_VIDEOS = [
     {
         _id: "1",
-        thumbnail: "/banner-brpl.jpeg",
+        thumbnail: "/banner-brpl.webp",
         duration: "10:24",
         videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2FBRPL_Launch_Film.mp4"
     },
     {
         _id: "2",
-        thumbnail: "/about-us.png",
+        thumbnail: "/about-us.webp",
         duration: "05:12",
         videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2FBRPL_Launch_Film.mp4"
     },
     {
         _id: "3",
-        thumbnail: "/banner-new.png",
+        thumbnail: "/banner-new.webp",
         duration: "15:30",
         videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2Fteams-video.mp4"
     },
     {
         _id: "4",
-        thumbnail: "/banner-2.png",
+        thumbnail: "/banner-2.webp",
         duration: "03:45",
         videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2Fteams-video.mp4"
     }

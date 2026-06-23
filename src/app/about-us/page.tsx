@@ -19,13 +19,13 @@ const AboutUs = () => {
                 scrollToId="about-content"
             />
 
-            <div id="about-content" data-aos="fade-up">
+            <div id="about-content">
                 <AboutSection />
             </div>
-            <div data-aos="fade-up">
+            <div>
                 <MissionVisionSection />
             </div>
-            <div data-aos="fade-up">
+            <div>
                 <MeetOurTeamSection />
             </div>
         </div>

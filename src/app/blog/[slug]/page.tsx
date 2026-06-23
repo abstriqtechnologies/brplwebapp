@@ -124,7 +124,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                   name: SITE_NAME,
                   logo: {
                       "@type": "ImageObject",
-                      url: `${origin}/logo.png`,
+                      url: `${origin}/logo.webp`,
                   },
               },
               mainEntityOfPage: {

@@ -36,7 +36,7 @@ const LivesChangedSection = () => {
     const [titleBefore, setTitleBefore] = useState("LIVES CHANGED BY");
     const [titleHighlight, setTitleHighlight] = useState("BRPL");
     const [subtitle, setSubtitle] = useState("Real stories from real players across India who found their stage.");
-    const [backgroundImage, setBackgroundImage] = useState("/artist.png");
+    const [backgroundImage, setBackgroundImage] = useState("/artist.webp");
 
     useEffect(() => {
         apiClient.get("/api/player-stories")

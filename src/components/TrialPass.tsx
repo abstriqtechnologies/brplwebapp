@@ -6,7 +6,7 @@ interface TrialPassProps {
     user?: any;
 }
 
-const DEFAULT_AVATAR = '/assets/avtar.jpg';
+const DEFAULT_AVATAR = '/assets/avtar.webp';
 
 const blobToBase64 = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -105,7 +105,7 @@ const TrialPass = ({ user }: TrialPassProps) => {
             id="brpl-trial-pass"
             className="relative w-full max-w-[400px] aspect-[400/510] shadow-[0_10px_40px_rgba(0,0,0,0.15)] select-none shrink-0 mx-auto overflow-hidden p-0 bg-white"
             style={{
-                backgroundImage: 'url(/assets/trail-pass-bg.png)',
+                backgroundImage: 'url(/assets/trail-pass-bg.webp)',
                 backgroundSize: '100% 100%',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',

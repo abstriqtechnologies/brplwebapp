@@ -49,7 +49,7 @@ const AmbassadorsSection: React.FC = () => {
             {/* Background Image */}
             <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('/artist.png')" }}
+                style={{ backgroundImage: "url('/artist.webp')" }}
             />
             {/* Dark Overlay */}
             <div className="absolute inset-0 bg-[#111a45]/10" />

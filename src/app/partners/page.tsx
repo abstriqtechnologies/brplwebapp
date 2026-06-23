@@ -82,7 +82,7 @@ const BecomePartner = () => {
             />
             <PageBanner pageKey="becomePartner" title="Become a Partner" currentPage="Become a Partner" />
 
-            <section className="container mx-auto px-4 py-16" data-aos="fade-up">
+            <section className="container mx-auto px-4 py-16">
                 <div className="max-w-4xl mx-auto">
                     {/* Centered Form */}
                     <div className="border border-gray-200 rounded-[32px] p-6 md:p-10 lg:p-12 bg-white shadow-sm">

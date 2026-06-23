@@ -38,7 +38,7 @@ const TeamsPage = () => {
                 scrollToId="teams-content"
             />
 
-            <section id="teams-content" className="container mx-auto px-4 py-16" data-aos="fade-up">
+            <section id="teams-content" className="container mx-auto px-4 py-16">
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-10 w-10 animate-spin text-[#111a45]" />

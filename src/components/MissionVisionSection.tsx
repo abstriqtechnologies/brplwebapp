@@ -94,7 +94,7 @@ const MissionVisionSection: React.FC<MissionVisionSectionProps> = ({
                     <div className="w-full lg:w-1/2">
                         <div className="relative rounded-tr-[80px] rounded-bl-[80px] overflow-hidden border border-[#D4AF37]">
                             <img
-                                src={activeTab === 'mission' ? (missionImage || "/about-2.jpg") : (visionImage || "/vision.jpg")}
+                                src={activeTab === 'mission' ? (missionImage || "/about-2.webp") : (visionImage || "/vision.webp")}
                                 alt="Target and Mission"
                                 className="w-full h-auto object-cover"
                                 loading="lazy"

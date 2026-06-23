@@ -78,7 +78,7 @@ export function SchemaMarkup({ organizationOnly, pathname, currentPageName, skip
         "@type": "Organization",
         name: SITE_NAME,
         url: SITE_URL,
-        logo: `${SITE_URL}/logo.png`,
+        logo: `${SITE_URL}/logo.webp`,
         contactPoint: {
             "@type": "ContactPoint",
             telephone: settings.contactPhone || "",

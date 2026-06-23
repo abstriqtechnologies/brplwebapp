@@ -13,7 +13,7 @@ const PaymentSuccessful = () => {
 
             {/* Background Elements matching Auth page style */}
             <div className="hero-gradient fixed inset-0 pointer-events-none" />
-            <div className="absolute inset-0 bg-[url('/bg-cricket1.jpg')] bg-cover bg-center opacity-10" />
+            <div className="absolute inset-0 bg-[url('/bg-cricket1.webp')] bg-cover bg-center opacity-10" />
 
             <div className="relative z-10 max-w-lg w-full text-center space-y-8 glass-card p-8 rounded-2xl animate-fade-in">
                 <div className="flex justify-center">

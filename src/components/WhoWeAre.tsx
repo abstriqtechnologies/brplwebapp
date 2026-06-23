@@ -35,7 +35,7 @@ const DEFAULT_WHO_WE_ARE: WhoWeAreData = {
                         <p class="text-gray-400 leading-relaxed">
                             Player benefits include <span class="text-white font-semibold">professional coaching, performance tracking, prize money, and scouting exposure</span> — a genuine shot at a long-term cricketing career. Every selected player represents their zone, wears their colours, and plays for a chance to inspire the next generation back home.
                         </p>`,
-    image: "/home2.png",
+    image: "/home2.webp",
 };
 
 const WhoWeAre = () => {
@@ -72,7 +72,7 @@ const WhoWeAre = () => {
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                     {/* Content Side */}
-                    <div className="flex flex-col gap-6" data-aos="fade-right">
+                    <div className="flex flex-col gap-6">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 w-fit">
                             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                             <span className="text-amber-500 text-xs font-bold tracking-wider uppercase">
@@ -121,10 +121,10 @@ const WhoWeAre = () => {
                     </div>
 
                     {/* Image/Visual Side */}
-                    <div className="relative" data-aos="fade-left">
+                    <div className="relative">
                         <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#0f172a]">
                             <img
-                                src={data?.image ? getImageUrl(data.image) : "/home2.png"}
+                                src={data?.image ? getImageUrl(data.image) : "/home2.webp"}
                                 alt="About BRPL"
                                 className="w-full h-full object-cover"
                             />

@@ -108,7 +108,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
         };
     }, [customBodyScripts]);
 
-    const defaultImage = typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : '/logo.png';
+    const defaultImage = typeof window !== 'undefined' ? `${window.location.origin}/logo.webp` : '/logo.webp';
     const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
     const breadcrumbSchema = buildBreadcrumbSchema(pathname, breadcrumbCurrentName);

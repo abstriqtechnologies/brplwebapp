@@ -99,7 +99,7 @@ const Header = () => {
             <div className="hidden lg:flex absolute top-0 bottom-0 left-0 z-30 items-center pl-12">
                 <Link href="/" className="flex items-center">
                     <img
-                        src="/logo.png"
+                        src="/logo.webp"
                         alt="BRPL Logo"
                         className="h-[80px] w-auto object-contain drop-shadow-lg"
                     />
@@ -153,7 +153,7 @@ const Header = () => {
                 {/* Mobile Logo (Visible only on mobile/tablet) */}
                 <Link href="/" className="flex items-center z-30 lg:hidden">
                     <img
-                        src="/logo.png"
+                        src="/logo.webp"
                         alt="BRPL Logo"
                         className="h-[60px] w-auto object-contain drop-shadow-lg"
                     />

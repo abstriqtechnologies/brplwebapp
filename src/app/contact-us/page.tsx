@@ -66,7 +66,7 @@ const ContactUs = () => {
             />
             <PageBanner pageKey="contactUs" title="Contact us" currentPage="Contact us" />
 
-            <section className="container mx-auto px-4 py-16" data-aos="fade-up">
+            <section className="container mx-auto px-4 py-16">
                 <div>
                     <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-10 lg:gap-12 items-start">
                         {/* Left: Form */}

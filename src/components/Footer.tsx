@@ -18,10 +18,10 @@ const Footer: React.FC = () => {
 
       {/* Player Images - Absolute Positioned */}
       <div className="absolute left-0 bottom-28 z-0 hidden xl:block pointer-events-none">
-        <img src="/foot1.png" alt="Player Left" className="h-[200px] object-contain opacity-80" loading="lazy" />
+        <img src="/foot1.webp" alt="Player Left" className="h-[200px] object-contain opacity-80" loading="lazy" />
       </div>
       <div className="absolute right-0 bottom-28 z-0 hidden xl:block pointer-events-none">
-        <img src="/foot2.png" alt="Player Right" className="h-[200px] object-contain opacity-80" loading="lazy" />
+        <img src="/foot2.webp" alt="Player Right" className="h-[200px] object-contain opacity-80" loading="lazy" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-10 py-12 md:py-10">
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
             </ul>
             {/* Store Buttons */}
             <div className="flex gap-3 mt-4">
-              <img src="/ios-app.png" alt="ios-app" className="w-25 h-12" loading="lazy" />
+              <img src="/ios-app.webp" alt="ios-app" className="w-25 h-12" loading="lazy" />
               <img src="/google-store.webp" alt="android-app" className="w-22 h-12" loading="lazy" />
             </div>
           </div>

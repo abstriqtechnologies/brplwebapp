@@ -31,9 +31,9 @@ const defaultSettings: SiteSettings = {
     whatsappNumber: "918130955866",
     mapEmbedUrl: "",
     socialLinks: [
-        { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61584782136820", image: "/facebook.png" },
-        { name: "Twitter", url: "https://x.com/BRPLOfficial", image: "/twiter.png" },
-        { name: "Instagram", url: "https://www.instagram.com/brpl.t10", image: "/instagram.png" },
+        { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61584782136820", image: "/facebook.webp" },
+        { name: "Twitter", url: "https://x.com/BRPLOfficial", image: "/twiter.webp" },
+        { name: "Instagram", url: "https://www.instagram.com/brpl.t10", image: "/instagram.webp" },
     ],
     bannerImage: "",
     bannerTitles: {},

@@ -3,15 +3,15 @@
 import React, { useState } from "react";
 
 const LINEAR_TV_PARTNERS = [
-  { name: "DD Sports", logo: "dd-image.png" }, /* Sports18 blue match */
-  { name: "Sony Sports Network", logo: "sony-image.jfif" }, /* Matches black gradient edges */
-  { name: "Star Sports", logo: "star-sports.jfif" },
+  { name: "DD Sports", logo: "/dd-image.webp" },
+  { name: "Sony Sports Network", logo: "/sony-image.webp" },
+  { name: "Star Sports", logo: "/star-sports.webp" },
 ];
 
 const OTT_PARTNERS = [
-  { name: "JioHotstar", logo: "jio-hotstar-image.png" }, /* Matches JioHotstar blue/pink */
-  { name: "SonyLIV", logo: "sonylive-images.jfif" }, /* Matches SonyLIV black background */
-  { name: "FanCode", logo: "fancode-image.png" }, /* Exact FanCode orange */
+  { name: "JioHotstar", logo: "/jio-hotstar-image.webp" },
+  { name: "SonyLIV", logo: "/sonylive-images.webp" },
+  { name: "FanCode", logo: "/fancode-image.webp" },
 ];
 
 function PartnerLogo({ name, logo }: { name: string; logo: string }) {
@@ -45,15 +45,15 @@ const BroadcastingPartners: React.FC = () => {
       <div className="relative py-10 md:py-12 lg:py-16 px-4 md:px-8 lg:px-12">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/fixture.png')" }}
+          style={{ backgroundImage: "url('/fixture.webp')" }}
         />
         <div className="absolute inset-0 bg-[#020617]/85" />
 
-        <div className="relative max-w-6xl mx-auto flex flex-col items-center" data-aos="fade-up">
+        <div className="relative max-w-6xl mx-auto flex flex-col items-center">
           {/* Section title - same format as BRPL Teams / Ambassadors */}
           <h2
             className="text-center text-[#FFD700] text-3xl md:text-4xl lg:text-[40px] font-extrabold tracking-[0.05em] mb-2 md:mb-3"
-            style={{ fontFamily: "'Rye', serif" }}
+            style={{ fontFamily: "var(--font-rye), 'Rye', serif" }}
           >
             Proposed Broadcasting Partners
           </h2>

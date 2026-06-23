@@ -18,7 +18,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ imageSrc, title, descriptio
                 <div className="w-full lg:w-1/2 flex justify-center lg:justify-end pr-0 lg:pr-10">
                     <div className="relative w-full">
                         <img
-                            src={imageSrc || "trophy image.jpeg"}
+                            src={imageSrc || "/trophy image.webp"}
                             alt="Cricket Action"
                             className="w-full h-[700px] object-cover rounded-xl"
                             loading="lazy"

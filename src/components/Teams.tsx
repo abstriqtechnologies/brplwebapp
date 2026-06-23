@@ -4,27 +4,27 @@ import React, { useEffect, useState } from "react";
 const teams = [
   {
     name: "North East Panthers",
-    logo: "/2.png",
+    logo: "/2.webp",
     bg: "bg-[#0F172A]",
   },
   {
     name: "Central Strikers",
-    logo: "/5.png",
+    logo: "/5.webp",
     bg: "bg-[#0F172A]",
   },
   {
     name: "Western Heroes",
-    logo: "/4.png",
+    logo: "/4.webp",
     bg: "bg-[#0F172A]",
   },
   {
     name: "Northern Dabanggss",
-    logo: "/3.png",
+    logo: "/3.webp",
     bg: "bg-[#0F172A]", // Dark background from image
   },
   {
     name: "Southern Lions",
-    logo: "/1.png",
+    logo: "/1.webp",
     bg: "bg-[#0F172A]",
   },
 ];
@@ -87,12 +87,12 @@ const Teams: React.FC = () => {
       <div className="relative py-8 md:py-12 lg:py-14 px-4 md:px-8 lg:px-12 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/fixture.png')" }}
+          style={{ backgroundImage: "url('/fixture.webp')" }}
         />
         {/* Slight dark overlay for contrast */}
         <div className="absolute inset-0 bg-[#020617]/10" />
 
-        <div className="relative max-w-12xl mx-auto flex flex-col items-center" data-aos="fade-up">
+        <div className="relative max-w-12xl mx-auto flex flex-col items-center">
           {/* Heading */}
           <h2
             className="text-center text-[#FFD700] text-3xl md:text-4xl lg:text-[40px] font-extrabold tracking-[0.05em] mb-4"

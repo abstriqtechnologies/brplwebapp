@@ -1,25 +1,40 @@
 import type { Metadata } from "next";
+import { Inter, Space_Grotesk, Rye } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import ClientProviders from "@/components/ClientProviders";
 
-export const dynamic = "force-dynamic";
+const inter = Inter({
+    subsets: ["latin"],
+    weight: ["400", "500", "600", "700"],
+    variable: "--font-inter",
+    display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+    subsets: ["latin"],
+    weight: ["400", "500", "600", "700"],
+    variable: "--font-space-grotesk",
+    display: "swap",
+});
+
+const rye = Rye({
+    subsets: ["latin"],
+    weight: ["400"],
+    variable: "--font-rye",
+    display: "swap",
+});
 
 export const metadata: Metadata = {
     title: "Beyond Reach Premier League",
     description: "India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones.",
-    icons: { icon: "/logo.png" },
+    icons: { icon: "/logo.webp" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" suppressHydrationWarning>
-            <head>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-            </head>
-            <body>
+        <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable} ${rye.variable}`}>
+            <body className={inter.className}>
                 <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
                     <ClientProviders>{children}</ClientProviders>
                 </ThemeProvider>

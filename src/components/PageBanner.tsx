@@ -20,7 +20,7 @@ const PageBanner: React.FC<PageBannerProps> = ({ title, currentPage, videoSrc, i
     const displayTitle = pageKey && settings.bannerTitles[pageKey]?.trim() ? settings.bannerTitles[pageKey] : title;
     const resolveBannerImage = () => {
         if (imageSrc) return imageSrc;
-        if (!settings.bannerImage) return "/tenis.png";
+        if (!settings.bannerImage) return "/tenis.webp";
         if (settings.bannerImage.startsWith("http") || settings.bannerImage.startsWith("blob:")) return settings.bannerImage;
         if (settings.bannerImage.startsWith("uploads/")) return getImageUrl(settings.bannerImage);
         return settings.bannerImage.startsWith("/") ? settings.bannerImage : "/" + settings.bannerImage;

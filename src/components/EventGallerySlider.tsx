@@ -51,7 +51,7 @@ const EventGallerySlider: React.FC = () => {
             <div className="relative py-10 md:py-12 lg:py-16 px-4 md:px-8 lg:px-12 overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/artist.png')" }}
+                    style={{ backgroundImage: "url('/artist.webp')" }}
                 />
                 {/* Dark tint for text readability */}
                 <div className="absolute inset-0 bg-[#020617]/60" />

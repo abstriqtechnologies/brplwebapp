@@ -35,7 +35,7 @@ const RoadmapSection = () => {
     const [steps, setSteps] = useState<StepItem[]>(fallbackSteps);
     const [titleBefore, setTitleBefore] = useState("YOUR JOURNEY TO");
     const [titleHighlight, setTitleHighlight] = useState("GLORY");
-    const [backgroundImage, setBackgroundImage] = useState("/banner.png");
+    const [backgroundImage, setBackgroundImage] = useState("/banner.webp");
 
     useEffect(() => {
         apiClient.get("/api/roadmap")
