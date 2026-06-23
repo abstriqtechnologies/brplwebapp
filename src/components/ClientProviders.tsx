@@ -1,6 +1,5 @@
 "use client";
 
-import { HelmetProvider } from "react-helmet-async";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,19 +11,17 @@ import Footer from "@/components/Footer";
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
     return (
-        <HelmetProvider>
-            <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <SchemaMarkup organizationOnly />
-                <CustomHeadScripts />
-                <CustomBodyScripts />
-                <div className="min-h-screen relative flex flex-col font-sans">
-                    <Header />
-                    <main className="flex-grow">{children}</main>
-                    <Footer />
-                </div>
-            </TooltipProvider>
-        </HelmetProvider>
+        <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <SchemaMarkup organizationOnly />
+            <CustomHeadScripts />
+            <CustomBodyScripts />
+            <div className="min-h-screen relative flex flex-col font-sans">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+            </div>
+        </TooltipProvider>
     );
 }
