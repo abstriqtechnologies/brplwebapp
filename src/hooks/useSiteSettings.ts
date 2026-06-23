@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useSiteContext } from "@/components/SiteContextProvider";
 
 export interface SocialLink {
     name: string;
@@ -21,40 +22,45 @@ export interface SiteSettings {
     teamsVideoUrl: string;
     customHeadScripts: string;
     customBodyScripts: string;
+    [key: string]: any;
 }
 
-const defaultSettings: SiteSettings = {
-    contactAddress: "Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309",
-    contactPhone: "+(91) 81309 55866",
-    contactPhoneSecondary: "+(91) 98215 63585",
-    contactEmail: "info@brpl.net",
+const FALLBACK: SiteSettings = {
+    contactAddress: "",
+    contactPhone: "",
+    contactPhoneSecondary: "",
+    contactEmail: "",
     whatsappNumber: "918130955866",
     mapEmbedUrl: "",
-    socialLinks: [
-        { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61584782136820", image: "/facebook.webp" },
-        { name: "Twitter", url: "https://x.com/BRPLOfficial", image: "/twiter.webp" },
-        { name: "Instagram", url: "https://www.instagram.com/brpl.t10", image: "/instagram.webp" },
-    ],
+    socialLinks: [],
     bannerImage: "",
     bannerTitles: {},
     teamsBannerImage: "",
-    teamsVideoUrl: "https://brpl-public-uploads.s3.ap-south-1.amazonaws.com/teams-video.mp4",
+    teamsVideoUrl: "",
     customHeadScripts: "",
     customBodyScripts: "",
 };
 
 /**
- * Static stub matching the original useSiteSettings API.
- * Returns the same default values the original provided when the API was unreachable.
- * No network calls in this static-only build.
+ * Backwards-compatible hook. Reads the merged site context and projects it
+ * to the legacy `SiteSettings` shape that older components expect. Any
+ * component still importing from `@/hooks/useSiteSettings` keeps working
+ * with dynamic data without code changes.
  */
 export function useSiteSettings() {
-    const [settings] = useState<SiteSettings>(defaultSettings);
-    const [loading] = useState(false);
-
-    useEffect(() => {
-        /* no-op: settings are static */
-    }, []);
-
-    return { settings, loading };
+    let ctx: ReturnType<typeof useSiteContext> | null = null;
+    try {
+        ctx = useSiteContext();
+    } catch {
+        return { settings: FALLBACK, loading: false };
+    }
+    const s = (ctx?.siteSettings as any) || {};
+    const settings: SiteSettings = {
+        ...FALLBACK,
+        ...s,
+        socialLinks: (ctx?.socialLinks as any) || FALLBACK.socialLinks,
+        customHeadScripts: s.customHeadScripts || "",
+        customBodyScripts: s.customBodyScripts || "",
+    };
+    return { settings, loading: false };
 }
