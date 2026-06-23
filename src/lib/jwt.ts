@@ -8,10 +8,13 @@ const ALG = "HS256";
 
 export type SessionPayload = {
     sub: string; // userId (mongo _id as string) or "pending:<phone>"
-    phone: string;
-    purpose?: "auth" | "pending_reg";
+    phone?: string;
+    purpose?: "auth" | "pending_reg" | "admin";
     paymentId?: string;
     orderId?: string;
+    role?: string;
+    email?: string;
+    name?: string;
     [key: string]: unknown;
 };
 
@@ -37,6 +40,7 @@ export async function verifyJwt<T = SessionPayload>(token: string): Promise<T | 
 export const COOKIE_NAMES = {
     AUTH: "brpl_auth",
     PENDING: "brpl_pending",
+    ADMIN: "brpl_admin",
 } as const;
 
 export const COOKIE_OPTIONS = {
@@ -74,4 +78,36 @@ export async function getAuthCookie(): Promise<string | undefined> {
 export async function getPendingCookie(): Promise<string | undefined> {
     const c = await cookies();
     return c.get(COOKIE_NAMES.PENDING)?.value;
+}
+
+// Admin cookie helpers
+export async function setAdminCookie(token: string) {
+    const c = await cookies();
+    c.set(COOKIE_NAMES.ADMIN, token, authCookieOptions(7 * 24 * 60 * 60));
+}
+
+export async function getAdminCookie(): Promise<string | undefined> {
+    const c = await cookies();
+    return c.get(COOKIE_NAMES.ADMIN)?.value;
+}
+
+export async function clearAdminCookie() {
+    const c = await cookies();
+    c.delete(COOKIE_NAMES.ADMIN);
+}
+
+export type AdminSession = {
+    sub: string;
+    email: string;
+    role: "superadmin" | "subadmin" | "seo_content";
+    name?: string;
+    purpose: "admin";
+};
+
+export async function getAdminSession(): Promise<AdminSession | null> {
+    const token = await getAdminCookie();
+    if (!token) return null;
+    const payload = await verifyJwt<AdminSession>(token);
+    if (!payload || payload.purpose !== "admin") return null;
+    return payload;
 }
