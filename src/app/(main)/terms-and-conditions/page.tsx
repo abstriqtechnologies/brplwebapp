@@ -3,14 +3,23 @@ import SEO from "@/components/SEO";
 import Link from "next/link";
 import { decodeHtmlEntities } from "@/utils/htmlHelper";
 import { SafeHtml } from "@/components/SafeHtml";
+import { getSiteContext, getLegal } from "@/lib/siteContext";
+import { SiteContextProvider } from "@/components/SiteContextProvider";
 
-const TermsAndConditions = () => {
+export const dynamic = "force-dynamic";
+
+export default async function TermsAndConditions() {
+    const [ctx, legal] = await Promise.all([
+        getSiteContext(),
+        getLegal(),
+    ]);
+
     const renderStaticContent = () => (
         <>
-            <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Terms & Condition</h1>
+            <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Terms &amp; Condition</h1>
             <div className="space-y-6 text-sm md:text-[1.05rem] leading-relaxed text-slate-600">
                 <p>
-                    Greetings from <span className="font-bold text-slate-900">Beyond Reach Premier League (BRPL)</span> (hereinafter referred to as the "<Link href="/" className="font-bold text-blue-600 hover:underline">Website</Link>"). The Website is owned and operated by <span className="font-bold text-slate-900">BRPL PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
+                    Greetings from <span className="font-bold text-slate-900">Beyond Reach Premier League (BRPL)</span> (hereinafter referred to as the &quot;<Link href="/" className="font-bold text-blue-600 hover:underline">Website</Link>&quot;). The Website is owned and operated by <span className="font-bold text-slate-900">BRPL PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
                 </p>
                 <p>
                     <span className="font-bold text-slate-900">BRPL PVT. LTD.</span> is a sports management organization dedicated to scouting talented cricketers and providing high-quality sports experiences to individuals across the nation.
@@ -22,16 +31,16 @@ const TermsAndConditions = () => {
                     <span className="font-bold text-slate-900">BRPL</span> is committed to bridging the gap between talent and opportunity, providing a platform where raw, untapped talent can shine on a grand stage. We aim to revolutionize grassroots cricket and bring players to the forefront of success, nurturing the passion and career aspirations of aspiring cricketers.
                 </p>
                 <p>
-                    The <span className="font-bold text-slate-900">BRPL League</span> is inclusive of <span className="font-bold">Multiple seasons</span>. <span className="font-bold">All Seasons / Trading & Teams</span> participation rules same as basic Terms and Condition of player registration and submission.
+                    The <span className="font-bold text-slate-900">BRPL League</span> is inclusive of <span className="font-bold">Multiple seasons</span>. <span className="font-bold">All Seasons / Trading &amp; Teams</span> participation rules same as basic Terms and Condition of player registration and submission.
                 </p>
                 <p>
-                    By accessing or using the Website through any computer, laptop, mobile phone, tablet, or any other electronic device, you expressly agree to be bound by these <Link href="/terms-and-conditions" className="font-bold text-slate-900 hover:underline">Terms and Conditions</Link> (hereinafter referred to as the "<Link href="/terms-and-conditions" className="font-bold text-blue-600 hover:underline">Terms</Link>").
+                    By accessing or using the Website through any computer, laptop, mobile phone, tablet, or any other electronic device, you expressly agree to be bound by these <Link href="/terms-and-conditions" className="font-bold text-slate-900 hover:underline">Terms and Conditions</Link> (hereinafter referred to as the &quot;<Link href="/terms-and-conditions" className="font-bold text-blue-600 hover:underline">Terms</Link>&quot;).
                 </p>
                 <p>
                     If you do not agree with these Terms, you must not access or use this Website. Please read these Terms carefully before accessing. These Terms constitute a binding legal agreement between you and <span className="font-bold">BRPL PVT. LTD.</span> governing your use.
                 </p>
                 <p>
-                    By creating an account, registering for upcoming seasons, or using other services (collectively referred to as "<span className="font-bold text-slate-900">The Services</span>"), you must not use the Website for any illegal, harmful, or fraudulent activities. You confirm that you have read, understood, and agreed to these Terms, Privacy Policy, and Community Guidelines (if any), and you represent that you are of legal age to enter into this agreement.
+                    By creating an account, registering for upcoming seasons, or using other services (collectively referred to as &quot;<span className="font-bold text-slate-900">The Services</span>&quot;), you must not use the Website for any illegal, harmful, or fraudulent activities. You confirm that you have read, understood, and agreed to these Terms, Privacy Policy, and Community Guidelines (if any), and you represent that you are of legal age to enter into this agreement.
                 </p>
             </div>
 
@@ -42,7 +51,7 @@ const TermsAndConditions = () => {
                 </section>
 
                 <section>
-                    <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Player Registration & Selection Details</h2>
+                    <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Player Registration &amp; Selection Details</h2>
                     <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed text-[1.05rem]">
                         <li><strong>Registration Opening Date:</strong> 20th Jan 2025</li>
                         <li>Trials/Selection dates will be notified as per specific announcements.</li>
@@ -162,17 +171,17 @@ const TermsAndConditions = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
-            <SEO title="Terms & Conditions" description="Terms and Conditions of Beyond Reach Premier League (BRPL)." />
-            <PageBanner pageKey="termsAndConditions" title="Terms & Condition" currentPage="Terms Conditions" />
+        <SiteContextProvider value={ctx}>
+            <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
+                <SEO title="Terms & Conditions" description="Terms and Conditions of Beyond Reach Premier League (BRPL)." />
+                <PageBanner pageKey="termsAndConditions" title="Terms & Condition" currentPage="Terms Conditions" />
 
-            <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
-                <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
-                    {renderStaticContent()}
+                <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
+                    <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
+                        {renderStaticContent()}
+                    </div>
                 </div>
             </div>
-        </div>
+        </SiteContextProvider>
     );
-};
-
-export default TermsAndConditions;
+}

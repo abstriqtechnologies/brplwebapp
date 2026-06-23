@@ -3,17 +3,26 @@ import SEO from "@/components/SEO";
 import Link from "next/link";
 import { decodeHtmlEntities } from "@/utils/htmlHelper";
 import { SafeHtml } from "@/components/SafeHtml";
+import { getSiteContext, getLegal } from "@/lib/siteContext";
+import { SiteContextProvider } from "@/components/SiteContextProvider";
 
-const PrivacyPolicy = () => {
+export const dynamic = "force-dynamic";
+
+export default async function PrivacyPolicy() {
+    const [ctx, legal] = await Promise.all([
+        getSiteContext(),
+        getLegal(),
+    ]);
+
     const renderStaticContent = () => (
         <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Privacy Policy</h1>
             <div className="space-y-6 text-sm md:text-[1.05rem] leading-relaxed text-slate-600">
                 <p>
-                    Greetings from <span className="font-bold text-slate-900">Beyond Reach Premier League (BRPL)</span> (hereinafter referred to as the "<span className="font-bold">Website</span>"). The Website is owned and operated by <span className="font-bold text-slate-900">BRPL PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
+                    Greetings from <span className="font-bold text-slate-900">Beyond Reach Premier League (BRPL)</span> (hereinafter referred to as the &quot;<span className="font-bold">Website</span>&quot;). The Website is owned and operated by <span className="font-bold text-slate-900">BRPL PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
                 </p>
                 <p>
-                    By accessing or using the Website through any computer, laptop, mobile phone, tablet, or any other electronic device, you expressly agree to be bound by this <Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link> (hereinafter referred to as the "<Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link>").
+                    By accessing or using the Website through any computer, laptop, mobile phone, tablet, or any other electronic device, you expressly agree to be bound by this <Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link> (hereinafter referred to as the &quot;<Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link>&quot;).
                 </p>
                 <p>
                     We value the privacy of our users and the confidentiality of the information they share with us. This Privacy Policy demonstrates our commitment to protecting your information. It outlines the types of information we collect, the purpose for which it is used, how it is stored and handled, and under what circumstances it may be disclosed.
@@ -59,7 +68,7 @@ const PrivacyPolicy = () => {
                         <li>Communicate with users via email, phone, or other channels about updates, offers, or services that may interest them.</li>
                         <li>Develop, display, and personalize content and advertisements based on user preferences.</li>
                         <li>Perform analytics and monitor website performance.</li>
-                        <li>Enforce or exercise any rights under our <Link href="/terms-and-conditions" className="font-bold text-blue-600 hover:underline">Terms & Conditions</Link> available at <Link href="/terms-and-conditions" className="text-blue-600 hover:underline">Terms & Conditions</Link>.</li>
+                        <li>Enforce or exercise any rights under our <Link href="/terms-and-conditions" className="font-bold text-blue-600 hover:underline">Terms &amp; Conditions</Link> available at <Link href="/terms-and-conditions" className="text-blue-600 hover:underline">Terms &amp; Conditions</Link>.</li>
                         <li>Detect and prevent fraud, abuse, or other unauthorized activities.</li>
                         <li>Resolve disputes or troubleshoot issues.</li>
                         <li>Perform other functions described to users at the time of data collection.</li>
@@ -72,7 +81,7 @@ const PrivacyPolicy = () => {
                     <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                         <li><span className="font-bold text-slate-900">With Service Providers:</span> To facilitate operations such as payment processing, marketing, analytics, or logistics – under confidentiality agreements.</li>
                         <li><span className="font-bold text-slate-900">For Legal Compliance:</span> To comply with applicable laws, court orders, or requests from government or law enforcement agencies.</li>
-                        <li><span className="font-bold text-slate-900">For Protection:</span> To enforce our Terms & Conditions, protect our rights or property, or prevent potential fraud or illegal activity.</li>
+                        <li><span className="font-bold text-slate-900">For Protection:</span> To enforce our Terms &amp; Conditions, protect our rights or property, or prevent potential fraud or illegal activity.</li>
                         <li><span className="font-bold text-slate-900">Corporate Transactions:</span> In the event of a merger, acquisition, sale of business, or reorganization, user data may form part of the transferred assets.</li>
                     </ul>
                     <p className="text-slate-600 mt-4 leading-relaxed">We may share <span className="font-bold">non-personal information</span> (aggregated or anonymized data) with third parties such as advertisers, partners, and investors for business or analytical purposes.</p>
@@ -113,17 +122,17 @@ const PrivacyPolicy = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
-            <SEO title="Privacy Policy" description="Privacy Policy of Beyond Reach Premier League (BRPL)." />
-            <PageBanner pageKey="privacyPolicy" title="Privacy Policy" currentPage="Privacy Policy" />
+        <SiteContextProvider value={ctx}>
+            <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
+                <SEO title="Privacy Policy" description="Privacy Policy of Beyond Reach Premier League (BRPL)." />
+                <PageBanner pageKey="privacyPolicy" title="Privacy Policy" currentPage="Privacy Policy" />
 
-            <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
-                <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
-                    {renderStaticContent()}
+                <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
+                    <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
+                        {renderStaticContent()}
+                    </div>
                 </div>
             </div>
-        </div>
+        </SiteContextProvider>
     );
-};
-
-export default PrivacyPolicy;
+}

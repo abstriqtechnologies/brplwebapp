@@ -2,8 +2,17 @@ import PageBanner from "@/components/PageBanner";
 import SEO from "@/components/SEO";
 import { decodeHtmlEntities } from "@/utils/htmlHelper";
 import { SafeHtml } from "@/components/SafeHtml";
+import { getSiteContext, getLegal } from "@/lib/siteContext";
+import { SiteContextProvider } from "@/components/SiteContextProvider";
 
-const RuleBook = () => {
+export const dynamic = "force-dynamic";
+
+export default async function RuleBook() {
+    const [ctx, legal] = await Promise.all([
+        getSiteContext(),
+        getLegal(),
+    ]);
+
     const renderStaticContent = () => (
         <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">BRPL Rule Book</h1>
@@ -437,7 +446,7 @@ const RuleBook = () => {
                 {/* Equipment Standards */}
                 <section>
                     <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Equipment Standards</h2>
-                    <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
+                    <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
                         <li><span className="font-bold text-slate-900">Ball:</span> BRPL-approved ball; no modification unless league-approved.</li>
                         <li><span className="font-bold text-slate-900">Bat:</span> Any commercially available cricket bat suitable for T10 cricket.</li>
                         <li><span className="font-bold text-slate-900">Protective gear:</span> Gloves and abdomen guards are recommended; helmets and pads are optional.</li>
@@ -448,7 +457,7 @@ const RuleBook = () => {
                 {/* Medical Guidelines */}
                 <section>
                     <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Medical Guidelines</h2>
-                    <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
+                    <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
                         <li>Each venue must maintain a first-aid kit and a designated medical contact available on call.</li>
                         <li>Ice packs, antiseptics, hydration salts, and basic medical supplies must always be accessible.</li>
                         <li>For high-intensity matches, playoffs, or finals, an ambulance or emergency transport arrangement is mandatory.</li>
@@ -459,7 +468,7 @@ const RuleBook = () => {
                 {/* Security & Emergency */}
                 <section>
                     <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Security &amp; Emergency Protocols</h2>
-                    <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
+                    <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
                         <li>All venues must ensure secure entry/exit points and proper safety checks for players and spectators.</li>
                         <li>In case of emergencies (weather disruptions, medical crises, or crowd issues), the Match Referee may suspend or abandon the match after consulting with local authorities.</li>
                         <li>Venues must follow fire-safety compliance and maintain a clear evacuation plan.</li>
@@ -768,17 +777,17 @@ const RuleBook = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
-            <SEO title="Rule Book" description="Rule Book of Beyond Reach Premier League (BRPL)." />
-            <PageBanner pageKey="ruleBook" title="Rule Book" currentPage="Rule Book" />
+        <SiteContextProvider value={ctx}>
+            <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
+                <SEO title="Rule Book" description="Rule Book of Beyond Reach Premier League (BRPL)." />
+                <PageBanner pageKey="ruleBook" title="Rule Book" currentPage="Rule Book" />
 
-            <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
-                <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
-                    {renderStaticContent()}
+                <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">
+                    <div className="p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 bg-white">
+                        {renderStaticContent()}
+                    </div>
                 </div>
             </div>
-        </div>
+        </SiteContextProvider>
     );
-};
-
-export default RuleBook;
+}
