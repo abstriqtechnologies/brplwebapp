@@ -9,7 +9,7 @@ import { Loader2, Phone } from "lucide-react";
 /* ---------- helpers (visual) ---------- */
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
-    return <main className="auth-shell">{children}</main>;
+    return <div className="auth-shell">{children}</div>;
 }
 
 export function AuthCard({ children }: { children: React.ReactNode }) {

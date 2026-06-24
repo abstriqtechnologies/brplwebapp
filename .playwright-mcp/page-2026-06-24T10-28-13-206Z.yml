@@ -1,0 +1,54 @@
+- generic [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - main [ref=e3]:
+    - generic [ref=e5]:
+      - complementary [ref=e6]:
+        - link "Back to home" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e10]: BRPL · Bharat Regional Premier League
+        - generic [ref=e11]:
+          - generic [ref=e12]: Season 2026 · Registrations Open
+          - heading "Where the next chapter of cricket begins." [level=1] [ref=e13]:
+            - text: Where the next
+            - emphasis [ref=e14]: chapter
+            - text: of
+            - text: cricket begins.
+          - paragraph [ref=e15]: A league built for the new India. Sign in to manage your profile, track trials, and stand a chance to be drafted into a franchise.
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18]:
+              - generic [ref=e19]: "48"
+              - generic [ref=e20]: Franchises
+            - generic [ref=e21]:
+              - generic [ref=e22]: 12K+
+              - generic [ref=e23]: Players
+            - generic [ref=e24]:
+              - generic [ref=e25]: ∞
+              - generic [ref=e26]: Dreams
+          - generic [ref=e29]: Trials live · Mumbai · Bengaluru · Guwahati
+      - main [ref=e30]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Step 01 · Mobile
+          - heading "Welcome to BRPL" [level=2] [ref=e36]
+          - paragraph [ref=e37]: Enter your mobile to receive a one-time passcode.
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - generic [ref=e40]: Mobile Number
+              - generic [ref=e41]:
+                - generic:
+                  - img
+                  - text: "+91"
+                - textbox "Mobile Number" [active] [ref=e42]:
+                  - /placeholder: 98765 43210
+            - button "Send OTP" [ref=e43] [cursor=pointer]:
+              - text: Send OTP
+              - img [ref=e44]
+            - generic [ref=e46]:
+              - img [ref=e47]
+              - generic [ref=e50]: Your information is encrypted and never shared.
+            - generic [ref=e51]:
+              - generic [ref=e52]: Already a player?
+              - link "Sign in" [ref=e53] [cursor=pointer]:
+                - /url: /auth?mode=login&next=%2Fdashboard

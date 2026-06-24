@@ -1,5 +1,5 @@
 export const isProduction = () => process.env.NODE_ENV === "production";
-export const isStaging = () => process.env.NODE_ENV === "staging";
+export const isStaging = (): boolean => (process.env.NODE_ENV as string | undefined) === "staging";
 
 /** Only allow the default-admin seed outside production unless explicitly enabled. */
 export function defaultAdminEnabled(): boolean {

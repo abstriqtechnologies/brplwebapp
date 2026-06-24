@@ -1,0 +1,212 @@
+- generic [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - link "BRPL Logo" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "BRPL Logo" [ref=e6]
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - img [ref=e11]
+            - link "+(91) 81309 55866" [ref=e13] [cursor=pointer]:
+              - /url: tel:+918130955866
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - link "info@brpl.net" [ref=e19] [cursor=pointer]:
+              - /url: mailto:info@brpl.net
+        - generic [ref=e20]:
+          - link "LOGIN" [ref=e21] [cursor=pointer]:
+            - /url: /auth?mode=login
+            - img [ref=e22]
+            - generic [ref=e25]: LOGIN
+          - generic [ref=e27]:
+            - link "Facebook" [ref=e28] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61584782136820
+              - img "Facebook" [ref=e29]
+            - link "Twitter" [ref=e30] [cursor=pointer]:
+              - /url: https://x.com/BRPLOfficial
+              - img "Twitter" [ref=e31]
+            - link "Instagram" [ref=e32] [cursor=pointer]:
+              - /url: https://www.instagram.com/brpl.t10
+              - img "Instagram" [ref=e33]
+      - navigation [ref=e35]:
+        - link "Home" [ref=e36] [cursor=pointer]:
+          - /url: /
+          - text: Home
+        - link "About Us" [ref=e37] [cursor=pointer]:
+          - /url: /about-us
+          - text: About Us
+        - link "Teams" [ref=e38] [cursor=pointer]:
+          - /url: /teams
+          - text: Teams
+        - link "Events" [ref=e39] [cursor=pointer]:
+          - /url: /events
+          - text: Events
+        - button "Blog" [ref=e41] [cursor=pointer]:
+          - text: Blog
+          - img [ref=e42]
+        - link "Career" [ref=e44] [cursor=pointer]:
+          - /url: /career
+          - text: Career
+        - button "Partners" [ref=e46] [cursor=pointer]:
+          - text: Partners
+          - img [ref=e47]
+        - link "FAQs" [ref=e49] [cursor=pointer]:
+          - /url: /faqs
+          - text: FAQs
+        - link "Registration" [ref=e50] [cursor=pointer]:
+          - /url: /registration
+          - text: Registration
+        - link "Contact Us" [ref=e51] [cursor=pointer]:
+          - /url: /contact-us
+          - text: Contact Us
+    - main [ref=e52]:
+      - generic [ref=e54]:
+        - complementary [ref=e55]:
+          - link "Back to home" [ref=e57] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e59]: BRPL · Bharat Regional Premier League
+          - generic [ref=e60]:
+            - generic [ref=e61]: Season 2026 · Registrations Open
+            - heading "Where the next chapter of cricket begins." [level=1] [ref=e62]:
+              - text: Where the next
+              - emphasis [ref=e63]: chapter
+              - text: of
+              - text: cricket begins.
+            - paragraph [ref=e64]: A league built for the new India. Sign in to manage your profile, track trials, and stand a chance to be drafted into a franchise.
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - generic [ref=e68]: "48"
+                - generic [ref=e69]: Franchises
+              - generic [ref=e70]:
+                - generic [ref=e71]: 12K+
+                - generic [ref=e72]: Players
+              - generic [ref=e73]:
+                - generic [ref=e74]: ∞
+                - generic [ref=e75]: Dreams
+            - generic [ref=e78]: Trials live · Mumbai · Bengaluru · Guwahati
+        - main [ref=e79]:
+          - generic [ref=e82]:
+            - generic [ref=e83]: Step 01 · Mobile
+            - heading "Welcome to BRPL" [level=2] [ref=e85]
+            - paragraph [ref=e86]: Enter your mobile to receive a one-time passcode.
+            - generic [ref=e87]:
+              - generic [ref=e88]:
+                - generic [ref=e89]: Mobile Number
+                - generic [ref=e90]:
+                  - generic:
+                    - img
+                    - text: "+91"
+                  - textbox "Mobile Number" [active] [ref=e91]:
+                    - /placeholder: 98765 43210
+              - button "Send OTP" [ref=e92] [cursor=pointer]:
+                - text: Send OTP
+                - img [ref=e93]
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e99]: Your information is encrypted and never shared.
+              - generic [ref=e100]:
+                - generic [ref=e101]: Already a player?
+                - link "Sign in" [ref=e102] [cursor=pointer]:
+                  - /url: /auth?mode=login&next=%2Fdashboard
+    - contentinfo [ref=e103]:
+      - generic:
+        - img "Player Left"
+      - generic:
+        - img "Player Right"
+      - generic [ref=e104]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - heading "Teams" [level=3] [ref=e108]
+            - list [ref=e110]:
+              - listitem [ref=e111] [cursor=pointer]:
+                - generic [ref=e112]: ●
+                - link "North East Panthers" [ref=e113]:
+                  - /url: /teams
+              - listitem [ref=e114] [cursor=pointer]:
+                - generic [ref=e115]: ●
+                - link "Central Strikers" [ref=e116]:
+                  - /url: /teams
+              - listitem [ref=e117] [cursor=pointer]:
+                - generic [ref=e118]: ●
+                - link "Western Heroes" [ref=e119]:
+                  - /url: /teams
+              - listitem [ref=e120] [cursor=pointer]:
+                - generic [ref=e121]: ●
+                - link "Northern Dabanggs" [ref=e122]:
+                  - /url: /teams
+              - listitem [ref=e123] [cursor=pointer]:
+                - generic [ref=e124]: ●
+                - link "Southern Lions" [ref=e125]:
+                  - /url: /teams
+              - listitem [ref=e126] [cursor=pointer]:
+                - generic [ref=e127]: ●
+                - link "Eastern Rhions" [ref=e128]:
+                  - /url: /teams
+          - generic [ref=e129]:
+            - heading "BRPL - T10" [level=3] [ref=e131]
+            - list [ref=e133]:
+              - listitem [ref=e134] [cursor=pointer]:
+                - generic [ref=e135]: ●
+                - link "About Us" [ref=e136]:
+                  - /url: /about-us
+              - listitem [ref=e137] [cursor=pointer]:
+                - generic [ref=e138]: ●
+                - link "Contact Us" [ref=e139]:
+                  - /url: /contact-us
+              - listitem [ref=e140] [cursor=pointer]:
+                - generic [ref=e141]: ●
+                - link "Partners" [ref=e142]:
+                  - /url: /partners
+          - generic [ref=e143]:
+            - heading "Useful Links" [level=3] [ref=e145]
+            - list [ref=e147]:
+              - listitem [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]: ●
+                - link "Registration" [ref=e150]:
+                  - /url: /registration
+              - listitem [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]: ●
+                - link "FAQs" [ref=e153]:
+                  - /url: /faqs
+              - listitem [ref=e154] [cursor=pointer]:
+                - generic [ref=e155]: ●
+                - link "Events" [ref=e156]:
+                  - /url: /events
+          - generic [ref=e157]:
+            - heading "Contact" [level=3] [ref=e159]
+            - list [ref=e161]:
+              - listitem [ref=e162] [cursor=pointer]:
+                - generic [ref=e163]: ●
+                - link "Contact Us" [ref=e164]:
+                  - /url: /contact-us
+              - listitem [ref=e165] [cursor=pointer]:
+                - generic [ref=e166]: ●
+                - link "News" [ref=e167]:
+                  - /url: /news
+        - generic [ref=e168]:
+          - generic [ref=e169]:
+            - generic [ref=e170]:
+              - text: "Phone:"
+              - link "+(91) 81309 55866" [ref=e171] [cursor=pointer]:
+                - /url: tel:+918130955866
+            - generic [ref=e172]:
+              - text: "Email:"
+              - link "info@brpl.net" [ref=e173] [cursor=pointer]:
+                - /url: mailto:info@brpl.net
+            - generic [ref=e174]: Address:Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309
+          - generic [ref=e175]:
+            - link "Facebook" [ref=e176] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61584782136820
+              - img "Facebook" [ref=e177]
+            - link "Twitter" [ref=e178] [cursor=pointer]:
+              - /url: https://x.com/BRPLOfficial
+              - img "Twitter" [ref=e179]
+            - link "Instagram" [ref=e180] [cursor=pointer]:
+              - /url: https://www.instagram.com/brpl.t10
+              - img "Instagram" [ref=e181]
+      - generic [ref=e183]: © Copyright 2026 | All Rights Reserved by Beyond Reach Premier League

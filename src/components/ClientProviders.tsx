@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,7 +10,12 @@ import { CustomBodyScripts } from "@/components/CustomBodyScripts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const CHROME_HIDDEN_PREFIXES = ["/auth"];
+
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname() || "";
+    const hideChrome = CHROME_HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
     return (
         <TooltipProvider>
             <Toaster />
@@ -18,9 +24,9 @@ export default function ClientProviders({ children }: { children: React.ReactNod
             <CustomHeadScripts />
             <CustomBodyScripts />
             <div className="min-h-screen relative flex flex-col font-sans">
-                <Header />
+                {!hideChrome && <Header />}
                 <main className="flex-grow">{children}</main>
-                <Footer />
+                {!hideChrome && <Footer />}
             </div>
         </TooltipProvider>
     );
