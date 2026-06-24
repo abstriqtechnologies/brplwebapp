@@ -7,7 +7,7 @@ import { ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import api from "@/apihelper/api";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useRazorpayScript } from "@/hooks/useRazorpayScript";
+import { loadRazorpayScript } from "@/hooks/useRazorpayScript";
 import {
     isValidPhone,
     isCompleteOtp,
@@ -67,7 +67,6 @@ export default function AuthClient({
 }) {
     const router = useRouter();
     const { settings } = useSiteSettings();
-    const razorpayReady = useRazorpayScript();
     const [step, setStep] = useState<Step>("phone");
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
@@ -193,10 +192,7 @@ export default function AuthClient({
                 return;
             }
             setOrderId(res.data.orderId);
-            if (!razorpayReady) {
-                toast({ variant: "destructive", title: "Payment script loading", description: "Please try again in a moment." });
-                return;
-            }
+            await loadRazorpayScript();
             const rzp = new (window as any).Razorpay({
                 key: res.data.key,
                 amount: res.data.amount,

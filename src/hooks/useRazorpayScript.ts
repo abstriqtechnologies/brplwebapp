@@ -12,7 +12,7 @@ declare global {
 
 let scriptPromise: Promise<boolean> | null = null;
 
-function loadRazorpayScript(): Promise<boolean> {
+export function loadRazorpayScript(): Promise<boolean> {
     if (typeof window === "undefined") return Promise.resolve(false);
     if (window.Razorpay) return Promise.resolve(true);
     if (scriptPromise) return scriptPromise;
