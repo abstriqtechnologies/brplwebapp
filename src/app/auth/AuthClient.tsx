@@ -3,17 +3,191 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Loader2, Phone, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import api from "@/apihelper/api";
-import { ArrowLeft, Loader2, Phone, ShieldCheck } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import {
+    isValidPhone,
+    isCompleteOtp,
+    formatOtpExpiry,
+    REGISTRATION_FEE_DISPLAY,
+} from "./auth-helpers";
 
-type Step = "phone" | "otp" | "register" | "loading";
+type Step = "phone" | "otp" | "register";
 
 const FALLBACK_NEXT = "/dashboard";
+
+const STEP_LABEL: Record<Step, string> = {
+    phone: "Step 01 of 03 · Mobile",
+    otp: "Step 02 of 03 · Verify",
+    register: "Step 03 of 03 · Register",
+};
+
+const STEP_TITLE = {
+    phone: (mode: "register" | "login") =>
+        mode === "register" ? "Welcome to BRPL" : "Welcome back",
+    otp: () => "Enter the code",
+    register: () => "Final stretch",
+} as const;
+
+const STEP_SUB = {
+    phone: (mode: "register" | "login") =>
+        mode === "register"
+            ? "Enter your mobile to receive a one-time passcode."
+            : "Enter your registered mobile to sign in.",
+    otp: (phone: string) => `We sent a 6-digit code to +91 ${phone}.`,
+    register: () => "One last step before you join the league.",
+} as const;
+
+/* ---------- helpers (visual, in-file) ---------- */
+
+function AuthShell({ children }: { children: React.ReactNode }) {
+    return <main className="auth-shell">{children}</main>;
+}
+
+function AuthCard({ children }: { children: React.ReactNode }) {
+    return <div className="auth-card">{children}</div>;
+}
+
+function StepPill({ label }: { label: string }) {
+    return (
+        <div className="auth-step-pill">
+            <span className="auth-step-dot" />
+            {label}
+        </div>
+    );
+}
+
+function AuthField({
+    label,
+    htmlFor,
+    children,
+}: {
+    label: string;
+    htmlFor: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="auth-field">
+            <label htmlFor={htmlFor} className="auth-field-label">
+                {label}
+            </label>
+            {children}
+        </div>
+    );
+}
+
+function PhoneInput({
+    id,
+    value,
+    onChange,
+    disabled,
+    autoFocus,
+}: {
+    id: string;
+    value: string;
+    onChange: (v: string) => void;
+    disabled?: boolean;
+    autoFocus?: boolean;
+}) {
+    return (
+        <div className="auth-phone-wrap">
+            <span className="auth-phone-prefix">
+                <Phone size={13} /> +91
+            </span>
+            <input
+                id={id}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                autoComplete="tel"
+                autoFocus={autoFocus}
+                disabled={disabled}
+                className="auth-field-input auth-phone-input"
+                value={value}
+                onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 10))}
+            />
+        </div>
+    );
+}
+
+function OtpInput({
+    value,
+    onChange,
+    disabled,
+}: {
+    value: ReadonlyArray<string>;
+    onChange: (next: string[]) => void;
+    disabled?: boolean;
+}) {
+    const refs = useRef<(HTMLInputElement | null)[]>([]);
+    const update = (i: number, v: string) => {
+        const digit = v.replace(/\D/g, "").slice(-1);
+        const next = [...value];
+        next[i] = digit;
+        onChange(next);
+        if (digit && i < 5) refs.current[i + 1]?.focus();
+        if (!digit && i > 0) refs.current[i - 1]?.focus();
+    };
+    return (
+        <div className="auth-otp-row">
+            {value.map((d, i) => (
+                <input
+                    key={i}
+                    ref={(el) => {
+                        refs.current[i] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    aria-label={`Digit ${i + 1}`}
+                    disabled={disabled}
+                    className={`auth-otp-cell ${d ? "filled" : ""}`}
+                    value={d}
+                    onChange={(e) => update(i, e.target.value)}
+                    autoFocus={i === 0}
+                />
+            ))}
+        </div>
+    );
+}
+
+function PrimaryButton({
+    busy,
+    busyLabel,
+    children,
+    disabled,
+    type = "button",
+    onClick,
+}: {
+    busy: boolean;
+    busyLabel: string;
+    children: React.ReactNode;
+    disabled?: boolean;
+    type?: "button" | "submit";
+    onClick?: () => void;
+}) {
+    return (
+        <button
+            type={type}
+            className="auth-submit"
+            disabled={busy || disabled}
+            aria-busy={busy}
+            onClick={onClick}
+        >
+            {busy ? (
+                <>
+                    <Loader2 size={16} className="animate-spin" /> {busyLabel}
+                </>
+            ) : (
+                children
+            )}
+        </button>
+    );
+}
+
+/* ---------- main component ---------- */
 
 export default function AuthClient({
     next,
@@ -26,14 +200,13 @@ export default function AuthClient({
     const { settings } = useSiteSettings();
     const [step, setStep] = useState<Step>("phone");
     const [phone, setPhone] = useState("");
-    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
     const [otpExpiresIn, setOtpExpiresIn] = useState(0);
     const [resendIn, setResendIn] = useState(0);
     const [busy, setBusy] = useState(false);
     const [form, setForm] = useState({ name: "", email: "", role: "batsman", state: "", city: "" });
     const [orderId, setOrderId] = useState<string | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
-    const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     useEffect(() => {
         if (otpExpiresIn <= 0) return;
@@ -47,8 +220,8 @@ export default function AuthClient({
         return () => clearTimeout(t);
     }, [resendIn]);
 
-    const sendOtp = async () => {
-        if (!/^\d{10}$/.test(phone)) {
+    const sendOtp = async (): Promise<boolean> => {
+        if (!isValidPhone(phone)) {
             toast({ variant: "destructive", title: "Invalid phone", description: "Enter a 10-digit mobile number." });
             return false;
         }
@@ -78,8 +251,8 @@ export default function AuthClient({
 
     const submitOtp = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isCompleteOtp(otp)) return;
         const code = otp.join("");
-        if (code.length !== 6) return;
         setBusy(true);
         try {
             const res = await api.post<{ exists: boolean; user?: any; redirect?: string }>(
@@ -88,6 +261,7 @@ export default function AuthClient({
             );
             if (!res.ok) {
                 toast({ variant: "destructive", title: "Incorrect OTP", description: res.error || "Try again" });
+                setOtp(["", "", "", "", "", ""]);
                 return;
             }
             if (res.data.exists) {
@@ -190,232 +364,221 @@ export default function AuthClient({
         }
     };
 
-    const handleOtpChange = (i: number, v: string) => {
-        const digit = v.replace(/\D/g, "").slice(-1);
-        const nextOtp = [...otp];
-        nextOtp[i] = digit;
-        setOtp(nextOtp);
-        if (digit && i < 5) otpRefs.current[i + 1]?.focus();
-        if (!digit && i > 0) otpRefs.current[i - 1]?.focus();
-    };
+    const auxLabel = initialMode === "register" ? "Already a player?" : "New to BRPL?";
+    const auxAction = initialMode === "register" ? "Sign in" : "Create account";
+    const auxHref = `/auth?mode=${initialMode === "register" ? "login" : "register"}&next=${encodeURIComponent(next)}`;
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative p-4 bg-slate-50">
-            <Link
-                href="/"
-                className="absolute top-6 left-6 z-20 flex items-center gap-2 text-sm text-slate-700 hover:text-amber-600"
-            >
-                <ArrowLeft className="w-4 h-4" /> Back to site
-            </Link>
-            <div className="w-full max-w-md bg-white rounded-xl border border-slate-200 shadow-xl p-8">
-                <div className="text-center mb-6">
-                    <div className="flex justify-center mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600">
-                            <ShieldCheck className="w-7 h-7" />
-                        </div>
-                    </div>
-                    <h1 className="text-2xl font-bold text-slate-900">
-                        {step === "register" ? "Complete Registration" : "Sign in to BRPL"}
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        {step === "phone" &&
-                            (initialMode === "register"
-                                ? "Enter your mobile to receive an OTP"
-                                : "Enter your registered mobile to sign in")}
-                        {step === "otp" && `OTP sent to +91 ${phone}`}
-                        {step === "register" && "One last step before you join the league"}
-                    </p>
-                </div>
+        <AuthShell>
+            <div className="auth-stage">
+                <Link href="/" className="auth-brand" aria-label="Back to home">
+                    <span className="auth-brand-dot" />
+                    <span>
+                        <span className="auth-brand-text">BRPL</span>
+                        <span className="auth-brand-sub">Bharat Regional Premier League</span>
+                    </span>
+                </Link>
 
-                {step === "phone" && (
-                    <form onSubmit={submitPhone} className="space-y-4">
-                        <div className="space-y-1.5">
-                            <Label htmlFor="phone">Mobile number</Label>
-                            <div className="relative">
-                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <Input
+                <AuthCard>
+                    <StepPill label={STEP_LABEL[step]} />
+                    <h1 className="auth-title">
+                        {step === "phone"
+                            ? STEP_TITLE.phone(initialMode)
+                            : step === "otp"
+                                ? STEP_TITLE.otp()
+                                : STEP_TITLE.register()}
+                    </h1>
+                    <p className="auth-sub">
+                        {step === "phone"
+                            ? STEP_SUB.phone(initialMode)
+                            : step === "otp"
+                                ? STEP_SUB.otp(phone)
+                                : STEP_SUB.register()}
+                    </p>
+
+                    {step === "phone" && (
+                        <form onSubmit={submitPhone}>
+                            <AuthField label="Mobile Number" htmlFor="phone">
+                                <PhoneInput
                                     id="phone"
-                                    inputMode="numeric"
-                                    maxLength={10}
-                                    className="pl-10"
-                                    placeholder="9876543210"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                                    required
+                                    onChange={setPhone}
+                                    disabled={busy}
                                     autoFocus
                                 />
-                            </div>
-                        </div>
-                        <Button
-                            type="submit"
-                            className="w-full bg-amber-500 text-black hover:bg-amber-400 font-semibold"
-                            disabled={busy}
-                        >
-                            {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                            Send OTP
-                        </Button>
-                        <p className="text-xs text-slate-500 text-center">
-                            {initialMode === "register" ? (
-                                <>
-                                    Already registered?{" "}
-                                    <Link
-                                        className="text-amber-600 hover:underline"
-                                        href={`/auth?mode=login&next=${encodeURIComponent(next)}`}
-                                    >
-                                        Sign in
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    New here?{" "}
-                                    <Link
-                                        className="text-amber-600 hover:underline"
-                                        href={`/auth?mode=register&next=${encodeURIComponent(next)}`}
-                                    >
-                                        Create an account
-                                    </Link>
-                                </>
-                            )}
-                        </p>
-                    </form>
-                )}
+                            </AuthField>
 
-                {step === "otp" && (
-                    <form onSubmit={submitOtp} className="space-y-4">
-                        <div className="flex gap-2 justify-between">
-                            {otp.map((d, i) => (
-                                <input
-                                    key={i}
-                                    ref={(el) => {
-                                        otpRefs.current[i] = el;
-                                    }}
-                                    type="text"
-                                    inputMode="numeric"
-                                    maxLength={1}
-                                    value={d}
-                                    onChange={(e) => handleOtpChange(i, e.target.value)}
-                                    className="w-12 h-12 text-center text-2xl font-mono font-bold border border-slate-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none"
-                                    autoFocus={i === 0}
-                                />
-                            ))}
-                        </div>
-                        <div className="text-xs text-slate-500 text-center">
-                            {otpExpiresIn > 0
-                                ? `Expires in ${Math.floor(otpExpiresIn / 60)}:${String(otpExpiresIn % 60).padStart(2, "0")}`
-                                : "OTP expired"}
-                        </div>
-                        <Button
-                            type="submit"
-                            className="w-full bg-amber-500 text-black hover:bg-amber-400 font-semibold"
-                            disabled={busy || otp.join("").length !== 6}
-                        >
-                            {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                            Verify
-                        </Button>
-                        <div className="text-xs text-slate-500 text-center">
-                            {resendIn > 0 ? (
-                                `Resend in ${resendIn}s`
-                            ) : (
+                            <PrimaryButton
+                                type="submit"
+                                busy={busy}
+                                busyLabel="Sending"
+                            >
+                                Send OTP →
+                            </PrimaryButton>
+
+                            <div className="auth-trust">
+                                <ShieldCheck size={16} />
+                                <span>Your information is encrypted and never shared.</span>
+                            </div>
+
+                            <div className="auth-aux">
+                                <span>{auxLabel}</span>
+                                <Link href={auxHref}>{auxAction}</Link>
+                            </div>
+                        </form>
+                    )}
+
+                    {step === "otp" && (
+                        <form onSubmit={submitOtp}>
+                            <OtpInput value={otp} onChange={setOtp} disabled={busy} />
+
+                            <div className="auth-otp-meta">
+                                <span>
+                                    <Lock size={11} style={{ marginRight: 4, verticalAlign: -1 }} />
+                                    {otpExpiresIn > 0
+                                        ? `Expires in ${formatOtpExpiry(otpExpiresIn)}`
+                                        : "OTP expired"}
+                                </span>
+                                {resendIn > 0 ? (
+                                    <span>Resend in {resendIn}s</span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="auth-ghost"
+                                        onClick={sendOtp}
+                                        disabled={busy}
+                                    >
+                                        Resend code
+                                    </button>
+                                )}
+                            </div>
+
+                            <PrimaryButton
+                                type="submit"
+                                busy={busy}
+                                busyLabel="Verifying"
+                                disabled={!isCompleteOtp(otp)}
+                            >
+                                Verify &amp; continue <CheckCircle2 size={14} />
+                            </PrimaryButton>
+
+                            <div className="auth-aux">
+                                <span>Wrong number?</span>
                                 <button
                                     type="button"
-                                    className="text-amber-600 hover:underline"
-                                    onClick={sendOtp}
-                                    disabled={busy}
+                                    className="auth-ghost"
+                                    onClick={() => {
+                                        setOtp(["", "", "", "", "", ""]);
+                                        setStep("phone");
+                                    }}
                                 >
-                                    Resend OTP
+                                    Change
                                 </button>
-                            )}
-                        </div>
-                    </form>
-                )}
+                            </div>
+                        </form>
+                    )}
 
-                {step === "register" && (
-                    <form onSubmit={submitRegister} className="space-y-4">
-                        {!orderId && (
-                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
-                                <p className="text-amber-900 font-semibold mb-1">Pay registration fee: ₹1499</p>
-                                <p className="text-amber-800 mb-3">
-                                    A one-time fee covers trials, kit, and processing.
-                                </p>
-                                <Button
-                                    type="button"
-                                    onClick={startPayment}
-                                    className="bg-amber-500 text-black hover:bg-amber-400 font-semibold"
-                                    disabled={busy}
-                                >
-                                    {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                    Pay ₹1499
-                                </Button>
-                            </div>
-                        )}
-                        {orderId && !paymentId && (
-                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-                                Payment started. Complete it in the Razorpay window, then return here.
-                            </div>
-                        )}
-                        {paymentId && (
-                            <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                    <Label>Full name *</Label>
-                                    <Input
-                                        required
-                                        value={form.name}
-                                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label>Email *</Label>
-                                    <Input
-                                        type="email"
-                                        required
-                                        value={form.email}
-                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-1.5">
-                                        <Label>Role *</Label>
-                                        <select
-                                            className="w-full h-10 px-3 border border-slate-300 rounded-md bg-white"
-                                            value={form.role}
-                                            onChange={(e) => setForm({ ...form, role: e.target.value })}
-                                        >
-                                            <option value="batsman">Batsman</option>
-                                            <option value="bowler">Bowler</option>
-                                            <option value="allrounder">All-rounder</option>
-                                            <option value="wicketkeeper">Wicket-keeper</option>
-                                        </select>
+                    {step === "register" && (
+                        <form onSubmit={submitRegister}>
+                            {!orderId && (
+                                <div className="auth-fee">
+                                    <div className="auth-fee-row">
+                                        <div className="auth-fee-label">Registration Fee</div>
+                                        <div className="auth-fee-amount">{REGISTRATION_FEE_DISPLAY}</div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label>State *</Label>
-                                        <Input
+                                    <p className="auth-fee-note">
+                                        Covers trials, official kit and processing.
+                                    </p>
+                                    <PrimaryButton
+                                        type="button"
+                                        busy={busy}
+                                        busyLabel="Opening"
+                                        onClick={startPayment}
+                                    >
+                                        Pay {REGISTRATION_FEE_DISPLAY}
+                                    </PrimaryButton>
+                                </div>
+                            )}
+
+                            {orderId && !paymentId && (
+                                <div className="auth-info">
+                                    Complete the payment in the Razorpay window, then return here.
+                                </div>
+                            )}
+
+                            {paymentId && (
+                                <>
+                                    <AuthField label="Full name" htmlFor="reg-name">
+                                        <input
+                                            id="reg-name"
+                                            className="auth-field-input"
                                             required
-                                            value={form.state}
-                                            onChange={(e) => setForm({ ...form, state: e.target.value })}
+                                            value={form.name}
+                                            onChange={(e) => setForm({ ...form, name: e.target.value })}
                                         />
+                                    </AuthField>
+                                    <AuthField label="Email address" htmlFor="reg-email">
+                                        <input
+                                            id="reg-email"
+                                            type="email"
+                                            className="auth-field-input"
+                                            required
+                                            value={form.email}
+                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                        />
+                                    </AuthField>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                                        <AuthField label="Role" htmlFor="reg-role">
+                                            <select
+                                                id="reg-role"
+                                                className="auth-field-input"
+                                                value={form.role}
+                                                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                                            >
+                                                <option value="batsman">Batsman</option>
+                                                <option value="bowler">Bowler</option>
+                                                <option value="allrounder">All-rounder</option>
+                                                <option value="wicketkeeper">Wicket-keeper</option>
+                                            </select>
+                                        </AuthField>
+                                        <AuthField label="State" htmlFor="reg-state">
+                                            <input
+                                                id="reg-state"
+                                                className="auth-field-input"
+                                                required
+                                                value={form.state}
+                                                onChange={(e) => setForm({ ...form, state: e.target.value })}
+                                            />
+                                        </AuthField>
                                     </div>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label>City *</Label>
-                                    <Input
-                                        required
-                                        value={form.city}
-                                        onChange={(e) => setForm({ ...form, city: e.target.value })}
-                                    />
-                                </div>
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-amber-500 text-black hover:bg-amber-400 font-semibold"
-                                    disabled={busy}
-                                >
-                                    {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                    Complete registration
-                                </Button>
-                            </div>
-                        )}
-                    </form>
-                )}
+                                    <AuthField label="City" htmlFor="reg-city">
+                                        <input
+                                            id="reg-city"
+                                            className="auth-field-input"
+                                            required
+                                            value={form.city}
+                                            onChange={(e) => setForm({ ...form, city: e.target.value })}
+                                        />
+                                    </AuthField>
+
+                                    <PrimaryButton
+                                        type="submit"
+                                        busy={busy}
+                                        busyLabel="Finishing"
+                                    >
+                                        Complete registration <CheckCircle2 size={14} />
+                                    </PrimaryButton>
+                                </>
+                            )}
+                        </form>
+                    )}
+                </AuthCard>
+
+                <div className="auth-foot">
+                    <span className="auth-foot-dot" />
+                    <span>Trials live · Mumbai · Bengaluru · Guwahati</span>
+                </div>
             </div>
-        </div>
+        </AuthShell>
     );
 }
