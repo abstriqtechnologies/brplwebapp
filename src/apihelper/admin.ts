@@ -185,3 +185,31 @@ export const getRegistrationSection = (section: string) =>
     api.get(`/api/admin/registration/${section}`);
 export const updateRegistrationSection = (section: string, body: any) =>
     api.patch(`/api/admin/registration/${section}`, body);
+
+// Media Library helpers
+export const uploadMedia = async (file: File, opts?: { folder?: string; tags?: string[] }) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (opts?.folder) form.append("folder", opts.folder);
+    if (opts?.tags) opts.tags.forEach((t) => form.append("tags", t));
+    return api.post("/api/admin/media/upload", form);
+};
+
+export const listMedia = async (filters: {
+    folder?: string; kind?: "image" | "video"; search?: string; page?: number; limit?: number;
+}) => {
+    const params = new URLSearchParams();
+    if (filters.folder) params.append("folder", filters.folder);
+    if (filters.kind) params.append("kind", filters.kind);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.page) params.append("page", String(filters.page));
+    if (filters.limit) params.append("limit", String(filters.limit));
+    return api.get(`/api/admin/media?${params.toString()}`);
+};
+
+export const listMediaFolders = async () => api.get("/api/admin/media/folders");
+
+export const updateMedia = async (id: string, body: { folder?: string; tags?: string[]; originalName?: string }) =>
+    api.patch(`/api/admin/media/${id}`, body);
+
+export const deleteMedia = async (id: string) => api.delete(`/api/admin/media/${id}`);

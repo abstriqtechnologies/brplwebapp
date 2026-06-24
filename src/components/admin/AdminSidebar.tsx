@@ -75,6 +75,7 @@ const ALL_ITEMS: NavItem[] = [
     { icon: Share2, label: "Social & Contact", path: "/admin/social-contact" },
     { icon: Mail, label: "Contact Us Leads", path: "/admin/contact-us-leads" },
     { icon: ImageIcon, label: "Page Banner", path: "/admin/page-banner" },
+    { icon: ImageIcon, label: "Media Library", path: "/admin/media" },
     { icon: Shield, label: "Privacy Policy", path: "/admin/privacy-policy" },
     { icon: FileText, label: "Terms & Conditions", path: "/admin/terms-conditions" },
     { icon: FileText, label: "Rule Book", path: "/admin/rule-book" },
