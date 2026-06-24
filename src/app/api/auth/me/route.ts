@@ -30,6 +30,7 @@ export async function GET() {
                 state: user.state,
                 city: user.city,
                 paymentStatus: user.paymentStatus,
+                profileImage: user.profileImage ?? null,
             },
         });
     } catch (err) {
