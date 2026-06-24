@@ -33,6 +33,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import api from "@/apihelper/api";
+import { toast } from "@/components/ui/use-toast";
 
 const partnerFormSchema = z.object({
     firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -65,13 +67,22 @@ const BecomePartnerClient = () => {
 
     const onSubmit = async (values: z.infer<typeof partnerFormSchema>) => {
         setIsSubmitting(true);
-        // Simulate submission
-        setTimeout(() => {
-            console.log("Form values:", values);
+        try {
+            const res = await api.post<{ success: boolean; id?: string; error?: string }>("/api/contact", {
+                source: "partner-form",
+                ...values,
+            });
+            if (!res.ok) {
+                toast({ variant: "destructive", title: "Failed", description: res.error || "Try again later" });
+                return;
+            }
             setShowSuccessDialog(true);
             form.reset();
+        } catch (err: any) {
+            toast({ variant: "destructive", title: "Network error", description: err?.message });
+        } finally {
             setIsSubmitting(false);
-        }, 1000);
+        }
     };
 
     return (

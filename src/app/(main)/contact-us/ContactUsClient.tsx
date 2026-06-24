@@ -15,6 +15,8 @@ import {
 import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
 import SEO from "@/components/SEO";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import api from "@/apihelper/api";
+import { toast } from "@/components/ui/use-toast";
 
 const ContactUsClient = () => {
     const { settings } = useSiteSettings();
@@ -40,22 +42,31 @@ const ContactUsClient = () => {
         e.preventDefault();
 
         if (!formData.firstName || !formData.lastName || !formData.email || !formData.mobileNumber || !formData.message) {
+            toast({ variant: "destructive", title: "Missing fields", description: "Please fill all fields." });
             return;
         }
 
         setLoading(true);
-        // Simulate submission
-        setTimeout(() => {
-            setShowSuccessDialog(true);
-            setFormData({
-                firstName: "",
-                lastName: "",
-                mobileNumber: "",
-                email: "",
-                message: ""
+        try {
+            const res = await api.post<{ success: boolean; id?: string; error?: string }>("/api/contact", {
+                source: "contact-form",
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                mobileNumber: formData.mobileNumber,
+                email: formData.email,
+                message: formData.message,
             });
+            if (!res.ok) {
+                toast({ variant: "destructive", title: "Failed to send", description: res.error });
+                return;
+            }
+            setShowSuccessDialog(true);
+            setFormData({ firstName: "", lastName: "", mobileNumber: "", email: "", message: "" });
+        } catch (err: any) {
+            toast({ variant: "destructive", title: "Network error", description: err?.message });
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
 
     return (
