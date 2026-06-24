@@ -65,7 +65,7 @@ const Header = () => {
             ],
         },
         { label: "FAQs", path: "/faqs", isActive: true, isExternal: false },
-        { label: "Registration", path: "/registration", isActive: true, isExternal: false },
+        { label: "Registration", path: "/login", isActive: true, isExternal: false },
         { label: "Contact Us", path: "/contact-us", isActive: true, isExternal: false },
     ];
 
@@ -110,7 +110,7 @@ const Header = () => {
                     {/* Login & Socials */}
                     <div className="flex items-center justify-center md:justify-end gap-4 w-full md:w-auto md:ml-auto">
                         <Link
-                            href="/auth?mode=login"
+                            href="/login"
                             className="flex items-center gap-2 font-bold bg-yellow-400 text-slate-900 px-4 py-1.5 rounded-full hover:bg-yellow-500 transition-all shadow-md group text-[13px]"
                         >
                             <LogIn className="w-4 h-4 stroke-[2.5]" />

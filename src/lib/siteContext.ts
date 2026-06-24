@@ -90,7 +90,7 @@ const DEFAULT_NAV_LINKS: NavbarLink[] = [
     { label: "Career", path: "/career" },
     { label: "Partners", path: "/partners", children: [{ label: "BRPL Partner", path: "/partners" }, { label: "BRPL Sponsors", path: "/types-of-partners" }] },
     { label: "FAQs", path: "/faqs" },
-    { label: "Registration", path: "/registration" },
+    { label: "Registration", path: "/login" },
     { label: "Contact Us", path: "/contact-us" },
 ];
 
@@ -109,7 +109,7 @@ const DEFAULT_FOOTER_LINKS: FooterLinkGroup[] = [
         { label: "Partners", path: "/partners" },
     ]},
     { heading: "Useful Links", links: [
-        { label: "Registration", path: "/registration" },
+        { label: "Registration", path: "/login" },
         { label: "FAQs", path: "/faqs" },
         { label: "Events", path: "/events" },
     ]},
@@ -131,9 +131,9 @@ function defaults(): SiteContext {
             contactAddress: "Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309",
             whatsappNumber: "918130955866",
             headerCtaText: "Register Now",
-            headerCtaLink: "/registration",
+            headerCtaLink: "/login",
             floatingRegisterText: "Register Now",
-            floatingRegisterLink: "/registration",
+            floatingRegisterLink: "/login",
             homeSeoTitle: "Beyond Reach Premier League",
             homeSeoDescription: "BRPL is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here.",
             homeSeoKeywords: "T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League",
