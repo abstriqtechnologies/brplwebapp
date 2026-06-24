@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Trophy, Tv, Bot, Users, Timer, Circle,
     Star, Heart, Zap, Shield, Target, Award, Crown, Flame, Gem, Globe,
     Megaphone, Rocket, ThumbsUp, TrendingUp, type LucideIcon
 } from "lucide-react";
-import apiClient from "@/apihelper/api";
+import { useHomeCms } from "@/components/SiteContextProvider";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     Trophy, Circle, Tv, Users, Bot, Timer,
@@ -21,9 +21,9 @@ interface TrustItem {
     order: number;
 }
 
-// Hardcoded fallback if API fails or returns empty
+// Hardcoded fallback used when CMS data is empty
 const fallbackItems: TrustItem[] = [
-    { _id: "1", icon: "Trophy", hook: "\u20B93 Crore", descriptor: "TOTAL PRIZE POOL", order: 0 },
+    { _id: "1", icon: "Trophy", hook: "₹3 Crore", descriptor: "TOTAL PRIZE POOL", order: 0 },
     { _id: "2", icon: "Circle", hook: "Tennis Ball", descriptor: "NO BIG KIT REQUIREMENTS", order: 1 },
     { _id: "3", icon: "Tv", hook: "Live TV", descriptor: "NATIONAL BROADCAST", order: 2 },
     { _id: "4", icon: "Users", hook: "All Ages", descriptor: "U-18, U-19, U-24, U-40", order: 3 },
@@ -32,23 +32,25 @@ const fallbackItems: TrustItem[] = [
 ];
 
 const TrustBar = () => {
-    const [trustItems, setTrustItems] = useState<TrustItem[]>(fallbackItems);
-    const [sectionTitle, setSectionTitle] = useState("The Numbers Speak");
+    const home = useHomeCms();
+    const [sectionTitle] = useState("The Numbers Speak");
 
-    useEffect(() => {
-        apiClient.get("/api/numbers-speak")
-            .then(res => {
-                if (res.data.success && res.data.data.length > 0) {
-                    setTrustItems(res.data.data);
-                }
-                if (res.data.settings?.title) {
-                    setSectionTitle(res.data.settings.title);
-                }
-            })
-            .catch(() => {
-                // Keep fallback items on error
-            });
-    }, []);
+    // Map CMS trustBar items to the shape the render expects.
+    // CMS shape: { label, value, icon?, order? }
+    // Render shape: { _id, icon, hook (value), descriptor (label), order }
+    const cmsItems: TrustItem[] = Array.isArray(home?.trustBar)
+        ? home.trustBar
+              .filter((it: any) => it && it.label && it.value)
+              .map((it: any, idx: number) => ({
+                  _id: it._id?.toString?.() || `cms-trust-${idx}`,
+                  icon: it.icon || "Trophy",
+                  hook: it.value,
+                  descriptor: it.label,
+                  order: typeof it.order === "number" ? it.order : idx,
+              }))
+        : [];
+
+    const trustItems = cmsItems.length > 0 ? cmsItems : fallbackItems;
 
     const renderIcon = (iconName: string) => {
         const IconComp = ICON_MAP[iconName] || Trophy;

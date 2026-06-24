@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useHomeCms } from "@/components/SiteContextProvider";
 
 const LINEAR_TV_PARTNERS = [
   { name: "DD Sports", logo: "/dd-image.webp" },
@@ -39,6 +40,25 @@ function PartnerLogo({ name, logo }: { name: string; logo: string }) {
 }
 
 const BroadcastingPartners: React.FC = () => {
+  const home = useHomeCms();
+  const cmsPartners = Array.isArray(home?.broadcastingPartners) ? home.broadcastingPartners : [];
+
+  // When CMS data exists, render those partners in both columns. Otherwise, fall
+  // back to the hardcoded Linear TV / OTT lists.
+  const linearTv = cmsPartners.length > 0
+    ? cmsPartners.map((p: any, idx: number) => ({
+        name: p.name || `Partner ${idx + 1}`,
+        logo: p.logo || "",
+      }))
+    : LINEAR_TV_PARTNERS;
+
+  const ott = cmsPartners.length > 0
+    ? cmsPartners.map((p: any, idx: number) => ({
+        name: p.name || `Partner ${idx + 1}`,
+        logo: p.logo || "",
+      }))
+    : OTT_PARTNERS;
+
   return (
     <section className="relative w-full overflow-hidden">
       {/* Background image - same pattern as Teams / Ambassadors */}
@@ -70,7 +90,7 @@ const BroadcastingPartners: React.FC = () => {
                 Linear TV
               </h3>
               <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                {LINEAR_TV_PARTNERS.map((partner) => (
+                {linearTv.map((partner) => (
                   <PartnerLogo
                     key={partner.name}
                     name={partner.name}
@@ -86,7 +106,7 @@ const BroadcastingPartners: React.FC = () => {
                 OTT
               </h3>
               <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                {OTT_PARTNERS.map((partner) => (
+                {ott.map((partner) => (
                   <PartnerLogo
                     key={partner.name}
                     name={partner.name}

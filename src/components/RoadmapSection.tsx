@@ -1,14 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
 import {
     FileText, Smartphone, Search, Trophy,
     Star, Heart, Zap, Shield, Target, Award, Crown, Flame, Gem, Globe,
     Megaphone, Rocket, ThumbsUp, TrendingUp, Users, Bot, Timer, Tv, Circle,
     type LucideIcon
 } from "lucide-react";
-import apiClient from "@/apihelper/api";
 import ZoneDeadlineSection from "./ZoneDeadlineSection";
 import LivesChangedSection from "./LivesChangedSection";
+import { useRegistrationCms } from "@/components/SiteContextProvider";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     FileText, Smartphone, Search, Trophy,
@@ -25,34 +24,38 @@ interface StepItem {
 }
 
 const fallbackSteps: StepItem[] = [
-    { _id: "1", icon: "FileText", headline: "SIGN UP & PAY", description: "Fill your details and pay the one-time entry fee of \u20B91499 to secure your spot.", order: 1 },
+    { _id: "1", icon: "FileText", headline: "SIGN UP & PAY", description: "Fill your details and pay the one-time entry fee of ₹1499 to secure your spot.", order: 1 },
     { _id: "2", icon: "Smartphone", headline: "RECORD & UPLOAD", description: "No travel needed! Record a batting or bowling video on your phone and upload it.", order: 2 },
     { _id: "3", icon: "Search", headline: "GET SHORTLISTED", description: "Our experts and AI technology analyze your technique. Best players get the \"Golden Call\".", order: 3 },
-    { _id: "4", icon: "Trophy", headline: "PLAY LIVE ON TV", description: "Get auctioned into a team, wear the pro jersey, and play for the \u20B93 Crore prize pool.", order: 4 },
+    { _id: "4", icon: "Trophy", headline: "PLAY LIVE ON TV", description: "Get auctioned into a team, wear the pro jersey, and play for the ₹3 Crore prize pool.", order: 4 },
 ];
 
-const RoadmapSection = () => {
-    const [steps, setSteps] = useState<StepItem[]>(fallbackSteps);
-    const [titleBefore, setTitleBefore] = useState("YOUR JOURNEY TO");
-    const [titleHighlight, setTitleHighlight] = useState("GLORY");
-    const [backgroundImage, setBackgroundImage] = useState("/banner.webp");
+// Icon rotation for steps that have no icon set in the CMS.
+const ICON_ROTATION = ["FileText", "Smartphone", "Search", "Trophy"];
 
-    useEffect(() => {
-        apiClient.get("/api/roadmap")
-            .then(res => {
-                if (res.data.success && res.data.data.length > 0) {
-                    setSteps(res.data.data);
-                }
-                if (res.data.settings) {
-                    if (res.data.settings.titleBefore) setTitleBefore(res.data.settings.titleBefore);
-                    if (res.data.settings.titleHighlight) setTitleHighlight(res.data.settings.titleHighlight);
-                    if (res.data.settings.backgroundImage) setBackgroundImage(res.data.settings.backgroundImage);
-                }
-            })
-            .catch(() => {
-                // Keep fallback on error
-            });
-    }, []);
+const RoadmapSection = () => {
+    const registration = useRegistrationCms();
+
+    // Map CMS roadmap to render shape.
+    // CMS shape: { step, description, order }
+    // Render shape: { _id, icon, headline (step), description, order }
+    const cmsSteps: StepItem[] = Array.isArray(registration?.roadmap)
+        ? registration.roadmap
+              .filter((s: any) => s && s.step)
+              .map((s: any, idx: number) => ({
+                  _id: s._id?.toString?.() || `cms-roadmap-${idx}`,
+                  icon: s.icon || ICON_ROTATION[idx % ICON_ROTATION.length],
+                  headline: s.step,
+                  description: s.description || "",
+                  order: typeof s.order === "number" ? s.order : idx + 1,
+              }))
+        : [];
+
+    const steps = cmsSteps.length > 0 ? cmsSteps : fallbackSteps;
+
+    const titleBefore = "YOUR JOURNEY TO";
+    const titleHighlight = "GLORY";
+    const backgroundImage = "/banner.webp";
 
     const renderIcon = (iconName: string) => {
         const IconComp = ICON_MAP[iconName] || FileText;

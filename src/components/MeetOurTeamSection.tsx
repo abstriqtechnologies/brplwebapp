@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import api from "@/apihelper/api";
+import React, { useEffect, useState } from "react";
 import { getImageUrl } from "@/utils/imageHelper";
 import { Loader2 } from "lucide-react";
+import { useCollections } from "@/components/SiteContextProvider";
 
 interface TeamMember {
   _id: string;
@@ -13,25 +13,54 @@ interface TeamMember {
   order: number;
 }
 
+const FALLBACK_TEAM: TeamMember[] = [
+  {
+    _id: "fallback-tm-1",
+    name: "Leadership Team",
+    role: "BRPL",
+    image: "/artist.webp",
+    bio: "Our team brings decades of experience from major cricket leagues and sports organizations across India.",
+    order: 0,
+  },
+  {
+    _id: "fallback-tm-2",
+    name: "Operations Team",
+    role: "BRPL",
+    image: "/artist.webp",
+    bio: "Working round the clock to bring the T10 dream to every corner of India.",
+    order: 1,
+  },
+  {
+    _id: "fallback-tm-3",
+    name: "Coaching Team",
+    role: "BRPL",
+    image: "/artist.webp",
+    bio: "Former cricketers and certified coaches guiding the next generation of talent.",
+    order: 2,
+  },
+];
+
 const MeetOurTeamSection: React.FC = () => {
+  const { teams } = useCollections();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const response = await api.get('/api/cms/our-team');
-        if (response.data && response.data.data) {
-          setMembers(response.data.data);
-        }
-      } catch (error) {
-        console.error("Failed to load team members", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMembers();
-  }, []);
+    if (Array.isArray(teams) && teams.length > 0) {
+      const mapped: TeamMember[] = teams.map((m: any, idx: number) => ({
+        _id: m._id?.toString?.() || `cms-team-${idx}`,
+        name: m.name || "",
+        role: m.role || "",
+        image: m.image || "",
+        bio: m.bio || "",
+        order: typeof m.order === "number" ? m.order : idx,
+      }));
+      setMembers(mapped);
+    } else {
+      setMembers([]);
+    }
+    setLoading(false);
+  }, [teams]);
 
   if (loading) {
     return <div className="py-20 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /></div>;

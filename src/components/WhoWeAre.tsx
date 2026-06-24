@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MoveRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import api from "@/apihelper/api";
 import { getImageUrl } from "@/utils/imageHelper";
 import { SafeHtml } from "./SafeHtml";
+import { useHomeCms } from "@/components/SiteContextProvider";
 
 type HeadingLevel = "h1" | "h2" | "h3";
 
@@ -39,27 +39,25 @@ const DEFAULT_WHO_WE_ARE: WhoWeAreData = {
 };
 
 const WhoWeAre = () => {
-    // Start with default data so section renders immediately (avoids CLS and improves LCP)
-    const [data, setData] = useState<WhoWeAreData>(DEFAULT_WHO_WE_ARE);
-    const [isLoading, setIsLoading] = useState(true);
+    const home = useHomeCms();
+    const cmsWho = home?.whoWeAre;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await api.get('/api/cms/who-we-are');
-                if (response.data.data) {
-                    setData(response.data.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch Who We Are data", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    // Always render with current data (default or from API)
+    // Map CMS whoWeAre to render shape.
+    // CMS shape: { title?, subtitle?, body?, image?, points? }
+    // Render shape: { title, titleHeadingLevel, titleColor, subtitle, tagline, description (body), image, videoUrl }
+    const data: WhoWeAreData =
+        cmsWho && (cmsWho.title || cmsWho.subtitle || cmsWho.body || cmsWho.image)
+            ? {
+                  title: cmsWho.title || DEFAULT_WHO_WE_ARE.title,
+                  titleHeadingLevel: (cmsWho.titleHeadingLevel as HeadingLevel) || DEFAULT_WHO_WE_ARE.titleHeadingLevel,
+                  titleColor: cmsWho.titleColor || DEFAULT_WHO_WE_ARE.titleColor,
+                  subtitle: cmsWho.subtitle || DEFAULT_WHO_WE_ARE.subtitle,
+                  tagline: cmsWho.tagline || DEFAULT_WHO_WE_ARE.tagline,
+                  description: cmsWho.body || DEFAULT_WHO_WE_ARE.description,
+                  image: cmsWho.image || DEFAULT_WHO_WE_ARE.image,
+                  videoUrl: cmsWho.videoUrl || DEFAULT_WHO_WE_ARE.videoUrl,
+              }
+            : DEFAULT_WHO_WE_ARE;
 
     return (
         <section className="w-full py-16 md:py-24 bg-[#020617] text-white overflow-hidden relative">

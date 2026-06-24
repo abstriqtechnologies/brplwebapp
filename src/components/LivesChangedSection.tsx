@@ -8,7 +8,7 @@ import {
     type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import apiClient from "@/apihelper/api";
+import { useRegistrationCms } from "@/components/SiteContextProvider";
 
 interface StoryItem {
     _id: string;
@@ -21,7 +21,7 @@ interface StoryItem {
 
 const fallbackTestimonials: StoryItem[] = [
     { _id: "1", quote: "I played district cricket 20 years ago. No one gave me a chance beyond that. BRPL is building the system I wish I had.", name: "VIJAY SINGH", role: "FORMER COACH, PUNJAB", highlight: "Coach's Perspective", order: 0 },
-    { _id: "2", quote: "I drive an auto all day. My bat is in the backseat\u2014I hit the nets every evening. BRPL made me believe I wasn't too old or too poor.", name: "SURESH KUMAR", role: "25, TAMIL NADU", highlight: "Passion over Circumstance", order: 1 },
+    { _id: "2", quote: "I drive an auto all day. My bat is in the backseat—I hit the nets every evening. BRPL made me believe I wasn't too old or too poor.", name: "SURESH KUMAR", role: "25, TAMIL NADU", highlight: "Passion over Circumstance", order: 1 },
     { _id: "3", quote: "I'm a night security guard. I practice with a tennis ball during my breaks. BRPL told me talent doesn't have a schedule.", name: "MOHAMMAD IRFAN", role: "28, UTTAR PRADESH", highlight: "Unstoppable Dedication", order: 2 },
     { _id: "4", quote: "Playing on Live TV is a dream come true. We always play in the gully. The idea of playing in a real stadium with floodlights gives me goosebumps.", name: "AMIT YADAV", role: "FAST BOWLER, LUCKNOW", highlight: "Dream Realized", order: 3 },
     { _id: "5", quote: "India's biggest league for sure! The digital skill card feature is very cool. If you love tennis cricket, you cannot miss this.", name: "KARTHIK R.", role: "CHENNAI", highlight: "Tech Enthusiast", order: 4 },
@@ -31,30 +31,30 @@ const LivesChangedSection = () => {
     const [api, setApi] = useState<CarouselApi>();
     const [current, setCurrent] = useState(0);
     const [count, setCount] = useState(0);
-    const [testimonials, setTestimonials] = useState<StoryItem[]>(fallbackTestimonials);
-    const [badgeText, setBadgeText] = useState("Player Stories");
-    const [titleBefore, setTitleBefore] = useState("LIVES CHANGED BY");
-    const [titleHighlight, setTitleHighlight] = useState("BRPL");
-    const [subtitle, setSubtitle] = useState("Real stories from real players across India who found their stage.");
-    const [backgroundImage, setBackgroundImage] = useState("/artist.webp");
+    const registration = useRegistrationCms();
 
-    useEffect(() => {
-        apiClient.get("/api/player-stories")
-            .then(res => {
-                if (res.data.success && res.data.data.length > 0) {
-                    setTestimonials(res.data.data);
-                }
-                if (res.data.settings) {
-                    const s = res.data.settings;
-                    if (s.badgeText) setBadgeText(s.badgeText);
-                    if (s.titleBefore) setTitleBefore(s.titleBefore);
-                    if (s.titleHighlight) setTitleHighlight(s.titleHighlight);
-                    if (s.backgroundImage) setBackgroundImage(s.backgroundImage);
-                    if (s.subtitle !== undefined) setSubtitle(s.subtitle);
-                }
-            })
-            .catch(() => {});
-    }, []);
+    // Map CMS playerStories to render shape.
+    // CMS shape: { name, role?, story, image?, order? }
+    // Render shape: { _id, quote (story), name, role, highlight (from role), order }
+    const cmsTestimonials: StoryItem[] = Array.isArray(registration?.playerStories)
+        ? registration.playerStories
+              .filter((s: any) => s && s.name && s.story)
+              .map((s: any, idx: number) => ({
+                  _id: s._id?.toString?.() || `cms-story-${idx}`,
+                  quote: s.story,
+                  name: s.name,
+                  role: s.role || "",
+                  highlight: s.role || "",
+                  order: typeof s.order === "number" ? s.order : idx,
+              }))
+        : [];
+
+    const testimonials = cmsTestimonials.length > 0 ? cmsTestimonials : fallbackTestimonials;
+    const badgeText = "Player Stories";
+    const titleBefore = "LIVES CHANGED BY";
+    const titleHighlight = "BRPL";
+    const subtitle = "Real stories from real players across India who found their stage.";
+    const backgroundImage = "/artist.webp";
 
     useEffect(() => {
         if (!api) return;

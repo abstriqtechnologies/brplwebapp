@@ -9,31 +9,69 @@ import {
     CarouselPrevious,
     type CarouselApi,
 } from "@/components/ui/carousel";
-import { ArrowRight, MapPin, Calendar, Loader2 } from "lucide-react";
-import api from "@/apihelper/api";
+import { ArrowRight, MapPin, Calendar } from "lucide-react";
+import { useCollections } from "@/components/SiteContextProvider";
+
+const FALLBACK_EVENTS = [
+    {
+        _id: "fallback-1",
+        title: "BRPL Zonal Trials",
+        image: "/artist.webp",
+        date: "Upcoming",
+        location: "Pan-India",
+    },
+    {
+        _id: "fallback-2",
+        title: "Franchise Auctions",
+        image: "/artist.webp",
+        date: "TBA",
+        location: "Mumbai",
+    },
+    {
+        _id: "fallback-3",
+        title: "T10 Season Opener",
+        image: "/artist.webp",
+        date: "TBA",
+        location: "Delhi NCR",
+    },
+    {
+        _id: "fallback-4",
+        title: "Grassroots Showcases",
+        image: "/artist.webp",
+        date: "Year-round",
+        location: "All Zones",
+    },
+];
 
 const EventGallerySlider: React.FC = () => {
     const [api2, setApi] = useState<CarouselApi>();
-    const [events, setEvents] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { events: cmsEvents } = useCollections();
+    const [events, setEvents] = useState<any[]>(FALLBACK_EVENTS);
 
+    // Map CMS events to the shape the render expects.
+    // CMS shape: { title, slug, description, image, venue, city, state, startDate, endDate, status, ... }
+    // Render shape: { _id, title, image, date (startDate formatted), location (city/state/venue) }
     useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await api.get('/api/events');
-                if (response.data && response.data.data) {
-                    // Take up to 8 events for the slider
-                    setEvents(response.data.data.slice(0, 8));
-                }
-            } catch (error) {
-                console.error('Failed to fetch events for gallery slider', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEvents();
-    }, []);
+        if (Array.isArray(cmsEvents) && cmsEvents.length > 0) {
+            const mapped = cmsEvents.slice(0, 8).map((e: any, idx: number) => {
+                const dateStr = e.startDate
+                    ? new Date(e.startDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                    : "";
+                const locationParts = [e.city, e.state].filter(Boolean);
+                const location = locationParts.length > 0 ? locationParts.join(", ") : (e.venue || "");
+                return {
+                    _id: e._id?.toString?.() || `cms-event-${idx}`,
+                    title: e.title || "",
+                    image: e.image || "/artist.webp",
+                    date: dateStr,
+                    location,
+                };
+            });
+            setEvents(mapped);
+        } else {
+            setEvents(FALLBACK_EVENTS);
+        }
+    }, [cmsEvents]);
 
     useEffect(() => {
         if (!api2) return;
@@ -74,12 +112,7 @@ const EventGallerySlider: React.FC = () => {
                         </p>
                     </div>
 
-                    {/* Loader */}
-                    {loading ? (
-                        <div className="flex justify-center items-center h-[350px]">
-                            <Loader2 className="w-10 h-10 animate-spin text-[#FFC928]" />
-                        </div>
-                    ) : events.length === 0 ? (
+                    {events.length === 0 ? (
                         <div className="text-center text-white/60 py-16">No events available.</div>
                     ) : (
                         /* Carousel */
@@ -152,4 +185,3 @@ const EventGallerySlider: React.FC = () => {
 
 export default EventGallerySlider;
 // end of file
-

@@ -10,27 +10,49 @@ import {
     CarouselPrevious,
     type CarouselApi,
 } from "@/components/ui/carousel";
-import apiClient from "@/apihelper/api";
-import { Loader2 } from "lucide-react";
+import { useCollections } from "@/components/SiteContextProvider";
+
+const FALLBACK_AMBASSADORS = [
+    {
+        _id: "fallback-amb-1",
+        name: "BRPL Ambassador",
+        image: "/artist.webp",
+        designation: "Coming Soon",
+    },
+    {
+        _id: "fallback-amb-2",
+        name: "BRPL Ambassador",
+        image: "/artist.webp",
+        designation: "Coming Soon",
+    },
+    {
+        _id: "fallback-amb-3",
+        name: "BRPL Ambassador",
+        image: "/artist.webp",
+        designation: "Coming Soon",
+    },
+    {
+        _id: "fallback-amb-4",
+        name: "BRPL Ambassador",
+        image: "/artist.webp",
+        designation: "Coming Soon",
+    },
+];
 
 const AmbassadorsSection: React.FC = () => {
     const [api, setApi] = useState<CarouselApi>();
+    const { ambassadors: cmsAmbassadors } = useCollections();
     const [ambassadors, setAmbassadors] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAmbassadors = async () => {
-            try {
-                const response = await apiClient.get('/api/ambassadors');
-                setAmbassadors(response.data);
-            } catch (error) {
-                console.error("Failed to fetch ambassadors", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchAmbassadors();
-    }, []);
+        if (Array.isArray(cmsAmbassadors) && cmsAmbassadors.length > 0) {
+            setAmbassadors(cmsAmbassadors);
+        } else {
+            setAmbassadors(FALLBACK_AMBASSADORS);
+        }
+        setIsLoading(false);
+    }, [cmsAmbassadors]);
 
     useEffect(() => {
         if (!api) {
@@ -74,9 +96,7 @@ const AmbassadorsSection: React.FC = () => {
 
                 {/* Carousel */}
                 {isLoading ? (
-                    <div className="flex justify-center items-center h-[400px]">
-                        <Loader2 className="h-10 w-10 animate-spin text-white" />
-                    </div>
+                    <div className="flex justify-center items-center h-[400px] text-white">Loading…</div>
                 ) : (
                     <Carousel
                         setApi={setApi}
