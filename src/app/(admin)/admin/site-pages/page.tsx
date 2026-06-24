@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Save, Loader2 } from "lucide-react";
 import { getSitePage, updateSitePage } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 // Mirror of SITE_PAGE_KEYS from the SitePage model. We redefine here to avoid
 // pulling mongoose into a client component.
@@ -191,11 +192,11 @@ export default function SitePagesAdmin() {
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
-                                                        <Label className="mb-1 block">Hero Image URL</Label>
-                                                        <Input
+                                                        <MediaUploadField
+                                                            label="Hero Image URL"
                                                             value={form.heroImage}
-                                                            onChange={(e) => set("heroImage", e.target.value)}
-                                                            placeholder="https://..."
+                                                            onChange={(v) => set("heroImage", v)}
+                                                            kind="image"
                                                         />
                                                     </div>
                                                     {form.heroImage && (
