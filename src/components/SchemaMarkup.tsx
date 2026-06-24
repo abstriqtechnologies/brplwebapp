@@ -21,6 +21,7 @@ export const PATH_TO_LABEL: Record<string, string> = {
     "/contact-us": "Contact Us",
     "/privacy-policy": "Privacy Policy",
     "/terms-and-conditions": "Terms & Conditions",
+    "/login": "Login",
     "/auth": "Login",
 };
 
