@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Phone, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import api from "@/apihelper/api";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -13,6 +13,7 @@ import {
     formatOtpExpiry,
     REGISTRATION_FEE_DISPLAY,
 } from "./auth-helpers";
+import { AuthShell, AuthCard, StepPill, AuthField, PhoneInput, OtpInput, PrimaryButton } from "./auth-components";
 
 type Step = "phone" | "otp" | "register";
 
@@ -39,153 +40,6 @@ const STEP_SUB = {
     otp: (phone: string) => `We sent a 6-digit code to +91 ${phone}.`,
     register: () => "One last step before you join the league.",
 } as const;
-
-/* ---------- helpers (visual, in-file) ---------- */
-
-function AuthShell({ children }: { children: React.ReactNode }) {
-    return <main className="auth-shell">{children}</main>;
-}
-
-function AuthCard({ children }: { children: React.ReactNode }) {
-    return <div className="auth-card">{children}</div>;
-}
-
-function StepPill({ label }: { label: string }) {
-    return (
-        <div className="auth-step-pill">
-            <span className="auth-step-dot" />
-            {label}
-        </div>
-    );
-}
-
-function AuthField({
-    label,
-    htmlFor,
-    children,
-}: {
-    label: string;
-    htmlFor: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="auth-field">
-            <label htmlFor={htmlFor} className="auth-field-label">
-                {label}
-            </label>
-            {children}
-        </div>
-    );
-}
-
-function PhoneInput({
-    id,
-    value,
-    onChange,
-    disabled,
-    autoFocus,
-}: {
-    id: string;
-    value: string;
-    onChange: (v: string) => void;
-    disabled?: boolean;
-    autoFocus?: boolean;
-}) {
-    return (
-        <div className="auth-phone-wrap">
-            <span className="auth-phone-prefix">
-                <Phone size={13} /> +91
-            </span>
-            <input
-                id={id}
-                type="tel"
-                inputMode="numeric"
-                maxLength={10}
-                autoComplete="tel"
-                autoFocus={autoFocus}
-                disabled={disabled}
-                className="auth-field-input auth-phone-input"
-                value={value}
-                onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            />
-        </div>
-    );
-}
-
-function OtpInput({
-    value,
-    onChange,
-    disabled,
-}: {
-    value: ReadonlyArray<string>;
-    onChange: (next: string[]) => void;
-    disabled?: boolean;
-}) {
-    const refs = useRef<(HTMLInputElement | null)[]>([]);
-    const update = (i: number, v: string) => {
-        const digit = v.replace(/\D/g, "").slice(-1);
-        const next = [...value];
-        next[i] = digit;
-        onChange(next);
-        if (digit && i < 5) refs.current[i + 1]?.focus();
-        if (!digit && i > 0) refs.current[i - 1]?.focus();
-    };
-    return (
-        <div className="auth-otp-row">
-            {value.map((d, i) => (
-                <input
-                    key={i}
-                    ref={(el) => {
-                        refs.current[i] = el;
-                    }}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    aria-label={`Digit ${i + 1}`}
-                    disabled={disabled}
-                    className={`auth-otp-cell ${d ? "filled" : ""}`}
-                    value={d}
-                    onChange={(e) => update(i, e.target.value)}
-                    autoFocus={i === 0}
-                />
-            ))}
-        </div>
-    );
-}
-
-function PrimaryButton({
-    busy,
-    busyLabel,
-    children,
-    disabled,
-    type = "button",
-    onClick,
-}: {
-    busy: boolean;
-    busyLabel: string;
-    children: React.ReactNode;
-    disabled?: boolean;
-    type?: "button" | "submit";
-    onClick?: () => void;
-}) {
-    return (
-        <button
-            type={type}
-            className="auth-submit"
-            disabled={busy || disabled}
-            aria-busy={busy}
-            onClick={onClick}
-        >
-            {busy ? (
-                <>
-                    <Loader2 size={16} className="animate-spin" /> {busyLabel}
-                </>
-            ) : (
-                children
-            )}
-        </button>
-    );
-}
 
 /* ---------- main component ---------- */
 
