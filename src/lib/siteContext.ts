@@ -18,6 +18,7 @@ import Campaign from "@/models/Campaign";
 import FAQ from "@/models/FAQ";
 import BlogPost from "@/models/BlogPost";
 import NewsArticle from "@/models/NewsArticle";
+import Media from "@/models/Media";
 import { TAGS } from "@/lib/revalidate";
 
 // ---------- Types ----------
@@ -63,6 +64,10 @@ export type SiteContext = {
     socialLinks: SocialLink[];
     navLinks: NavbarLink[];
     footerLinks: FooterLinkGroup[];
+    media: {
+        items: any[];
+        folders: string[];
+    };
     featureFlag: { cmsLive: boolean };
 };
 
@@ -150,6 +155,7 @@ function defaults(): SiteContext {
         socialLinks: DEFAULT_SOCIAL_LINKS,
         navLinks: DEFAULT_NAV_LINKS,
         footerLinks: DEFAULT_FOOTER_LINKS,
+        media: { items: [], folders: [] },
         featureFlag: { cmsLive: CMS_LIVE },
     };
 }
@@ -248,6 +254,22 @@ async function readCollections(): Promise<any> {
     } catch { return { events: [], jobs: [], ambassadors: [], teams: [], partners: [], campaigns: [], faqs: [], blogs: [], news: [] }; }
 }
 
+async function readMedia(): Promise<any> {
+    try {
+        await connectDB();
+        const [items, folders] = await Promise.all([
+            Media.find({}).sort({ createdAt: -1 }).limit(200).lean(),
+            Media.distinct("folder", { folder: { $nin: [null, ""] } }),
+        ]);
+        return {
+            items: items.map((m) => ({ ...m, _id: m._id.toString() })),
+            folders: folders.filter((f): f is string => typeof f === "string" && f.length > 0).sort(),
+        };
+    } catch {
+        return { items: [], folders: [] };
+    }
+}
+
 // ---------- Cached wrappers ----------
 
 const cachedAll = unstable_cache(
@@ -265,6 +287,7 @@ const cachedSeo = unstable_cache(readSeo, ["site-context-seo"], { tags: [TAGS.SE
 const cachedPageBanners = unstable_cache(readPageBanners, ["site-context-page-banners"], { tags: [TAGS.PAGE_BANNERS, TAGS.ALL] });
 const cachedPages = unstable_cache(readPages, ["site-context-pages"], { tags: [TAGS.ALL] });
 const cachedCollections = unstable_cache(readCollections, ["site-context-collections"], { tags: [TAGS.COLLECTIONS, TAGS.ALL] });
+const cachedMedia = unstable_cache(readMedia, ["site-context-media"], { tags: [TAGS.MEDIA, TAGS.ALL] });
 
 // ---------- Public API ----------
 
@@ -296,6 +319,7 @@ export async function getSeoAll() { return cachedSeo(); }
 export async function getPageBannersAll() { return cachedPageBanners(); }
 export async function getSitePages() { return cachedPages(); }
 export async function getAllCollections() { return cachedCollections(); }
+export async function getMedia() { return cachedMedia(); }
 
 // ---------- Build ----------
 
@@ -322,7 +346,7 @@ async function build(): Promise<SiteContext> {
     if (!CMS_LIVE) return defaults();
 
     const d = defaults();
-    const [settings, home, about, registration, legal, seo, pageBanners, pages, collections] = await Promise.all([
+    const [settings, home, about, registration, legal, seo, pageBanners, pages, collections, media] = await Promise.all([
         cachedSettings(),
         cachedHome(),
         cachedAbout(),
@@ -332,6 +356,7 @@ async function build(): Promise<SiteContext> {
         cachedPageBanners(),
         cachedPages(),
         cachedCollections(),
+        cachedMedia(),
     ]);
 
     return {
@@ -370,6 +395,7 @@ async function build(): Promise<SiteContext> {
         footerLinks: Array.isArray(settings.footerLinks) && settings.footerLinks.length > 0
             ? settings.footerLinks
             : d.footerLinks,
+        media,
         featureFlag: d.featureFlag,
     };
 }
