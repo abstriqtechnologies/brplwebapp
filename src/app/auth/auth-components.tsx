@@ -106,6 +106,7 @@ export function OtpInput({
                     }}
                     type="text"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     maxLength={1}
                     aria-label={`Digit ${i + 1}`}
                     disabled={disabled}

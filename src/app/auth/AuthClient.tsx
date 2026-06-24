@@ -7,6 +7,7 @@ import { ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import api from "@/apihelper/api";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useRazorpayScript } from "@/hooks/useRazorpayScript";
 import {
     isValidPhone,
     isCompleteOtp,
@@ -41,6 +42,20 @@ const STEP_SUB = {
     register: () => "One last step before you join the league.",
 } as const;
 
+const REGISTER_FIELDS = [
+    { id: "reg-name", label: "Full name", key: "name", type: "text", required: true },
+    { id: "reg-email", label: "Email address", key: "email", type: "email", required: true },
+    { id: "reg-state", label: "State", key: "state", type: "text", required: true },
+    { id: "reg-city", label: "City", key: "city", type: "text", required: true },
+] as const;
+
+const ROLE_OPTIONS = [
+    { value: "batsman", label: "Batsman" },
+    { value: "bowler", label: "Bowler" },
+    { value: "allrounder", label: "All-rounder" },
+    { value: "wicketkeeper", label: "Wicket-keeper" },
+] as const;
+
 /* ---------- main component ---------- */
 
 export default function AuthClient({
@@ -52,6 +67,7 @@ export default function AuthClient({
 }) {
     const router = useRouter();
     const { settings } = useSiteSettings();
+    const razorpayReady = useRazorpayScript();
     const [step, setStep] = useState<Step>("phone");
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
@@ -177,15 +193,9 @@ export default function AuthClient({
                 return;
             }
             setOrderId(res.data.orderId);
-            if (!(window as any).Razorpay) {
-                await new Promise<void>((resolve, reject) => {
-                    const s = document.createElement("script");
-                    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-                    s.async = true;
-                    s.onload = () => resolve();
-                    s.onerror = () => reject(new Error("Failed to load Razorpay"));
-                    document.body.appendChild(s);
-                });
+            if (!razorpayReady) {
+                toast({ variant: "destructive", title: "Payment script loading", description: "Please try again in a moment." });
+                return;
             }
             const rzp = new (window as any).Razorpay({
                 key: res.data.key,
@@ -196,13 +206,13 @@ export default function AuthClient({
                 order_id: res.data.orderId,
                 prefill: { contact: phone },
                 handler: async (resp: any) => {
-                    setPaymentId(resp.razorpay_payment_id);
                     const v = await api.post("/api/payment/verify", {
                         orderId: resp.razorpay_order_id,
                         paymentId: resp.razorpay_payment_id,
                         signature: resp.razorpay_signature,
                     });
                     if (v.ok) {
+                        setPaymentId(resp.razorpay_payment_id);
                         toast({ title: "Payment successful", description: "Now complete your details." });
                     } else {
                         toast({ variant: "destructive", title: "Verification failed", description: v.error });
@@ -362,58 +372,42 @@ export default function AuthClient({
 
                             {paymentId && (
                                 <>
-                                    <AuthField label="Full name" htmlFor="reg-name">
-                                        <input
-                                            id="reg-name"
-                                            className="auth-field-input"
-                                            required
-                                            value={form.name}
-                                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                        />
-                                    </AuthField>
-                                    <AuthField label="Email address" htmlFor="reg-email">
-                                        <input
-                                            id="reg-email"
-                                            type="email"
-                                            className="auth-field-input"
-                                            required
-                                            value={form.email}
-                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                        />
-                                    </AuthField>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                                         <AuthField label="Role" htmlFor="reg-role">
                                             <select
                                                 id="reg-role"
                                                 className="auth-field-input"
                                                 value={form.role}
-                                                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                                                onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
                                             >
-                                                <option value="batsman">Batsman</option>
-                                                <option value="bowler">Bowler</option>
-                                                <option value="allrounder">All-rounder</option>
-                                                <option value="wicketkeeper">Wicket-keeper</option>
+                                                {ROLE_OPTIONS.map((o) => (
+                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                ))}
                                             </select>
                                         </AuthField>
                                         <AuthField label="State" htmlFor="reg-state">
                                             <input
                                                 id="reg-state"
-                                                className="auth-field-input"
+                                                type="text"
                                                 required
+                                                className="auth-field-input"
                                                 value={form.state}
-                                                onChange={(e) => setForm({ ...form, state: e.target.value })}
+                                                onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
                                             />
                                         </AuthField>
                                     </div>
-                                    <AuthField label="City" htmlFor="reg-city">
-                                        <input
-                                            id="reg-city"
-                                            className="auth-field-input"
-                                            required
-                                            value={form.city}
-                                            onChange={(e) => setForm({ ...form, city: e.target.value })}
-                                        />
-                                    </AuthField>
+                                    {REGISTER_FIELDS.filter((f) => f.key !== "state").map((field) => (
+                                        <AuthField key={field.id} label={field.label} htmlFor={field.id}>
+                                            <input
+                                                id={field.id}
+                                                type={field.type}
+                                                required={field.required}
+                                                className="auth-field-input"
+                                                value={form[field.key]}
+                                                onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
+                                            />
+                                        </AuthField>
+                                    ))}
 
                                     <PrimaryButton
                                         type="submit"
