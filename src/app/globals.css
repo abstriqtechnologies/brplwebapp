@@ -57,6 +57,14 @@
     --cream-50: #f7f1e6;
     --cream-300: rgba(245, 241, 234, 0.55);
     --cream-500: rgba(245, 241, 234, 0.4);
+
+    /* Spark — auth background & glass tokens (light fallback) */
+    --spark-bg: #020617;
+    --spark-blue: #1d4ed8;
+    --spark-blue-soft: #3b82f6;
+    --spark-yellow: #FFC928;
+    --spark-glass: rgba(17, 26, 69, 0.55);
+    --spark-input-bg: #0b1428;
   }
 
   .dark {
@@ -110,6 +118,14 @@
     --cream-50: #f7f1e6;
     --cream-300: rgba(245, 241, 234, 0.55);
     --cream-500: rgba(245, 241, 234, 0.4);
+
+    /* Spark — auth background & glass tokens (dark = primary) */
+    --spark-bg: #020617;
+    --spark-blue: #1d4ed8;
+    --spark-blue-soft: #3b82f6;
+    --spark-yellow: #FFC928;
+    --spark-glass: rgba(17, 26, 69, 0.55);
+    --spark-input-bg: #0b1428;
   }
 }
 
