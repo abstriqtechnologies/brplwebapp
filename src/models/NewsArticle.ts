@@ -7,6 +7,12 @@ export interface INewsArticle extends Document {
     summary?: string;
     content: string;
     heroImage?: string;
+    // Public-API aliases
+    featuredImage?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    enableSchema?: boolean;
+    isPublished?: boolean;
     source?: string;
     sourceUrl?: string;
     tags?: string[];
@@ -24,6 +30,11 @@ const NewsArticleSchema = new Schema<INewsArticle>(
         summary: { type: String },
         content: { type: String, required: true },
         heroImage: { type: String },
+        featuredImage: { type: String },
+        metaTitle: { type: String, default: "" },
+        metaDescription: { type: String, default: "" },
+        enableSchema: { type: Boolean, default: true },
+        isPublished: { type: Boolean, default: true },
         source: { type: String },
         sourceUrl: { type: String },
         tags: [{ type: String }],
@@ -33,6 +44,8 @@ const NewsArticleSchema = new Schema<INewsArticle>(
     },
     { timestamps: true }
 );
+
+NewsArticleSchema.index({ isPublished: 1, publishedAt: -1 });
 
 const NewsArticle: Model<INewsArticle> =
     (mongoose.models.NewsArticle as Model<INewsArticle>) ||

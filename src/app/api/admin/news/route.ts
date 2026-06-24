@@ -8,11 +8,16 @@ const schema = z.object({
     summary: z.string().optional(),
     content: z.string().min(1),
     heroImage: z.string().optional(),
+    featuredImage: z.string().optional(),
+    metaTitle: z.string().max(300).optional(),
+    metaDescription: z.string().max(1000).optional(),
+    enableSchema: z.boolean().default(true),
+    isPublished: z.boolean().default(true),
     source: z.string().optional(),
     sourceUrl: z.string().optional(),
     tags: z.array(z.string()).optional(),
     publishedAt: z.string().datetime().or(z.string()).optional(),
-    draft: z.boolean().default(true),
+    draft: z.boolean().default(false),
     views: z.number().int().min(0).default(0),
 });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import NewsArticle from "@/models/NewsArticle";
+import { serializePost } from "@/lib/serializePost";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export async function GET() {
             .lean();
         return NextResponse.json({
             success: true,
-            data: docs.map((d) => ({ ...d, _id: d._id.toString() })),
+            data: docs.map(serializePost),
         });
     } catch (err: any) {
         console.error("[api/news]", err);

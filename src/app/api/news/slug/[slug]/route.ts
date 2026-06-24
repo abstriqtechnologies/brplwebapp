@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import NewsArticle from "@/models/NewsArticle";
+import { serializePost } from "@/lib/serializePost";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
         await connectDB();
         const doc = await NewsArticle.findOne({ slug: params.slug.toLowerCase(), draft: { $ne: true } }).lean();
         if (!doc) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
-        return NextResponse.json({ success: true, data: { ...doc, _id: doc._id.toString() } });
+        return NextResponse.json({ success: true, data: serializePost(doc) });
     } catch (err: any) {
         console.error("[api/news/slug]", err);
         return NextResponse.json({ success: false, error: "Internal error" }, { status: 500 });

@@ -7,6 +7,12 @@ export interface IBlogPost extends Document {
     excerpt?: string;
     content: string;
     heroImage?: string;
+    // Public-API aliases — admin can populate either set of fields.
+    featuredImage?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    enableSchema?: boolean;
+    isPublished?: boolean;
     tags?: string[];
     authorName?: string;
     authorImage?: string;
@@ -24,6 +30,11 @@ const BlogPostSchema = new Schema<IBlogPost>(
         excerpt: { type: String },
         content: { type: String, required: true },
         heroImage: { type: String },
+        featuredImage: { type: String },
+        metaTitle: { type: String, default: "" },
+        metaDescription: { type: String, default: "" },
+        enableSchema: { type: Boolean, default: true },
+        isPublished: { type: Boolean, default: true },
         tags: [{ type: String }],
         authorName: { type: String },
         authorImage: { type: String },
@@ -33,6 +44,8 @@ const BlogPostSchema = new Schema<IBlogPost>(
     },
     { timestamps: true }
 );
+
+BlogPostSchema.index({ isPublished: 1, publishedAt: -1 });
 
 const BlogPost: Model<IBlogPost> =
     (mongoose.models.BlogPost as Model<IBlogPost>) ||
