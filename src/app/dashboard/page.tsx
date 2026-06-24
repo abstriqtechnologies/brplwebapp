@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
     const session = await getAuthSession();
-    if (!session) redirect("/auth?next=/dashboard");
+    if (!session) redirect("/login?next=/dashboard");
     const ctx = await getSiteContext();
     return (
         <SiteContextProvider value={ctx}>

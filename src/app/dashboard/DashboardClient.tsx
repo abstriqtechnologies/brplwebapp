@@ -52,12 +52,12 @@ export default function DashboardClient() {
             .then((r) => r.json())
             .then((d) => {
                 if (!d.user) {
-                    router.replace("/auth?next=/dashboard");
+                    router.replace("/login?next=/dashboard");
                     return;
                 }
                 setUser(d.user);
             })
-            .catch(() => router.replace("/auth?next=/dashboard"))
+            .catch(() => router.replace("/login?next=/dashboard"))
             .finally(() => setLoading(false));
     }, [router]);
 
@@ -65,7 +65,7 @@ export default function DashboardClient() {
         setLoggingOut(true);
         try {
             await fetch("/api/auth/logout", { method: "POST" });
-            router.replace("/auth");
+            router.replace("/login");
         } finally {
             setLoggingOut(false);
         }
@@ -248,7 +248,7 @@ export default function DashboardClient() {
                             <p className="text-sm text-slate-500">Pay the registration fee to confirm your slot.</p>
                         </div>
                         <Button asChild className="bg-amber-500 text-black hover:bg-amber-400">
-                            <Link href="/auth?mode=register">Continue</Link>
+                            <Link href="/login">Continue</Link>
                         </Button>
                     </div>
                 )}
