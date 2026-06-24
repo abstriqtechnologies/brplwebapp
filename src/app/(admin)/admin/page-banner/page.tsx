@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { listPageBanners, upsertPageBanner, updatePageBanner, deletePageBanner } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 const COMMON_KEYS = [
     "about-us",
@@ -177,8 +178,12 @@ export default function PageBannerPage() {
                                 <Textarea rows={2} value={form.subtitle || ""} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
                             </div>
                             <div className="md:col-span-2">
-                                <Label>Image URL</Label>
-                                <Input value={form.image || ""} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." />
+                                <MediaUploadField
+                                    label="Image URL"
+                                    value={form.image || ""}
+                                    onChange={(v) => setForm({ ...form, image: v })}
+                                    kind="image"
+                                />
                             </div>
                             <div>
                                 <Label>CTA Text</Label>

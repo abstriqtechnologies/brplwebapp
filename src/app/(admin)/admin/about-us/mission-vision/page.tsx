@@ -15,7 +15,7 @@ export default function MissionVisionPage() {
                 { name: "missionBody", label: "Mission Body", type: "textarea", rows: 5 },
                 { name: "visionTitle", label: "Vision Title", type: "text" },
                 { name: "visionBody", label: "Vision Body", type: "textarea", rows: 5 },
-                { name: "image", label: "Image URL", type: "url" },
+                { name: "image", label: "Image URL", type: "url", image: true },
             ]}
         />
     );

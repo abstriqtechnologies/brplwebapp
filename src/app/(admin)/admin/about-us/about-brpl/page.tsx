@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { getAboutSection, updateAboutSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type Stat = { label: string; value: string; order?: number };
 type AboutBrpl = { title?: string; body?: string; image?: string; stats?: Stat[] };
@@ -63,7 +64,7 @@ export default function AboutBrplPage() {
                 <CardHeader><CardTitle>Content</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><Label>Title</Label><Input value={data.title || ""} onChange={(e) => setData({ ...data, title: e.target.value })} /></div>
-                    <div className="md:col-span-2"><Label>Image URL</Label><Input value={data.image || ""} onChange={(e) => setData({ ...data, image: e.target.value })} /></div>
+                    <div className="md:col-span-2"><MediaUploadField label="Image URL" value={data.image || ""} onChange={(v) => setData({ ...data, image: v })} kind="image" /></div>
                     <div className="md:col-span-2"><Label>Body</Label><Textarea rows={6} value={data.body || ""} onChange={(e) => setData({ ...data, body: e.target.value })} /></div>
                 </CardContent>
             </Card>

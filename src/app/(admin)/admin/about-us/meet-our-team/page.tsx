@@ -13,7 +13,7 @@ export default function MeetOurTeamPage() {
             fields={[
                 { name: "title", label: "Title", type: "text" },
                 { name: "subtitle", label: "Subtitle", type: "text" },
-                { name: "image", label: "Image URL", type: "url" },
+                { name: "image", label: "Image URL", type: "url", image: true },
                 { name: "body", label: "Body", type: "textarea", rows: 6 },
             ]}
         />

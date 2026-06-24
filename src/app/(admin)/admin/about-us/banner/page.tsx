@@ -13,7 +13,7 @@ export default function AboutBannerPage() {
             fields={[
                 { name: "title", label: "Title", type: "text" },
                 { name: "subtitle", label: "Subtitle", type: "textarea" },
-                { name: "image", label: "Image URL", type: "url" },
+                { name: "image", label: "Image URL", type: "url", image: true },
             ]}
         />
     );

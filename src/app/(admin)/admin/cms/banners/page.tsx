@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { getHomeSection, updateHomeSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type Banner = { title: string; subtitle: string; image: string; videoUrl: string; ctaText: string; ctaLink: string; order: number; active?: boolean };
 type TrustItem = { label: string; value: string; icon?: string; order?: number };
@@ -119,9 +120,9 @@ function BannersSection({
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div className="md:col-span-2"><Label>Title</Label><Input value={b.title || ""} onChange={(e) => update(i, "title", e.target.value)} /></div>
                                 <div className="md:col-span-2"><Label>Subtitle</Label><Textarea rows={2} value={b.subtitle || ""} onChange={(e) => update(i, "subtitle", e.target.value)} /></div>
-                                <div className="md:col-span-2"><Label>Image URL</Label><Input value={b.image || ""} onChange={(e) => update(i, "image", e.target.value)} placeholder="https://..." /></div>
+                                <div className="md:col-span-2"><MediaUploadField label="Image URL" value={b.image || ""} onChange={(v) => update(i, "image", v)} kind="image" /></div>
                                 {b.image && <div className="md:col-span-2"><img src={b.image} alt="" className="max-h-32 rounded border" /></div>}
-                                <div><Label>Video URL (optional)</Label><Input value={b.videoUrl || ""} onChange={(e) => update(i, "videoUrl", e.target.value)} /></div>
+                                <div className="md:col-span-2"><MediaUploadField label="Video URL (optional)" value={b.videoUrl || ""} onChange={(v) => update(i, "videoUrl", v)} kind="video" /></div>
                                 <div><Label>Order</Label><Input type="number" value={b.order ?? 0} onChange={(e) => update(i, "order", Number(e.target.value))} /></div>
                                 <div><Label>CTA Text</Label><Input value={b.ctaText || ""} onChange={(e) => update(i, "ctaText", e.target.value)} /></div>
                                 <div><Label>CTA Link</Label><Input value={b.ctaLink || ""} onChange={(e) => update(i, "ctaLink", e.target.value)} /></div>
@@ -248,9 +249,8 @@ function BroadcastingPartnersSection({
                                     <Label>Name</Label>
                                     <Input value={p.name || ""} onChange={(e) => update(i, "name", e.target.value)} placeholder="Star Sports" />
                                 </div>
-                                <div>
-                                    <Label>Logo URL</Label>
-                                    <Input value={p.logo || ""} onChange={(e) => update(i, "logo", e.target.value)} placeholder="https://..." />
+                                <div className="md:col-span-2">
+                                    <MediaUploadField label="Logo URL" value={p.logo || ""} onChange={(v) => update(i, "logo", v)} kind="image" />
                                 </div>
                                 {p.logo && (
                                     <div className="md:col-span-2">

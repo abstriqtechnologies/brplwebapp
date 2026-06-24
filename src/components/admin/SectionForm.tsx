@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "./MediaUploadField";
 
 export type SectionField = {
     name: string;
@@ -15,6 +16,10 @@ export type SectionField = {
     type?: "text" | "url" | "email" | "tel" | "textarea";
     placeholder?: string;
     rows?: number;
+    /** Render an image picker field instead of a bare URL input. */
+    image?: boolean;
+    /** When image is true, control upload kind. */
+    imageKind?: "image" | "video";
 };
 
 export type SectionArrayItem = {
@@ -120,22 +125,33 @@ export function SectionForm({
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {fields.map((f) => (
-                                    <div key={f.name} className={f.type === "textarea" ? "md:col-span-2" : ""}>
-                                        <Label className="mb-2 block">{f.label}</Label>
-                                        {f.type === "textarea" ? (
-                                            <Textarea
+                                    <div key={f.name} className={f.type === "textarea" || f.image ? "md:col-span-2" : ""}>
+                                        {f.image ? (
+                                            <MediaUploadField
+                                                label={f.label}
                                                 value={scalar[f.name] || ""}
-                                                onChange={(e) => setScalar({ ...scalar, [f.name]: e.target.value })}
-                                                rows={f.rows || 4}
-                                                placeholder={f.placeholder}
+                                                onChange={(v) => setScalar({ ...scalar, [f.name]: v })}
+                                                kind={f.imageKind || "image"}
                                             />
                                         ) : (
-                                            <Input
-                                                type={f.type || "text"}
-                                                value={scalar[f.name] || ""}
-                                                onChange={(e) => setScalar({ ...scalar, [f.name]: e.target.value })}
-                                                placeholder={f.placeholder}
-                                            />
+                                            <>
+                                                <Label className="mb-2 block">{f.label}</Label>
+                                                {f.type === "textarea" ? (
+                                                    <Textarea
+                                                        value={scalar[f.name] || ""}
+                                                        onChange={(e) => setScalar({ ...scalar, [f.name]: e.target.value })}
+                                                        rows={f.rows || 4}
+                                                        placeholder={f.placeholder}
+                                                    />
+                                                ) : (
+                                                    <Input
+                                                        type={f.type || "text"}
+                                                        value={scalar[f.name] || ""}
+                                                        onChange={(e) => setScalar({ ...scalar, [f.name]: e.target.value })}
+                                                        placeholder={f.placeholder}
+                                                    />
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 ))}
@@ -167,22 +183,33 @@ export function SectionForm({
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {arrayFields.itemFields.map((f) => (
-                                                <div key={f.name} className={f.type === "textarea" ? "md:col-span-2" : ""}>
-                                                    <Label className="mb-1 block text-xs">{f.label}</Label>
-                                                    {f.type === "textarea" ? (
-                                                        <Textarea
-                                                            rows={f.rows || 3}
+                                                <div key={f.name} className={f.type === "textarea" || f.image ? "md:col-span-2" : ""}>
+                                                    {f.image ? (
+                                                        <MediaUploadField
+                                                            label={f.label}
                                                             value={it.fields[f.name] || ""}
-                                                            onChange={(e) => updateItem(it.id, f.name, e.target.value)}
-                                                            placeholder={f.placeholder}
+                                                            onChange={(v) => updateItem(it.id, f.name, v)}
+                                                            kind={f.imageKind || "image"}
                                                         />
                                                     ) : (
-                                                        <Input
-                                                            type={f.type || "text"}
-                                                            value={it.fields[f.name] || ""}
-                                                            onChange={(e) => updateItem(it.id, f.name, e.target.value)}
-                                                            placeholder={f.placeholder}
-                                                        />
+                                                        <>
+                                                            <Label className="mb-1 block text-xs">{f.label}</Label>
+                                                            {f.type === "textarea" ? (
+                                                                <Textarea
+                                                                    rows={f.rows || 3}
+                                                                    value={it.fields[f.name] || ""}
+                                                                    onChange={(e) => updateItem(it.id, f.name, e.target.value)}
+                                                                    placeholder={f.placeholder}
+                                                                />
+                                                            ) : (
+                                                                <Input
+                                                                    type={f.type || "text"}
+                                                                    value={it.fields[f.name] || ""}
+                                                                    onChange={(e) => updateItem(it.id, f.name, e.target.value)}
+                                                                    placeholder={f.placeholder}
+                                                                />
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             ))}

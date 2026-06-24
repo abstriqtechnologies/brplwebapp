@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { getHomeSection, updateHomeSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type WhoWeAre = {
     title?: string;
@@ -70,7 +71,7 @@ export default function WhoWeArePage() {
                     <div><Label>Title</Label><Input value={data.title || ""} onChange={(e) => setData({ ...data, title: e.target.value })} /></div>
                     <div><Label>Subtitle</Label><Input value={data.subtitle || ""} onChange={(e) => setData({ ...data, subtitle: e.target.value })} /></div>
                     <div className="md:col-span-2"><Label>Body</Label><Textarea rows={4} value={data.body || ""} onChange={(e) => setData({ ...data, body: e.target.value })} /></div>
-                    <div className="md:col-span-2"><Label>Image URL</Label><Input value={data.image || ""} onChange={(e) => setData({ ...data, image: e.target.value })} /></div>
+                    <div className="md:col-span-2"><MediaUploadField label="Image URL" value={data.image || ""} onChange={(v) => setData({ ...data, image: v })} kind="image" /></div>
                 </CardContent>
             </Card>
 
