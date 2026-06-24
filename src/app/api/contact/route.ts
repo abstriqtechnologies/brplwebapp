@@ -66,7 +66,13 @@ export async function POST(req: Request) {
         // Best-effort admin notification (does not block the lead)
         sendContactNotification(lead).catch((err) => console.error("[contact] email notify failed", err));
 
-        revalidatePath("/admin/contact-us-leads");
+        // Best-effort cache revalidation; admin list uses fresh DB reads so missing
+        // the revalidate (e.g. in test contexts) is harmless.
+        try {
+            revalidatePath("/admin/contact-us-leads");
+        } catch {
+            /* not running in a Next request context */
+        }
         return NextResponse.json({ success: true, id: lead._id.toString() });
     } catch (err: any) {
         console.error("[api/contact]", err);
