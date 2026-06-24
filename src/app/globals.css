@@ -526,6 +526,10 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .auth-stage { animation: none; }
+}
+
 .auth-brand {
   display: inline-flex;
   align-items: center;
@@ -872,8 +876,4 @@ select.auth-field-input option { background: #111e18; color: #f7f1e6; }
   .auth-otp-cell { height: 44px; font-size: 1.3rem; }
   .auth-title { font-size: 1.5rem; }
   .auth-brand-sub { display: none; }
-}
-
-@media (max-width: 768px) {
-  .auth-shell, .auth-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
