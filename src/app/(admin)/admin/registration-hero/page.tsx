@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Save, Loader2 } from "lucide-react";
 import { getRegistrationSection, updateRegistrationSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type Hero = { title?: string; subtitle?: string; image?: string; videoUrl?: string; ctaText?: string; ctaLink?: string };
 
@@ -63,8 +64,8 @@ export default function RegistrationHeroPage() {
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2"><Label>Title</Label><Input value={data.title || ""} onChange={(e) => setData({ ...data, title: e.target.value })} /></div>
                     <div className="md:col-span-2"><Label>Subtitle</Label><Textarea rows={3} value={data.subtitle || ""} onChange={(e) => setData({ ...data, subtitle: e.target.value })} /></div>
-                    <div className="md:col-span-2"><Label>Image URL</Label><Input value={data.image || ""} onChange={(e) => setData({ ...data, image: e.target.value })} /></div>
-                    <div className="md:col-span-2"><Label>Video URL</Label><Input value={data.videoUrl || ""} onChange={(e) => setData({ ...data, videoUrl: e.target.value })} /></div>
+                    <div className="md:col-span-2"><MediaUploadField label="Image URL" value={data.image || ""} onChange={(v) => setData({ ...data, image: v })} kind="image" /></div>
+                    <div className="md:col-span-2"><MediaUploadField label="Video URL" value={data.videoUrl || ""} onChange={(v) => setData({ ...data, videoUrl: v })} kind="video" /></div>
                     <div><Label>CTA Text</Label><Input value={data.ctaText || ""} onChange={(e) => setData({ ...data, ctaText: e.target.value })} /></div>
                     <div><Label>CTA Link</Label><Input value={data.ctaLink || ""} onChange={(e) => setData({ ...data, ctaLink: e.target.value })} /></div>
                 </CardContent>

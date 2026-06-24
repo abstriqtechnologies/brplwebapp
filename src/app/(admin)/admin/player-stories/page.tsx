@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { getRegistrationSection, updateRegistrationSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type Story = { name: string; role?: string; story: string; image?: string; order?: number };
 
@@ -81,7 +82,7 @@ export default function PlayerStoriesPage() {
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div><Label>Player Name</Label><Input value={s.name} onChange={(e) => update(i, "name", e.target.value)} /></div>
                                 <div><Label>Role / Position</Label><Input value={s.role || ""} onChange={(e) => update(i, "role", e.target.value)} /></div>
-                                <div className="md:col-span-2"><Label>Image URL</Label><Input value={s.image || ""} onChange={(e) => update(i, "image", e.target.value)} /></div>
+                                <div className="md:col-span-2"><MediaUploadField label="Image URL" value={s.image || ""} onChange={(v) => update(i, "image", v)} kind="image" /></div>
                                 <div className="md:col-span-2"><Label>Story</Label><Textarea rows={4} value={s.story} onChange={(e) => update(i, "story", e.target.value)} /></div>
                                 <div className="md:col-span-2"><Label>Order</Label><Input type="number" value={s.order ?? 0} onChange={(e) => update(i, "order", Number(e.target.value))} /></div>
                             </CardContent>

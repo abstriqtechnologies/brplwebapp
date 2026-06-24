@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { getRegistrationSection, updateRegistrationSection } from "@/apihelper/admin";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "@/components/admin/MediaUploadField";
 
 type Video = { title: string; url: string; thumbnail: string; order: number };
 
@@ -79,8 +80,8 @@ export default function RegistrationVideosPage() {
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div className="md:col-span-2"><Label>Title</Label><Input value={v.title} onChange={(e) => update(i, "title", e.target.value)} /></div>
-                                <div className="md:col-span-2"><Label>Video URL</Label><Input value={v.url} onChange={(e) => update(i, "url", e.target.value)} placeholder="https://youtube.com/..." /></div>
-                                <div><Label>Thumbnail URL</Label><Input value={v.thumbnail} onChange={(e) => update(i, "thumbnail", e.target.value)} /></div>
+                                <div className="md:col-span-2"><MediaUploadField label="Video URL" value={v.url} onChange={(val) => update(i, "url", val)} kind="video" /></div>
+                                <div><MediaUploadField label="Thumbnail URL" value={v.thumbnail} onChange={(val) => update(i, "thumbnail", val)} kind="image" /></div>
                                 <div><Label>Order</Label><Input type="number" value={v.order} onChange={(e) => update(i, "order", Number(e.target.value))} /></div>
                             </CardContent>
                         </Card>
