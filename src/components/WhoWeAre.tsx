@@ -109,7 +109,7 @@ const WhoWeAre = () => {
                         />
 
                         <div className="pt-4 flex flex-wrap gap-4">
-                            <Link href="/registration">
+                            <Link href="/login">
                                 <Button className="bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-full px-8 py-6 text-base shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all duration-300">
                                     Register for Trials
                                     <MoveRight className="ml-2 w-5 h-5" />

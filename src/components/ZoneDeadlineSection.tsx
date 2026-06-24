@@ -103,7 +103,7 @@ const ZoneDeadlineSection = () => {
                             if (formContainer) {
                                 formContainer.scrollIntoView({ behavior: "smooth" });
                             } else {
-                                router.push("/registration");
+                                router.push("/login");
                             }
                         }}
                         className="bg-[#FFC928] text-black hover:bg-[#FFC928]/90 text-base md:text-lg font-bold px-8 py-3 h-auto rounded-full shadow-[0_0_20px_rgba(255,201,40,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,201,40,0.5)]"

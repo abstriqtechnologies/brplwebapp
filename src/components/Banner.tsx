@@ -83,7 +83,7 @@ const Banner = () => {
 
                     {/* Buttons Container */}
                     <div className="flex flex-row gap-4 w-full justify-center md:justify-end">
-                      <Link href="/registration">
+                      <Link href="/login">
                         <Button
                           size="lg"
                           className="bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs md:text-sm px-4 md:px-6 h-10 md:h-12 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.5)] transform hover:scale-105 transition-all duration-300 flex items-center justify-center"
