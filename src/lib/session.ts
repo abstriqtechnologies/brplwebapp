@@ -10,10 +10,13 @@ export type AuthSession = {
     name?: string;
     email?: string;
     role?: string;
+    state?: string;
+    city?: string;
     paymentStatus?: "pending" | "completed";
     paymentId?: string;
     orderId?: string;
     amount?: number;
+    profileImage?: string;
 };
 
 export async function getAuthSession(): Promise<AuthSession | null> {
@@ -33,9 +36,12 @@ export async function getAuthSession(): Promise<AuthSession | null> {
         name: user.name,
         email: user.email,
         role: user.role,
+        state: user.state,
+        city: user.city,
         paymentStatus: user.paymentStatus,
         paymentId: user.paymentId,
         orderId: user.orderId,
         amount: user.amount,
+        profileImage: user.profileImage,
     };
 }
