@@ -20,6 +20,7 @@ import {
 import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { formatDate } from "@/utils/adminDate";
+import { MediaUploadField } from "./MediaUploadField";
 
 export type CrudField =
     | { name: string; label: string; type: "text" | "email" | "url" | "number" | "textarea" | "date" | "datetime-local" | "select" | "boolean" | "tags"; required?: boolean; options?: { value: string; label: string }[]; placeholder?: string; rows?: number }
@@ -308,14 +309,11 @@ function renderFieldInput(
     }
     if (field.type === "imageUrl") {
         return (
-            <div className="space-y-2">
-                <Input value={v || ""} onChange={(e) => set(e.target.value)} placeholder={field.placeholder || "https://..."} />
-                {v && (
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-md p-2 bg-slate-50 dark:bg-slate-800">
-                        <img src={v} alt="preview" className="max-h-32 rounded" onError={(e) => (e.currentTarget.style.display = "none")} />
-                    </div>
-                )}
-            </div>
+            <MediaUploadField
+                value={v || ""}
+                onChange={set}
+                kind="image"
+            />
         );
     }
     if (field.type === "tags") {
