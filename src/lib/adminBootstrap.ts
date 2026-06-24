@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
+import { defaultAdminEnabled, isProduction } from "@/lib/featureFlags";
 
 const DEFAULT_EMAIL = "admin@brpl.com";
 const DEFAULT_PASSWORD = "Admin@123";
@@ -8,12 +9,16 @@ const DEFAULT_NAME = "Super Admin";
 
 let seeded = false;
 
-/**
- * Ensures the default super-admin user exists. Idempotent — only runs once
- * per process. Called at the top of admin auth handlers.
- */
+/** Idempotent. Only runs in dev/staging or when ALLOW_DEFAULT_ADMIN=1. */
 export async function ensureDefaultAdmin() {
     if (seeded) return;
+    if (!defaultAdminEnabled()) {
+        seeded = true;
+        if (isProduction()) {
+            console.warn("[admin-bootstrap] Skipped default admin (production).");
+        }
+        return;
+    }
     try {
         await connectDB();
         const existing = await AdminUser.findOne({ email: DEFAULT_EMAIL }).lean();
@@ -27,10 +32,11 @@ export async function ensureDefaultAdmin() {
                 active: true,
                 totpEnabled: false,
             });
-            // Log once per server lifetime so the dev knows the credentials.
-            console.info(
-                `[admin-bootstrap] Seeded default admin: ${DEFAULT_EMAIL} / ${DEFAULT_PASSWORD}`
-            );
+            if (process.env.NODE_ENV !== "production") {
+                console.info(
+                    `[admin-bootstrap] Seeded default admin: ${DEFAULT_EMAIL} / ${DEFAULT_PASSWORD}`
+                );
+            }
         }
         seeded = true;
     } catch (err) {

@@ -1,7 +1,12 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { isProduction } from "@/lib/featureFlags";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-insecure-secret-change-me";
+const RAW_SECRET = process.env.JWT_SECRET;
+if (!RAW_SECRET && isProduction()) {
+    throw new Error("JWT_SECRET must be set in production");
+}
+const JWT_SECRET = RAW_SECRET || "dev-insecure-secret-change-me";
 const SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
 const ALG = "HS256";
@@ -9,7 +14,7 @@ const ALG = "HS256";
 export type SessionPayload = {
     sub: string; // userId (mongo _id as string) or "pending:<phone>"
     phone?: string;
-    purpose?: "auth" | "pending_reg" | "admin";
+    purpose?: "auth" | "pending_reg" | "admin" | "admin_otp";
     paymentId?: string;
     orderId?: string;
     role?: string;
