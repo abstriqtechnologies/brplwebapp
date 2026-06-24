@@ -16,6 +16,7 @@ export interface IUser extends Document {
     paymentId?: string;
     orderId?: string;
     amount?: number;
+    profileImage?: string; // URL or data URI; TrialPass falls back to /assets/avtar.webp when absent
     createdAt: Date;
     updatedAt: Date;
 }
@@ -32,6 +33,7 @@ const UserSchema = new Schema<IUser>(
         paymentId: { type: String },
         orderId: { type: String, index: true },
         amount: { type: Number },
+        profileImage: { type: String }, // unvalidated URL or data URI; optional
     },
     { timestamps: true }
 );
