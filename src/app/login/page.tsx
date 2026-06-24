@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { loadRazorpayScript } from "@/hooks/useRazorpayScript";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
@@ -52,7 +53,6 @@ function LoginClient() {
     const [otpExpiresIn, setOtpExpiresIn] = useState(0);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [info, setInfo] = useState<string | null>(null);
 
     const [orderId, setOrderId] = useState<string | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
@@ -85,7 +85,6 @@ function LoginClient() {
             return false;
         }
         setError(null);
-        setInfo(null);
         setBusy(true);
         try {
             const res = await fetch("/api/auth/send-otp", {
@@ -113,7 +112,6 @@ function LoginClient() {
         if (busy || code.length !== OTP_LENGTH) return;
         setBusy(true);
         setError(null);
-        setInfo(null);
         try {
             const res = await fetch("/api/auth/verify-otp", {
                 method: "POST",
@@ -154,20 +152,11 @@ function LoginClient() {
 
             setOrderId(data.orderId);
 
-            // Lazily load Razorpay script
-            const w = window as any;
-            if (!w.Razorpay) {
-                await new Promise<void>((resolve, reject) => {
-                    const s = document.createElement("script");
-                    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-                    s.async = true;
-                    s.onload = () => resolve();
-                    s.onerror = () => reject(new Error("Failed to load Razorpay"));
-                    document.body.appendChild(s);
-                });
-            }
+            // Lazily load Razorpay script via shared helper (promise-deduped, typed window.Razorpay).
+            const loaded = await loadRazorpayScript();
+            if (!loaded) throw new Error("Failed to load Razorpay");
 
-            const rzp = new (window as any).Razorpay({
+            const rzp = new window.Razorpay!({
                 key: data.key,
                 amount: data.amount,
                 currency: data.currency,
@@ -276,7 +265,6 @@ function LoginClient() {
                         phone={phone}
                         otp={otp}
                         error={error}
-                        info={info}
                         busy={busy}
                         otpExpiresIn={otpExpiresIn}
                         resendIn={resendIn}
@@ -289,7 +277,6 @@ function LoginClient() {
                             setStep("phone");
                             setOtp(Array(OTP_LENGTH).fill(""));
                             setError(null);
-                            setInfo(null);
                         }}
                         onSubmit={() => void submitOtp(otp.join(""))}
                     />
@@ -401,7 +388,6 @@ function OtpStep(props: {
     phone: string;
     otp: string[];
     error: string | null;
-    info: string | null;
     busy: boolean;
     otpExpiresIn: number;
     resendIn: number;
@@ -417,7 +403,6 @@ function OtpStep(props: {
         phone,
         otp,
         error,
-        info,
         busy,
         otpExpiresIn,
         resendIn,
@@ -504,11 +489,6 @@ function OtpStep(props: {
                 {error && (
                     <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-md px-3 py-2 text-center">
                         {error}
-                    </p>
-                )}
-                {info && (
-                    <p className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 rounded-md px-3 py-2 text-center">
-                        {info}
                     </p>
                 )}
 
