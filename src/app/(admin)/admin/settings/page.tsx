@@ -44,7 +44,7 @@ export default function SettingsPage() {
                 { name: "homeSeoDescription", label: "Home SEO Description", type: "textarea" },
                 { name: "homeSeoKeywords", label: "Home SEO Keywords (comma-separated)", type: "text" },
                 { name: "headerCtaText", label: "Header CTA Text", type: "text", placeholder: "Register Now" },
-                { name: "headerCtaLink", label: "Header CTA Link", type: "text", placeholder: "/registration" },
+                { name: "headerCtaLink", label: "Header CTA Link", type: "text", placeholder: "/login" },
                 { name: "footerAboutText", label: "Footer About Text", type: "textarea" },
                 { name: "mapEmbedUrl", label: "Map Embed URL", type: "text" },
                 { name: "whatsappNumber", label: "WhatsApp Number (no +)", type: "text", placeholder: "918130955866" },

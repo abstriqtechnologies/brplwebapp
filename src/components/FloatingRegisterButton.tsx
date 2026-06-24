@@ -23,7 +23,7 @@ const FloatingRegisterButton = () => {
         return () => window.removeEventListener("scroll", toggleVisibility);
     }, []);
 
-    const href: string = settings.floatingRegisterLink || "/registration";
+    const href: string = settings.floatingRegisterLink || "/login";
     const label: string = settings.floatingRegisterText || "REGISTER NOW";
 
     const onClick = (e: React.MouseEvent) => {
