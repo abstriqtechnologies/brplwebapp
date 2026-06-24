@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
     const token = req.cookies.get("brpl_auth")?.value;
     if (!token) {
         const url = req.nextUrl.clone();
-        url.pathname = "/auth";
+        url.pathname = "/login";
         url.searchParams.set("next", pathname);
         return NextResponse.redirect(url);
     }
@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
     } catch {
         const url = req.nextUrl.clone();
-        url.pathname = "/auth";
+        url.pathname = "/login";
         url.searchParams.set("next", pathname);
         const res = NextResponse.redirect(url);
         res.cookies.delete("brpl_auth");
