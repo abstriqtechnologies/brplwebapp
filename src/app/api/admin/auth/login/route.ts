@@ -37,7 +37,7 @@ export async function POST(req: Request) {
             return fail("Invalid credentials", 401);
         }
 
-        // If TOTP enabled, issue a short-lived "otp" token first.
+        // If TOTP enabled, issue a short-lived "admin_otp" token first.
         if (admin.totpEnabled && admin.totpSecret) {
             const otpToken = await signJwt(
                 {
@@ -45,9 +45,7 @@ export async function POST(req: Request) {
                     email: admin.email,
                     role: admin.role,
                     name: admin.name,
-                    purpose: "admin",
-                    // We re-purpose as "admin_otp" via a custom marker — kept
-                    // inside purpose-compat by reusing the field.
+                    purpose: "admin_otp",
                 },
                 "5m"
             );

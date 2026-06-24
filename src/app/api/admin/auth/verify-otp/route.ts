@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
 import { signJwt, setAdminCookie, verifyJwt } from "@/lib/jwt";
 import { ok, fail } from "@/lib/adminApi";
+import { verifyTotp } from "@/lib/totp";
+import { isProduction } from "@/lib/featureFlags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,9 +15,9 @@ const schema = z.object({
 });
 
 /**
- * Dev-mode TOTP verification: accepts "000000" if TOTP is disabled.
- * If TOTP is enabled, we still accept any 6-digit number (the production
- * swap point is here — wire a `speakeasy.totp.verify(...)` call).
+ * Verifies a 6-digit TOTP code against the admin's stored secret.
+ * In non-production builds, falls back to "000000" if TOTP isn't configured
+ * (useful for the default admin seed).
  */
 export async function POST(req: Request) {
     try {
@@ -25,10 +27,14 @@ export async function POST(req: Request) {
             return fail("Invalid input", 400);
         }
 
-        const payload = await verifyJwt<{ sub: string; email: string; role: string; name?: string }>(
-            parsed.data.otpToken
-        );
-        if (!payload || !payload.sub) {
+        const payload = await verifyJwt<{
+            sub: string;
+            email: string;
+            role: string;
+            name?: string;
+            purpose?: string;
+        }>(parsed.data.otpToken);
+        if (!payload || !payload.sub || (payload.purpose !== "admin" && payload.purpose !== "admin_otp")) {
             return fail("Session expired. Please log in again.", 401);
         }
 
@@ -38,9 +44,14 @@ export async function POST(req: Request) {
             return fail("Invalid session", 401);
         }
 
-        // Dev verification — replace with real TOTP check in production.
-        const accepted =
-            parsed.data.code.length === 6 && /^\d{6}$/.test(parsed.data.code);
+        let accepted = false;
+        if (admin.totpEnabled && admin.totpSecret) {
+            accepted = verifyTotp(admin.totpSecret, parsed.data.code);
+        } else if (!isProduction()) {
+            // Dev convenience: accept "000000" when TOTP isn't configured
+            accepted = parsed.data.code === "000000";
+        }
+
         if (!accepted) {
             return fail("Invalid OTP", 400);
         }
