@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { MediaUploadField } from "./MediaUploadField";
 
 export type CmsField = {
     name: string;
@@ -17,6 +18,10 @@ export type CmsField = {
     required?: boolean;
     placeholder?: string;
     rows?: number;
+    /** Render an image picker field instead of a bare URL input. */
+    image?: boolean;
+    /** When image is true, control upload kind. */
+    imageKind?: "image" | "video";
 };
 
 /**
@@ -101,28 +106,40 @@ export function CmsForm({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {fields.map((f) => (
                                 <div key={f.name} className={f.type === "textarea" ? "md:col-span-2" : ""}>
-                                    <Label className="mb-2 block">
-                                        {f.label}
-                                        {f.required && <span className="text-red-500 ml-1">*</span>}
-                                    </Label>
-                                    {f.type === "textarea" ? (
-                                        <Textarea
+                                    {f.image ? (
+                                        <MediaUploadField
+                                            label={f.label}
                                             value={data[f.name] ?? ""}
-                                            onChange={(e) => set(f.name, e.target.value)}
-                                            rows={f.rows || 4}
-                                            placeholder={f.placeholder}
+                                            onChange={(v) => set(f.name, v)}
+                                            kind={f.imageKind || "image"}
                                             required={f.required}
                                         />
-                                    ) : f.type === "boolean" ? (
-                                        <Switch checked={Boolean(data[f.name])} onCheckedChange={(v) => set(f.name, v)} />
                                     ) : (
-                                        <Input
-                                            type={f.type}
-                                            value={data[f.name] ?? ""}
-                                            onChange={(e) => set(f.name, e.target.value)}
-                                            placeholder={f.placeholder}
-                                            required={f.required}
-                                        />
+                                        <>
+                                            <Label className="mb-2 block">
+                                                {f.label}
+                                                {f.required && <span className="text-red-500 ml-1">*</span>}
+                                            </Label>
+                                            {f.type === "textarea" ? (
+                                                <Textarea
+                                                    value={data[f.name] ?? ""}
+                                                    onChange={(e) => set(f.name, e.target.value)}
+                                                    rows={f.rows || 4}
+                                                    placeholder={f.placeholder}
+                                                    required={f.required}
+                                                />
+                                            ) : f.type === "boolean" ? (
+                                                <Switch checked={Boolean(data[f.name])} onCheckedChange={(v) => set(f.name, v)} />
+                                            ) : (
+                                                <Input
+                                                    type={f.type}
+                                                    value={data[f.name] ?? ""}
+                                                    onChange={(e) => set(f.name, e.target.value)}
+                                                    placeholder={f.placeholder}
+                                                    required={f.required}
+                                                />
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             ))}
