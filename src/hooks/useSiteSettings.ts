@@ -16,10 +16,6 @@ export interface SiteSettings {
     whatsappNumber: string;
     mapEmbedUrl: string;
     socialLinks: SocialLink[];
-    bannerImage: string;
-    bannerTitles: Record<string, string>;
-    teamsBannerImage: string;
-    teamsVideoUrl: string;
     customHeadScripts: string;
     customBodyScripts: string;
     [key: string]: any;
@@ -33,10 +29,6 @@ const FALLBACK: SiteSettings = {
     whatsappNumber: "918130955866",
     mapEmbedUrl: "",
     socialLinks: [],
-    bannerImage: "",
-    bannerTitles: {},
-    teamsBannerImage: "",
-    teamsVideoUrl: "",
     customHeadScripts: "",
     customBodyScripts: "",
 };

@@ -4,23 +4,23 @@ import PageBanner from "@/components/PageBanner";
 import SEO from "@/components/SEO";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { usePageBanners } from "@/components/SiteContextProvider";
 import { getImageUrl } from "@/utils/imageHelper";
 
 const TeamsClient = () => {
-    const { settings } = useSiteSettings();
+    const pageBanners = usePageBanners() || {};
     const [teams] = useState<any[]>([]);
     const [isLoading] = useState(false);
 
-    const teamsVideoSrc = settings.teamsVideoUrl?.trim() || undefined;
-    const teamsImageSrc = settings.teamsBannerImage
-        ? (settings.teamsBannerImage.startsWith("http")
-            ? settings.teamsBannerImage
-            : settings.teamsBannerImage.startsWith("uploads/")
-                ? getImageUrl(settings.teamsBannerImage)
-                : settings.teamsBannerImage.startsWith("/")
-                    ? settings.teamsBannerImage
-                    : getImageUrl(settings.teamsBannerImage))
+    const adminImage = typeof pageBanners.teams?.image === "string" ? pageBanners.teams.image.trim() : "";
+    const teamsImageSrc = adminImage
+        ? (adminImage.startsWith("http") || adminImage.startsWith("blob:")
+            ? adminImage
+            : adminImage.startsWith("uploads/")
+                ? getImageUrl(adminImage)
+                : adminImage.startsWith("/")
+                    ? adminImage
+                    : getImageUrl(adminImage))
         : undefined;
 
     return (
@@ -33,8 +33,7 @@ const TeamsClient = () => {
                 pageKey="teams"
                 title="Teams"
                 currentPage="Teams"
-                videoSrc={teamsVideoSrc}
-                imageSrc={!teamsVideoSrc ? teamsImageSrc : undefined}
+                imageSrc={teamsImageSrc}
                 scrollToId="teams-content"
             />
 

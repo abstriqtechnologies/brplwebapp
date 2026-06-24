@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { Home, ChevronDown } from "lucide-react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { usePageBanners } from "@/components/SiteContextProvider";
 import { getImageUrl } from "@/utils/imageHelper";
 
 interface PageBannerProps {
@@ -11,19 +11,24 @@ interface PageBannerProps {
     videoSrc?: string;
     imageSrc?: string;
     scrollToId?: string;
-    /** Page key for dynamic title from admin (e.g. contactUs, aboutUs). If set and admin has a title for this key, it overrides `title`. */
+    /** Page key for dynamic title and image from admin. Accepts either
+     * camelCase (e.g. "contactUs") or kebab-case ("contact-us"); admin keys
+     * are stored lowercased, so we normalize before lookup. */
     pageKey?: string;
 }
 
 const PageBanner: React.FC<PageBannerProps> = ({ title, currentPage, videoSrc, imageSrc, scrollToId, pageKey }) => {
-    const { settings } = useSiteSettings();
-    const displayTitle = pageKey && settings.bannerTitles[pageKey]?.trim() ? settings.bannerTitles[pageKey] : title;
+    const pageBanners = usePageBanners() || {};
+    const adminBanner = pageKey ? pageBanners[pageKey.toLowerCase()] : undefined;
+    const adminTitle = typeof adminBanner?.title === "string" ? adminBanner.title.trim() : "";
+    const adminImage = typeof adminBanner?.image === "string" ? adminBanner.image.trim() : "";
+    const displayTitle = adminTitle || title;
     const resolveBannerImage = () => {
         if (imageSrc) return imageSrc;
-        if (!settings.bannerImage) return "/tenis.webp";
-        if (settings.bannerImage.startsWith("http") || settings.bannerImage.startsWith("blob:")) return settings.bannerImage;
-        if (settings.bannerImage.startsWith("uploads/")) return getImageUrl(settings.bannerImage);
-        return settings.bannerImage.startsWith("/") ? settings.bannerImage : "/" + settings.bannerImage;
+        if (!adminImage) return "/tenis.webp";
+        if (adminImage.startsWith("http") || adminImage.startsWith("blob:")) return adminImage;
+        if (adminImage.startsWith("uploads/")) return getImageUrl(adminImage);
+        return adminImage.startsWith("/") ? adminImage : "/" + adminImage;
     };
     const bannerImageSrc = resolveBannerImage();
     const handleScrollDown = () => {
