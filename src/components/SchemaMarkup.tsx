@@ -17,12 +17,10 @@ export const PATH_TO_LABEL: Record<string, string> = {
     "/partners": "Partners",
     "/types-of-partners": "Types of Partners",
     "/faqs": "FAQs",
-    "/registration": "Registration",
     "/contact-us": "Contact Us",
     "/privacy-policy": "Privacy Policy",
     "/terms-and-conditions": "Terms & Conditions",
     "/login": "Login",
-    "/auth": "Login",
 };
 
 export function buildBreadcrumbSchema(pathname: string, currentPageName?: string) {
