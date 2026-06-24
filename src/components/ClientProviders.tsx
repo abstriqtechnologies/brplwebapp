@@ -10,7 +10,7 @@ import { CustomBodyScripts } from "@/components/CustomBodyScripts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const CHROME_HIDDEN_PREFIXES = ["/auth"];
+const CHROME_HIDDEN_PREFIXES = ["/login"];
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
     const pathname = usePathname() || "";
