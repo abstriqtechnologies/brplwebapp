@@ -40,7 +40,7 @@ export async function POST(req: Request) {
             success: true,
             orderId,
             paymentId,
-            redirect: "/auth/register",
+            redirect: "/auth?mode=register&next=/dashboard",
         });
     } catch (err: any) {
         console.error("[payment/verify]", err);

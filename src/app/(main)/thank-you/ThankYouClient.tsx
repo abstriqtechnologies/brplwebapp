@@ -99,7 +99,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div className="pt-4 space-y-4">
                     {!isPayment ? (
                         <Button asChild className="w-full" size="lg" variant="hero">
-                            <Link href="/auth">
+                            <Link href="/auth?mode=login&next=/dashboard">
                                 Go to Sign In <ArrowRight className="w-4 h-4 ml-2" />
                             </Link>
                         </Button>
