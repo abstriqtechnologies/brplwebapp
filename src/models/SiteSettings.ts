@@ -115,7 +115,7 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
         homeSeoKeywords: { type: String },
 
         headerCtaText: { type: String, default: "Register Now" },
-        headerCtaLink: { type: String, default: "/registration" },
+        headerCtaLink: { type: String, default: "/login" },
         navbarLinks: { type: Schema.Types.Mixed },
 
         footerAboutText: { type: String },
@@ -124,7 +124,7 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
 
         whatsappNumber: { type: String, default: "918130955866" },
         floatingRegisterText: { type: String, default: "Register Now" },
-        floatingRegisterLink: { type: String, default: "/registration" },
+        floatingRegisterLink: { type: String, default: "/login" },
 
         customHeadScripts: { type: String, default: "" },
         customBodyScripts: { type: String, default: "" },
