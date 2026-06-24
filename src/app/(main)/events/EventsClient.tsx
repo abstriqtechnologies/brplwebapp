@@ -14,22 +14,32 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import api from "@/apihelper/api";
 
 const ITEMS_PER_PAGE = 12;
 
 const EventsClient = () => {
-    const [events] = useState<any[]>([]);
-    const [loading] = useState(false);
+    const [events, setEvents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        setCurrentPage(1);
-    }, [activeFilter]);
+        let cancelled = false;
+        api.get<{ success: boolean; data: any[] }>("/api/events")
+            .then((res) => {
+                if (cancelled) return;
+                if (res.ok && res.data?.success && Array.isArray(res.data.data)) {
+                    setEvents(res.data.data);
+                }
+            })
+            .catch(() => { /* leave events empty */ })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
 
-    // Reset page on filter change
     useEffect(() => {
         setCurrentPage(1);
     }, [activeFilter]);
