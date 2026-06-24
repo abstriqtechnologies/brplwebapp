@@ -44,6 +44,19 @@
     --shadow-glow: 0 0 40px hsl(175 80% 40% / 0.2);
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.1);
     --shadow-button: 0 4px 20px hsl(175 80% 40% / 0.2);
+
+    /* Auth — Stadium tokens (light fallbacks) */
+    --ink-900: #0d1f17;
+    --ink-800: #111e18;
+    --ink-700: #18261f;
+    --pitch-500: #22c55e;
+    --pitch-700: #15803d;
+    --amber-500: #fbbf24;
+    --amber-400: #fcd34d;
+    --amber-700: #b45309;
+    --cream-50: #f7f1e6;
+    --cream-300: rgba(245, 241, 234, 0.55);
+    --cream-500: rgba(245, 241, 234, 0.4);
   }
 
   .dark {
@@ -84,6 +97,19 @@
     --shadow-glow: 0 0 60px hsl(175 80% 50% / 0.3);
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.4);
     --shadow-button: 0 4px 20px hsl(175 80% 50% / 0.4);
+
+    /* Auth — Stadium tokens (dark mode = primary) */
+    --ink-900: #0d1f17;
+    --ink-800: #111e18;
+    --ink-700: #18261f;
+    --pitch-500: #22c55e;
+    --pitch-700: #15803d;
+    --amber-500: #fbbf24;
+    --amber-400: #fcd34d;
+    --amber-700: #b45309;
+    --cream-50: #f7f1e6;
+    --cream-300: rgba(245, 241, 234, 0.55);
+    --cream-500: rgba(245, 241, 234, 0.4);
   }
 }
 
