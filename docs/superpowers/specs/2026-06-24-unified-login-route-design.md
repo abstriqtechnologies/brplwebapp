@@ -108,7 +108,15 @@ These are the call sites that point to the old routes. Each is a one-line change
 
 `SiteSettings.headerCtaLink` and `SiteSettings.floatingRegisterLink` are CMS-configurable per site. If existing sites have explicitly set these to `/registration`, the redirect shim (when we keep it during the migration window) will still send users to `/login` correctly. After the shim is deleted, any explicit `/registration` value in the DB will 404 — admins will need to update those fields. The *defaults* are changed so newly-created sites land on `/login` automatically.
 
-This is a one-time migration concern. We update the defaults now; admins who customized the values will see a brief 404 until they re-save. Acceptable risk for a single deletion.
+This is a one-time migration concern. To eliminate the brief 404 window entirely, the implementation plan will run the deletes in this order:
+
+1. Create `/login` (the new unified route).
+2. Update all internal `href`s and `redirect`s to point at `/login` (so admin-customized links in the DB still point at the old `/registration`, but every code-controlled link is now correct).
+3. Replace the `(main)/registration/page.tsx` shim with a 301 redirect to `/login` (so any admin-customized `headerCtaLink: "/registration"` continues to work).
+4. Run a one-time migration: in the same commit, update any DB row with `headerCtaLink === "/registration"` to `"/login"`, and same for `floatingRegisterLink`. (Idempotent: only updates rows that match.)
+5. Delete the shim.
+
+After step 4, no production link can still point at `/registration`. Step 5 is a cleanup. The `SiteSettings` model defaults are updated in step 2 so future deployments don't ship with the old value.
 
 ---
 
