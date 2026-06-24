@@ -10,6 +10,7 @@ export const TAGS = {
     SEO: "site-context:seo",
     PAGE_BANNERS: "site-context:page-banners",
     COLLECTIONS: "site-context:collections",
+    MEDIA: "site-context:media",
 } as const;
 
 export type SiteTag = (typeof TAGS)[keyof typeof TAGS];
