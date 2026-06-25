@@ -211,7 +211,12 @@ function LoginClient() {
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || "Registration failed");
             toast({ title: "Welcome to BRPL!" });
-            router.replace(data.redirect || next);
+            // Hard navigation: `router.replace` from next/navigation can race
+            // with the Set-Cookie from this response, so the dashboard's
+            // middleware sometimes sees no auth cookie and bounces back to /login.
+            // A full document reload guarantees the cookie is committed before
+            // the middleware reads it.
+            window.location.href = data.redirect || next;
         } catch (err: any) {
             toast({ variant: "destructive", title: "Error", description: err?.message || "Network error" });
         } finally {

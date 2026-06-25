@@ -17,9 +17,9 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
         sort?: Record<string, 1 | -1>;
         searchFields?: string[];
         allowedRoles?: ("superadmin" | "subadmin" | "seo_content")[];
-    }
+    },
 ) {
-    const sort = options?.sort ?? { createdAt: -1 } as any;
+    const sort = options?.sort ?? ({ createdAt: -1 } as any);
     const searchFields = options?.searchFields ?? [];
     const allowedRoles = options?.allowedRoles;
 
@@ -40,7 +40,11 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
             query.$or = searchFields.map((f) => ({ [f]: rx }));
         }
         const [items, total] = await Promise.all([
-            Model.find(query).sort(sort).skip((page - 1) * limit).limit(limit).lean(),
+            Model.find(query)
+                .sort(sort)
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .lean(),
             Model.countDocuments(query),
         ]);
         return ok({
@@ -86,9 +90,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
             return fail(parsed.error.issues[0]?.message || "Invalid input", 400);
         }
         await connectDB();
-        const doc = await getModel()
-            .findByIdAndUpdate(params.id, parsed.data, { new: true })
-            .lean();
+        const doc = await getModel().findByIdAndUpdate(params.id, parsed.data, { new: true }).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.COLLECTIONS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
@@ -98,7 +100,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
         const session = await requireAdminDb();
         if (session instanceof Response) return session;
         if (allowedRoles && !hasRole(session, allowedRoles)) return fail("Forbidden", 403);
-        if (session.role !== "superadmin" && allowedRoles?.includes("superadmin")) {
+        if (session.session.role !== "superadmin" && allowedRoles?.includes("superadmin")) {
             return fail("Forbidden", 403);
         }
         await connectDB();

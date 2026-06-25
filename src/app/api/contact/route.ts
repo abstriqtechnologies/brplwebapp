@@ -36,10 +36,7 @@ export async function POST(req: Request) {
         const parsed = bodySchema.safeParse(json);
         if (!parsed.success) {
             const first = parsed.error.issues[0];
-            return NextResponse.json(
-                { success: false, error: first?.message || "Invalid input" },
-                { status: 400 }
-            );
+            return NextResponse.json({ success: false, error: first?.message || "Invalid input" }, { status: 400 });
         }
         const data: any = parsed.data;
         await connectDB();

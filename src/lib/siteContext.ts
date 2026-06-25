@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
+import { env } from "@/lib/env";
 import SiteSettings, { type INavbarLink, type IFooterLinkGroup } from "@/models/SiteSettings";
 import HomeCms from "@/models/HomeCms";
 import AboutCms from "@/models/AboutCms";
@@ -73,7 +74,7 @@ export type SiteContext = {
 
 // ---------- Defaults (from current hardcoded values) ----------
 
-const CMS_LIVE = process.env.CMS_LIVE !== "false";
+const CMS_LIVE = Boolean(env.CMS_LIVE);
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
     { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61584782136820", image: "/facebook.webp" },
@@ -86,37 +87,63 @@ const DEFAULT_NAV_LINKS: NavbarLink[] = [
     { label: "About Us", path: "/about-us" },
     { label: "Teams", path: "/teams" },
     { label: "Events", path: "/events" },
-    { label: "Blog", path: "/blog", children: [{ label: "Blog", path: "/blog" }, { label: "News", path: "/news" }] },
+    {
+        label: "Blog",
+        path: "/blog",
+        children: [
+            { label: "Blog", path: "/blog" },
+            { label: "News", path: "/news" },
+        ],
+    },
     { label: "Career", path: "/career" },
-    { label: "Partners", path: "/partners", children: [{ label: "BRPL Partner", path: "/partners" }, { label: "BRPL Sponsors", path: "/types-of-partners" }] },
+    {
+        label: "Partners",
+        path: "/partners",
+        children: [
+            { label: "BRPL Partner", path: "/partners" },
+            { label: "BRPL Sponsors", path: "/types-of-partners" },
+        ],
+    },
     { label: "FAQs", path: "/faqs" },
     { label: "Registration", path: "/login" },
     { label: "Contact Us", path: "/contact-us" },
 ];
 
 const DEFAULT_FOOTER_LINKS: FooterLinkGroup[] = [
-    { heading: "Teams", links: [
-        { label: "North East Panthers", path: "/teams" },
-        { label: "Central Strikers", path: "/teams" },
-        { label: "Western Heroes", path: "/teams" },
-        { label: "Northern Dabanggs", path: "/teams" },
-        { label: "Southern Lions", path: "/teams" },
-        { label: "Eastern Rhions", path: "/teams" },
-    ]},
-    { heading: "BRPL - T10", links: [
-        { label: "About Us", path: "/about-us" },
-        { label: "Contact Us", path: "/contact-us" },
-        { label: "Partners", path: "/partners" },
-    ]},
-    { heading: "Useful Links", links: [
-        { label: "Registration", path: "/login" },
-        { label: "FAQs", path: "/faqs" },
-        { label: "Events", path: "/events" },
-    ]},
-    { heading: "Contact", links: [
-        { label: "Contact Us", path: "/contact-us" },
-        { label: "News", path: "/news" },
-    ]},
+    {
+        heading: "Teams",
+        links: [
+            { label: "North East Panthers", path: "/teams" },
+            { label: "Central Strikers", path: "/teams" },
+            { label: "Western Heroes", path: "/teams" },
+            { label: "Northern Dabanggs", path: "/teams" },
+            { label: "Southern Lions", path: "/teams" },
+            { label: "Eastern Rhions", path: "/teams" },
+        ],
+    },
+    {
+        heading: "BRPL - T10",
+        links: [
+            { label: "About Us", path: "/about-us" },
+            { label: "Contact Us", path: "/contact-us" },
+            { label: "Partners", path: "/partners" },
+        ],
+    },
+    {
+        heading: "Useful Links",
+        links: [
+            { label: "Registration", path: "/login" },
+            { label: "FAQs", path: "/faqs" },
+            { label: "Events", path: "/events" },
+        ],
+    },
+    {
+        heading: "Contact",
+        links: [
+            { label: "Contact Us", path: "/contact-us" },
+            { label: "News", path: "/news" },
+        ],
+    },
 ];
 
 function defaults(): SiteContext {
@@ -128,15 +155,18 @@ function defaults(): SiteContext {
             contactPhone: "+(91) 81309 55866",
             contactPhoneSecondary: "+(91) 98215 63585",
             contactEmail: "info@brpl.net",
-            contactAddress: "Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309",
+            contactAddress:
+                "Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309",
             whatsappNumber: "918130955866",
             headerCtaText: "Register Now",
             headerCtaLink: "/login",
             floatingRegisterText: "Register Now",
             floatingRegisterLink: "/login",
             homeSeoTitle: "Beyond Reach Premier League",
-            homeSeoDescription: "BRPL is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here.",
-            homeSeoKeywords: "T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League",
+            homeSeoDescription:
+                "BRPL is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here.",
+            homeSeoKeywords:
+                "T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League",
             registrationFee: 1499,
             customHeadScripts: "",
             customBodyScripts: "",
@@ -144,13 +174,29 @@ function defaults(): SiteContext {
         home: { banners: [], whoWeAre: {}, trustBar: [], broadcastingPartners: [] },
         about: { banner: {}, aboutBrpl: {}, missionVision: {}, meetOurTeam: {} },
         registration: {
-            hero: {}, banner: {}, videos: [], numbersSpeak: [],
-            roadmap: [], zoneDeadlines: [], playerStories: [], registrationFaqs: [],
+            hero: {},
+            banner: {},
+            videos: [],
+            numbersSpeak: [],
+            roadmap: [],
+            zoneDeadlines: [],
+            playerStories: [],
+            registrationFaqs: [],
         },
         legal: { privacy: {}, terms: {}, rulebook: {} },
         seo: {},
         pageBanners: {},
-        collections: { events: [], jobs: [], ambassadors: [], teams: [], partners: [], campaigns: [], faqs: [], blogs: [], news: [] },
+        collections: {
+            events: [],
+            jobs: [],
+            ambassadors: [],
+            teams: [],
+            partners: [],
+            campaigns: [],
+            faqs: [],
+            blogs: [],
+            news: [],
+        },
         pages: {} as any,
         socialLinks: DEFAULT_SOCIAL_LINKS,
         navLinks: DEFAULT_NAV_LINKS,
@@ -167,7 +213,9 @@ async function readSettings(): Promise<any> {
         await connectDB();
         const doc = await SiteSettings.findOne({}).lean();
         return doc ? { ...doc, _id: doc._id?.toString() } : {};
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readHome(): Promise<any> {
@@ -175,7 +223,9 @@ async function readHome(): Promise<any> {
         await connectDB();
         const doc = await HomeCms.findOne({}).lean();
         return doc || {};
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readAbout(): Promise<any> {
@@ -183,7 +233,9 @@ async function readAbout(): Promise<any> {
         await connectDB();
         const doc = await AboutCms.findOne({}).lean();
         return doc || {};
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readRegistration(): Promise<any> {
@@ -191,7 +243,9 @@ async function readRegistration(): Promise<any> {
         await connectDB();
         const doc = await RegistrationCms.findOne({}).lean();
         return doc || {};
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readLegal(): Promise<any> {
@@ -203,7 +257,9 @@ async function readLegal(): Promise<any> {
             LegalPage.findOne({ type: "rulebook" }).lean(),
         ]);
         return { privacy: privacy || {}, terms: terms || {}, rulebook: rulebook || {} };
-    } catch { return { privacy: {}, terms: {}, rulebook: {} }; }
+    } catch {
+        return { privacy: {}, terms: {}, rulebook: {} };
+    }
 }
 
 async function readSeo(): Promise<Record<string, any>> {
@@ -213,7 +269,9 @@ async function readSeo(): Promise<Record<string, any>> {
         const out: Record<string, any> = {};
         for (const d of docs) out[d.path] = d;
         return out;
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readPageBanners(): Promise<Record<string, any>> {
@@ -223,7 +281,9 @@ async function readPageBanners(): Promise<Record<string, any>> {
         const out: Record<string, any> = {};
         for (const d of docs) out[d.key] = d;
         return out;
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readPages(): Promise<Record<string, any>> {
@@ -233,7 +293,9 @@ async function readPages(): Promise<Record<string, any>> {
         const out: Record<string, any> = {};
         for (const d of docs) out[d.key] = d;
         return out;
-    } catch { return {}; }
+    } catch {
+        return {};
+    }
 }
 
 async function readCollections(): Promise<any> {
@@ -251,7 +313,19 @@ async function readCollections(): Promise<any> {
             NewsArticle.find({ draft: false }).sort({ publishedAt: -1 }).lean(),
         ]);
         return { events, jobs, ambassadors, teams, partners, campaigns, faqs, blogs, news };
-    } catch { return { events: [], jobs: [], ambassadors: [], teams: [], partners: [], campaigns: [], faqs: [], blogs: [], news: [] }; }
+    } catch {
+        return {
+            events: [],
+            jobs: [],
+            ambassadors: [],
+            teams: [],
+            partners: [],
+            campaigns: [],
+            faqs: [],
+            blogs: [],
+            news: [],
+        };
+    }
 }
 
 async function readMedia(): Promise<any> {
@@ -272,21 +346,26 @@ async function readMedia(): Promise<any> {
 
 // ---------- Cached wrappers ----------
 
-const cachedAll = unstable_cache(
-    async (): Promise<SiteContext> => build(),
-    ["site-context-all"],
-    { tags: [TAGS.ALL], revalidate: 3600 }
-);
+const cachedAll = unstable_cache(async (): Promise<SiteContext> => build(), ["site-context-all"], {
+    tags: [TAGS.ALL],
+    revalidate: 3600,
+});
 
 const cachedSettings = unstable_cache(readSettings, ["site-context-settings"], { tags: [TAGS.SETTINGS, TAGS.ALL] });
 const cachedHome = unstable_cache(readHome, ["site-context-home"], { tags: [TAGS.HOME, TAGS.ALL] });
 const cachedAbout = unstable_cache(readAbout, ["site-context-about"], { tags: [TAGS.ABOUT, TAGS.ALL] });
-const cachedRegistration = unstable_cache(readRegistration, ["site-context-registration"], { tags: [TAGS.REGISTRATION, TAGS.ALL] });
+const cachedRegistration = unstable_cache(readRegistration, ["site-context-registration"], {
+    tags: [TAGS.REGISTRATION, TAGS.ALL],
+});
 const cachedLegal = unstable_cache(readLegal, ["site-context-legal"], { tags: [TAGS.LEGAL, TAGS.ALL] });
 const cachedSeo = unstable_cache(readSeo, ["site-context-seo"], { tags: [TAGS.SEO, TAGS.ALL] });
-const cachedPageBanners = unstable_cache(readPageBanners, ["site-context-page-banners"], { tags: [TAGS.PAGE_BANNERS, TAGS.ALL] });
+const cachedPageBanners = unstable_cache(readPageBanners, ["site-context-page-banners"], {
+    tags: [TAGS.PAGE_BANNERS, TAGS.ALL],
+});
 const cachedPages = unstable_cache(readPages, ["site-context-pages"], { tags: [TAGS.ALL] });
-const cachedCollections = unstable_cache(readCollections, ["site-context-collections"], { tags: [TAGS.COLLECTIONS, TAGS.ALL] });
+const cachedCollections = unstable_cache(readCollections, ["site-context-collections"], {
+    tags: [TAGS.COLLECTIONS, TAGS.ALL],
+});
 const cachedMedia = unstable_cache(readMedia, ["site-context-media"], { tags: [TAGS.MEDIA, TAGS.ALL] });
 
 // ---------- Public API ----------
@@ -297,29 +376,64 @@ export async function getSiteContext(): Promise<SiteContext> {
 
 export async function getSiteContextSlice<K extends keyof SiteContext>(slice: K): Promise<SiteContext[K]> {
     switch (slice) {
-        case "siteSettings": return (await cachedSettings()) as SiteContext[K];
-        case "home": return { banners: (await cachedHome()).banners || [], whoWeAre: (await cachedHome()).whoWeAre || {}, trustBar: (await cachedHome()).trustBar || [], broadcastingPartners: (await cachedHome()).broadcastingPartners || [] } as any;
-        case "about": return (await cachedAbout()) as any;
-        case "registration": return (await cachedRegistration()) as any;
-        case "legal": return (await cachedLegal()) as any;
-        case "seo": return (await cachedSeo()) as SiteContext[K];
-        case "pageBanners": return (await cachedPageBanners()) as SiteContext[K];
-        case "collections": return (await cachedCollections()) as SiteContext[K];
-        case "pages": return (await cachedPages()) as SiteContext[K];
-        default: return (await cachedAll())[slice];
+        case "siteSettings":
+            return (await cachedSettings()) as SiteContext[K];
+        case "home":
+            return {
+                banners: (await cachedHome()).banners || [],
+                whoWeAre: (await cachedHome()).whoWeAre || {},
+                trustBar: (await cachedHome()).trustBar || [],
+                broadcastingPartners: (await cachedHome()).broadcastingPartners || [],
+            } as any;
+        case "about":
+            return (await cachedAbout()) as any;
+        case "registration":
+            return (await cachedRegistration()) as any;
+        case "legal":
+            return (await cachedLegal()) as any;
+        case "seo":
+            return (await cachedSeo()) as SiteContext[K];
+        case "pageBanners":
+            return (await cachedPageBanners()) as SiteContext[K];
+        case "collections":
+            return (await cachedCollections()) as SiteContext[K];
+        case "pages":
+            return (await cachedPages()) as SiteContext[K];
+        default:
+            return (await cachedAll())[slice];
     }
 }
 
-export async function getSettings() { return cachedSettings(); }
-export async function getHomeCms() { return cachedHome(); }
-export async function getAboutCms() { return cachedAbout(); }
-export async function getRegistrationCms() { return cachedRegistration(); }
-export async function getLegal() { return cachedLegal(); }
-export async function getSeoAll() { return cachedSeo(); }
-export async function getPageBannersAll() { return cachedPageBanners(); }
-export async function getSitePages() { return cachedPages(); }
-export async function getAllCollections() { return cachedCollections(); }
-export async function getMedia() { return cachedMedia(); }
+export async function getSettings() {
+    return cachedSettings();
+}
+export async function getHomeCms() {
+    return cachedHome();
+}
+export async function getAboutCms() {
+    return cachedAbout();
+}
+export async function getRegistrationCms() {
+    return cachedRegistration();
+}
+export async function getLegal() {
+    return cachedLegal();
+}
+export async function getSeoAll() {
+    return cachedSeo();
+}
+export async function getPageBannersAll() {
+    return cachedPageBanners();
+}
+export async function getSitePages() {
+    return cachedPages();
+}
+export async function getAllCollections() {
+    return cachedCollections();
+}
+export async function getMedia() {
+    return cachedMedia();
+}
 
 // ---------- Build ----------
 
@@ -346,18 +460,20 @@ async function build(): Promise<SiteContext> {
     if (!CMS_LIVE) return defaults();
 
     const d = defaults();
-    const [settings, home, about, registration, legal, seo, pageBanners, pages, collections, media] = await Promise.all([
-        cachedSettings(),
-        cachedHome(),
-        cachedAbout(),
-        cachedRegistration(),
-        cachedLegal(),
-        cachedSeo(),
-        cachedPageBanners(),
-        cachedPages(),
-        cachedCollections(),
-        cachedMedia(),
-    ]);
+    const [settings, home, about, registration, legal, seo, pageBanners, pages, collections, media] = await Promise.all(
+        [
+            cachedSettings(),
+            cachedHome(),
+            cachedAbout(),
+            cachedRegistration(),
+            cachedLegal(),
+            cachedSeo(),
+            cachedPageBanners(),
+            cachedPages(),
+            cachedCollections(),
+            cachedMedia(),
+        ],
+    );
 
     return {
         siteSettings: { ...d.siteSettings, ...settings },
@@ -389,12 +505,12 @@ async function build(): Promise<SiteContext> {
         collections,
         pages: pages as any,
         socialLinks: projectSocials(settings.socials),
-        navLinks: Array.isArray(settings.navbarLinks) && settings.navbarLinks.length > 0
-            ? settings.navbarLinks
-            : d.navLinks,
-        footerLinks: Array.isArray(settings.footerLinks) && settings.footerLinks.length > 0
-            ? settings.footerLinks
-            : d.footerLinks,
+        navLinks:
+            Array.isArray(settings.navbarLinks) && settings.navbarLinks.length > 0 ? settings.navbarLinks : d.navLinks,
+        footerLinks:
+            Array.isArray(settings.footerLinks) && settings.footerLinks.length > 0
+                ? settings.footerLinks
+                : d.footerLinks,
         media,
         featureFlag: d.featureFlag,
     };

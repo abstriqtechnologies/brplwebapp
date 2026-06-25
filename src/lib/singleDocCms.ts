@@ -10,7 +10,7 @@ import type { Model } from "mongoose";
 export function buildSingleDocHandlers<T>(
     getModel: () => Model<T>,
     defaultDoc: () => Partial<T> = () => ({}) as Partial<T>,
-    revalidateTag: SiteTag = TAGS.ALL
+    revalidateTag: SiteTag = TAGS.ALL,
 ) {
     async function GET() {
         const session = await requireAdminDb();
@@ -36,12 +36,12 @@ export function buildSingleDocHandlers<T>(
         if (!existingDoc) {
             const created = await Model.create({ ...defaultDoc(), ...body } as any);
             revalidateSite(revalidateTag);
-            return ok({ ...created.toObject(), _id: created._id.toString() });
+            return ok({ ...created.toObject(), _id: String(created._id) });
         }
         Object.assign(existingDoc, body);
         await existingDoc.save();
         revalidateSite(revalidateTag);
-        return ok({ ...existingDoc.toObject(), _id: existingDoc._id.toString() });
+        return ok({ ...existingDoc.toObject(), _id: String(existingDoc._id) });
     }
 
     return { GET, PATCH };

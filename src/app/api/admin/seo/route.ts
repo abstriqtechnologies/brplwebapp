@@ -9,7 +9,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
-    path: z.string().min(1).max(300).transform((v) => v.toLowerCase()),
+    path: z
+        .string()
+        .min(1)
+        .max(300)
+        .transform((v) => v.toLowerCase()),
     title: z.string().min(1).max(300),
     description: z.string().min(1).max(500),
     keywords: z.string().optional(),
@@ -47,11 +51,10 @@ export async function POST(req: Request) {
         const parsed = schema.safeParse(body);
         if (!parsed.success) return fail(parsed.error.issues[0]?.message || "Invalid input", 400);
         await connectDB();
-        const doc = await SeoMeta.findOneAndUpdate(
-            { path: parsed.data.path },
-            parsed.data,
-            { upsert: true, new: true }
-        ).lean();
+        const doc = await SeoMeta.findOneAndUpdate({ path: parsed.data.path }, parsed.data, {
+            upsert: true,
+            new: true,
+        }).lean();
         revalidateSite(TAGS.SEO);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     } catch (err) {

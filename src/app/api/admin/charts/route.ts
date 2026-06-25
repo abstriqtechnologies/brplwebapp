@@ -49,7 +49,7 @@ export async function GET() {
                     users,
                     revenue: revenueAgg?.[0]?.total ?? 0,
                 };
-            })
+            }),
         );
 
         return ok(data);

@@ -32,7 +32,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     try {
         const session = await requireAdminDb();
         if (session instanceof Response) return session;
-        if (session.role !== "superadmin") return fail("Forbidden", 403);
+        if (session.session.role !== "superadmin") return fail("Forbidden", 403);
         await connectDB();
         const r = await ContactLead.findByIdAndDelete(params.id).lean();
         if (!r) return notFound();

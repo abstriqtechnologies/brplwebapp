@@ -1,82 +1,36 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
-import { verifyWebhookSignature } from "@/lib/razorpay";
+/**
+ * POST /api/payment/webhook
+ *
+ * Razorpay server-to-server webhook. This is the SOURCE OF TRUTH for
+ * payment status. The `/api/payment/verify` endpoint is a defense-in-depth
+ * client-side check.
+ *
+ * Phase 3.6b: business logic in `@/lib/domain/payment/service`. The route
+ * is a thin adapter that:
+ *   - reads the raw body (HMAC needs the exact bytes, not a parsed object),
+ *   - passes through to `handleWebhook` with the signature header.
+ */
+
+import { withRequest } from "@/lib/api/handlers";
+import { ok } from "@/lib/api/response";
+import { handleWebhook as handleWebhookService } from "@/lib/domain/payment/service";
+import { env } from "@/lib/env";
+import { MongooseUserRepo, MongoosePaymentRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * Razorpay webhook handler. Verifies signature, then updates the user.
- * This is the source of truth for payment status.
- *
- * To configure: in Razorpay dashboard, set webhook URL to:
- *   https://<your-domain>/api/payment/webhook
- * And active events: payment.captured, payment.failed, order.paid
- */
-export async function POST(req: Request) {
-    try {
-        const rawBody = await req.text();
-        const signature = req.headers.get("x-razorpay-signature") || "";
-        const ok = verifyWebhookSignature(rawBody, signature);
-        if (!ok) {
-            console.warn("[webhook] Invalid signature");
-            return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-        }
+export const POST = withRequest(async ({ req }) => {
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-razorpay-signature") || "";
 
-        const event = JSON.parse(rawBody);
-        const eventType = event?.event;
-        const paymentEntity = event?.payload?.payment?.entity;
-        const orderEntity = event?.payload?.order?.entity;
+    await handleWebhookService({
+        rawBody,
+        signature,
+        secret: env.RAZORPAY_WEBHOOK_SECRET || "",
+        userRepo: new MongooseUserRepo(),
+        paymentRepo: new MongoosePaymentRepo(),
+    });
 
-        if (eventType === "payment.captured" && paymentEntity) {
-            const phone = paymentEntity.notes?.phone || orderEntity?.notes?.phone;
-            const orderId = paymentEntity.order_id || orderEntity?.id;
-            const paymentId = paymentEntity.id;
-
-            await connectDB();
-
-            if (phone) {
-                // Upsert by phone so we capture the payment even before user record exists
-                await User.findOneAndUpdate(
-                    { phone },
-                    {
-                        $set: {
-                            paymentStatus: "completed",
-                            paymentId,
-                            orderId,
-                            amount: paymentEntity.amount ? paymentEntity.amount / 100 : 1499,
-                        },
-                        $setOnInsert: { phone, paymentStatus: "completed" },
-                    },
-                    { upsert: true, new: true }
-                );
-            } else if (orderId) {
-                await User.findOneAndUpdate(
-                    { orderId },
-                    {
-                        $set: {
-                            paymentStatus: "completed",
-                            paymentId,
-                            amount: paymentEntity.amount ? paymentEntity.amount / 100 : 1499,
-                        },
-                    }
-                );
-            }
-        } else if (eventType === "payment.failed" && paymentEntity) {
-            const phone = paymentEntity.notes?.phone || orderEntity?.notes?.phone;
-            if (phone) {
-                await connectDB();
-                await User.findOneAndUpdate(
-                    { phone },
-                    { $set: { paymentStatus: "pending" } }
-                );
-            }
-        }
-
-        return NextResponse.json({ received: true });
-    } catch (err: any) {
-        console.error("[webhook]", err);
-        return NextResponse.json({ error: "Webhook handler error" }, { status: 500 });
-    }
-}
+    return ok({ received: true });
+});

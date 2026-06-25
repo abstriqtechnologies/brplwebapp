@@ -1,49 +1,45 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import User from "@/models/User";
-import { verifyCheckoutSignature } from "@/lib/razorpay";
+/**
+ * POST /api/payment/verify
+ *
+ * Client-side confirmation endpoint. Defense in depth on top of the webhook
+ * (which is the source of truth).
+ *
+ * Phase 3.6b: business logic in `@/lib/domain/payment/service`.
+ */
+
+import { z } from "zod";
+import { withRequest } from "@/lib/api/handlers";
+import { ok } from "@/lib/api/response";
+import { parse } from "@/lib/api/parse";
+import { verifyPayment as verifyPaymentService } from "@/lib/domain/payment/service";
+import { env } from "@/lib/env";
+import { MongooseUserRepo, MongoosePaymentRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * Client-side confirmation endpoint.
- * Called by the frontend after Razorpay checkout returns success.
- * Verifies the signature (defense in depth on top of the webhook).
- */
-export async function POST(req: Request) {
-    try {
-        const body = await req.json().catch(() => ({}));
-        const { orderId, paymentId, signature } = body as {
-            orderId?: string;
-            paymentId?: string;
-            signature?: string;
-        };
-        if (!orderId || !paymentId || !signature) {
-            return NextResponse.json({ error: "Missing payment details" }, { status: 400 });
-        }
+const schema = z.object({
+    orderId: z.string().min(1),
+    paymentId: z.string().min(1),
+    signature: z.string().min(1),
+});
 
-        const ok = verifyCheckoutSignature({ orderId, paymentId, signature });
-        if (!ok) {
-            return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
-        }
+export const POST = withRequest(async ({ req }) => {
+    const body = parse(await req.json().catch(() => ({})), schema);
 
-        await connectDB();
-        // Best-effort: mark user as paid if a row exists; the webhook is the source of truth.
-        await User.findOneAndUpdate(
-            { orderId },
-            { $set: { paymentStatus: "completed", paymentId } },
-            { new: true }
-        );
+    await verifyPaymentService({
+        paymentId: body.paymentId,
+        orderId: body.orderId,
+        signature: body.signature,
+        secret: env.RAZORPAY_KEY_SECRET || "",
+        userRepo: new MongooseUserRepo(),
+        paymentRepo: new MongoosePaymentRepo(),
+    });
 
-        return NextResponse.json({
-            success: true,
-            orderId,
-            paymentId,
-            redirect: "/login?next=/dashboard",
-        });
-    } catch (err: any) {
-        console.error("[payment/verify]", err);
-        return NextResponse.json({ error: "Internal error" }, { status: 500 });
-    }
-}
+    return ok({
+        success: true,
+        orderId: body.orderId,
+        paymentId: body.paymentId,
+        redirect: "/login?next=/dashboard",
+    });
+});

@@ -1,56 +1,54 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import OtpRecord from "@/models/OtpRecord";
+/**
+ * POST /api/auth/send-otp
+ *
+ * Phase 3.6: migrated to the new layered pattern. Auth/business logic now
+ * lives in `@/lib/domain/auth/service`. This route is a thin adapter:
+ *   - withRequest for request ID + error envelope.
+ *   - withRateLimit (5 per 10 min per IP).
+ *   - parse() for input validation.
+ *   - sendOtp() service call.
+ */
+
+import { z } from "zod";
+import { withRequest, withRateLimit } from "@/lib/api/handlers";
+import { ok } from "@/lib/api/response";
+import { parse } from "@/lib/api/parse";
+import { limiterFor } from "@/lib/api/rate-limit";
 import { sendSmsOtp } from "@/lib/sms";
-import { generateOtp, normalizePhone } from "@/lib/phone";
+import { generateOtp } from "@/lib/phone";
+import { sendOtp as sendOtpService } from "@/lib/domain/auth/service";
+import { MongooseUserRepo, MongooseOtpRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds between OTPs
+const schema = z.object({
+    phone: z.string().min(10).max(20),
+});
 
-export async function POST(req: Request) {
-    try {
-        const body = await req.json().catch(() => ({}));
-        const phone = normalizePhone(String(body.phone || ""));
-        if (!phone) {
-            return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
-        }
+// Shared in-memory rate limiter (process-local). 5 OTP requests per 10 min
+// per IP — matches the original route's behaviour.
+const otpLimiter = limiterFor("otp-send");
 
-        await connectDB();
+export const POST = withRequest(
+    withRateLimit(
+        { capacity: 5, refillPerSec: 5 / 600 },
+        otpLimiter,
+    )(async ({ req }) => {
+        const body = parse(await req.json().catch(() => ({})), schema);
 
-        // Rate limit: don't allow resend within cooldown
-        const recent = await OtpRecord.findOne({ phone, verified: false })
-            .sort({ createdAt: -1 })
-            .lean();
-        if (recent && Date.now() - new Date(recent.createdAt).getTime() < RESEND_COOLDOWN_MS) {
-            const waitSec = Math.ceil(
-                (RESEND_COOLDOWN_MS - (Date.now() - new Date(recent.createdAt).getTime())) / 1000
-            );
-            return NextResponse.json(
-                { error: `Please wait ${waitSec}s before requesting a new OTP` },
-                { status: 429 }
-            );
-        }
+        const result = await sendOtpService({
+            phone: body.phone,
+            userRepo: new MongooseUserRepo(),
+            otpRepo: new MongooseOtpRepo(),
+            generateOtp,
+            sendSms: sendSmsOtp,
+        });
 
-        const otp = generateOtp();
-        const expiresAt = new Date(Date.now() + OTP_TTL_MS);
-
-        await OtpRecord.create({ phone, otp, expiresAt, attempts: 0, verified: false });
-
-        const sent = await sendSmsOtp(phone, otp, "registration");
-        if (!sent) {
-            return NextResponse.json({ error: "Failed to send OTP. Please try again." }, { status: 502 });
-        }
-
-        return NextResponse.json({
+        return ok({
             success: true,
             message: "OTP sent",
-            expiresInSec: OTP_TTL_MS / 1000,
+            expiresInSec: result.expiresInSec,
         });
-    } catch (err: any) {
-        console.error("[send-otp]", err);
-        return NextResponse.json({ error: "Internal error" }, { status: 500 });
-    }
-}
+    }),
+);

@@ -7,8 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write \"src/lib/**/*.{ts,tsx}\" \"src/app/api/**/*.{ts,tsx}\" \"src/hooks/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/lib/**/*.{ts,tsx}\" \"src/app/api/**/*.{ts,tsx}\" \"src/hooks/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["prettier --write", "eslint --fix"],
+    "*.{mjs,json,css}": ["prettier --write"]
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -83,7 +90,10 @@
     "dotenv": "^17.4.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "postcss": "^8",
+    "prettier": "^3.8.4",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.22.4",
     "typescript": "^5",

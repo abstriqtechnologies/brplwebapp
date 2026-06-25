@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BRPL Frontend
 
-## Getting Started
+Beyond Reach Premier League — a Next.js 14 App Router project for cricket-league management. Players register via phone OTP + Razorpay payment; admins manage content, users, payments, and media through a full CMS.
 
-First, run the development server:
+## Architecture
+
+```
+src/
+  app/            Next.js App Router (pages + API routes)
+  components/     UI components (shadcn/ui design system)
+  hooks/          React hooks
+  lib/
+    api/          Response helpers, error classes, HTTP client, CSRF, rate limit, handler wrappers
+    auth/         JWT crypto, cookies, session, RBAC, middleware guards
+    domain/       Business logic (auth service, payment service)
+    infra/db/     Repository interfaces + Mongoose impls + in-memory fakes
+    env.ts        Centralised env validation (zod)
+    logger.ts     Structured logging
+    password-policy.ts, security-headers.ts, ...  Other utilities
+  models/         Mongoose schemas
+  middleware.ts   Edge-runtime auth (login redirect, protected routes)
+```
+
+## Setup
+
+1. **Install dependencies**
+
+```bash
+npm install
+```
+
+2. **Environment variables**
+
+Copy `.env.example` to `.env.local` and fill in:
+
+| Variable | Required | Description |
+|---|---|---|
+| `MONGODB_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` | Yes | HS256 signing key (≥ 32 chars) |
+| `RAZORPAY_KEY_ID` | In prod | Razorpay API key |
+| `RAZORPAY_KEY_SECRET` | In prod | Razorpay API secret |
+| `RAZORPAY_WEBHOOK_SECRET` | In prod | Webhook HMAC secret |
+| `SMS_API_KEY` | For OTP | SMSIndiaHub API key |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | For payments | Client-side Razorpay key |
+| `ALLOW_DEFAULT_ADMIN` | Dev only | Set `1` to seed default admin |
+
+3. **Run**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build (strict TS) |
+| `npm run test` | Run unit tests (vitest) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier (lib + api + tests) |
+| `npm run format:check` | Check formatting (CI) |
 
-## Learn More
+## Testing
 
-To learn more about Next.js, take a look at the following resources:
+The project uses **vitest**. Tests are colocated in `tests/` mirroring `src/`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+tests/
+  lib/           Unit tests for lib/*
+  api/           Integration tests for API routes
+  lib/domain/    Business-logic tests with in-memory repositories
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run all tests: `npm run test`
 
-## Deploy on Vercel
+Run a single file: `npx vitest run tests/lib/env.test.ts`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key patterns (post-refactor)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Route handlers** compose wrappers: `withRequest(withAuth({ lookup })(handler))`.
+- **Business logic** lives in `@/lib/domain/` and depends on repository interfaces.
+- **Database access** goes through `@/lib/infra/db/repos.ts` interfaces (Mongoose or in-memory).
+- **Environment** is validated once at boot in `@/lib/env.ts` (zod schema).
+- **Errors** are thrown as typed AppErrors and caught by `withRequest` for a consistent JSON envelope.
+- **Rate limiting** is per-instance token bucket (Redis-backed in multi-instance deployments).
+- **CSRF** is available via `BRPL_CSRF_REQUIRED=true` (double-submit cookie).
+
+## CI
+
+The `.github/workflows/ci.yml` workflow runs `format:check` → `lint` → `build` → `test` on every PR. Pre-commit hooks (Husky + lint-staged) format staged files.

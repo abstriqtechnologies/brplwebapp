@@ -52,7 +52,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     try {
         const session = await requireAdminDb();
         if (session instanceof Response) return session;
-        if (session.role !== "superadmin") return fail("Forbidden", 403);
+        if (session.session.role !== "superadmin") return fail("Forbidden", 403);
         if (!mongoose.Types.ObjectId.isValid(params.id)) return notFound("Invalid user id");
 
         await connectDB();

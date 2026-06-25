@@ -1,11 +1,13 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { env } from "@/lib/env";
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
+const RAZORPAY_KEY_ID = env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = env.RAZORPAY_KEY_SECRET;
+const RAZORPAY_WEBHOOK_SECRET = env.RAZORPAY_WEBHOOK_SECRET;
 
 if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    // eslint-disable-next-line no-console
     console.warn("[Razorpay] RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not set — payment endpoints will fail");
 }
 
@@ -33,10 +35,7 @@ export function verifyCheckoutSignature({
 }): boolean {
     if (!RAZORPAY_KEY_SECRET) return false;
     const body = orderId + "|" + paymentId;
-    const expected = crypto
-        .createHmac("sha256", RAZORPAY_KEY_SECRET)
-        .update(body)
-        .digest("hex");
+    const expected = crypto.createHmac("sha256", RAZORPAY_KEY_SECRET).update(body).digest("hex");
     try {
         return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
     } catch {
@@ -48,11 +47,16 @@ export function verifyCheckoutSignature({
  * Verify Razorpay webhook signature (from server-to-server webhook call).
  */
 export function verifyWebhookSignature(body: string, signature: string): boolean {
-    if (!RAZORPAY_WEBHOOK_SECRET) return false;
-    const expected = crypto
-        .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
-        .update(body)
-        .digest("hex");
+    if (!RAZORPAY_WEBHOOK_SECRET) {
+        // Phase 0 fix: previously this returned false silently in production
+        // when the env was missing, causing every webhook to 400. We still
+        // can't recover from a missing secret at runtime, but the env module
+        // throws at boot in production if it's not set.
+        // eslint-disable-next-line no-console
+        console.warn("[Razorpay] webhook signature verification skipped — RAZORPAY_WEBHOOK_SECRET not set");
+        return false;
+    }
+    const expected = crypto.createHmac("sha256", RAZORPAY_WEBHOOK_SECRET).update(body).digest("hex");
     try {
         return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
     } catch {

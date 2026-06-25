@@ -63,9 +63,7 @@ export async function GET(req: Request) {
         ]);
 
         const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-        const csv = [header, ...rows]
-            .map((r) => r.map(escape).join(","))
-            .join("\r\n");
+        const csv = [header, ...rows].map((r) => r.map(escape).join(",")).join("\r\n");
 
         return new Response(csv, {
             status: 200,

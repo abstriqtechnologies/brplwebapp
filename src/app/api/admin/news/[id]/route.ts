@@ -4,7 +4,11 @@ import { buildCrudRoutes } from "@/lib/adminCrud";
 
 const schema = z.object({
     title: z.string().min(1).max(300),
-    slug: z.string().min(1).max(300).transform((v) => v.toLowerCase()),
+    slug: z
+        .string()
+        .min(1)
+        .max(300)
+        .transform((v) => v.toLowerCase()),
     summary: z.string().optional(),
     content: z.string().min(1),
     heroImage: z.string().optional(),

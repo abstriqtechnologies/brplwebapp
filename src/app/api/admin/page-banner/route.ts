@@ -51,11 +51,10 @@ export async function POST(req: Request) {
         });
         if (!parsed.success) return fail(parsed.error.issues[0]?.message || "Invalid input", 400);
         await connectDB();
-        const doc = await PageBanner.findOneAndUpdate(
-            { key: parsed.data.key },
-            parsed.data,
-            { upsert: true, new: true }
-        ).lean();
+        const doc = await PageBanner.findOneAndUpdate({ key: parsed.data.key }, parsed.data, {
+            upsert: true,
+            new: true,
+        }).lean();
         revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     } catch (err) {

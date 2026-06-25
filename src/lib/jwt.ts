@@ -1,12 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { isProduction } from "@/lib/featureFlags";
+import { env } from "@/lib/env";
 
-const RAW_SECRET = process.env.JWT_SECRET;
-if (!RAW_SECRET && isProduction()) {
-    throw new Error("JWT_SECRET must be set in production");
-}
-const JWT_SECRET = RAW_SECRET || "dev-insecure-secret-change-me";
+// dev-insecure fallback is also in `env` when JWT_SECRET is missing in dev.
+const JWT_SECRET = env.JWT_SECRET;
 const SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
 const ALG = "HS256";
@@ -72,6 +69,13 @@ export async function setPendingCookie(token: string) {
 export async function clearAuthCookies() {
     const c = await cookies();
     c.delete(COOKIE_NAMES.AUTH);
+    c.delete(COOKIE_NAMES.PENDING);
+}
+
+// Clear only the pending cookie (used after upgrading to a full auth cookie,
+// where the just-set auth cookie must NOT be wiped out).
+export async function clearPendingCookie() {
+    const c = await cookies();
     c.delete(COOKIE_NAMES.PENDING);
 }
 

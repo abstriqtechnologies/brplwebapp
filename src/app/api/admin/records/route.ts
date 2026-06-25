@@ -45,11 +45,7 @@ export async function GET(req: Request) {
 
         const skip = (page - 1) * limit;
         const [items, total] = await Promise.all([
-            User.find(query)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
+            User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
             User.countDocuments(query),
         ]);
 

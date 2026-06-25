@@ -28,7 +28,8 @@ export function serializePost(doc: any): SerializedPost {
     // Public-API aliases
     d.featuredImage = d.featuredImage || d.heroImage;
     d.metaTitle = d.metaTitle && d.metaTitle.length > 0 ? d.metaTitle : d.title;
-    d.metaDescription = d.metaDescription && d.metaDescription.length > 0 ? d.metaDescription : d.excerpt || d.summary || "";
+    d.metaDescription =
+        d.metaDescription && d.metaDescription.length > 0 ? d.metaDescription : d.excerpt || d.summary || "";
     d.isPublished = d.isPublished !== undefined ? d.isPublished : !d.draft;
     return d as SerializedPost;
 }

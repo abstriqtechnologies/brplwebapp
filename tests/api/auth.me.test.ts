@@ -27,7 +27,9 @@ describe("GET /api/auth/me", () => {
     it("includes profileImage (null) when user has none", async () => {
         const User = (await import("@/models/User")).default;
         await mongoose.connect(process.env.MONGODB_URI!);
-        const phone = `8${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`;
+        const phone = `8${Math.floor(Math.random() * 1e9)
+            .toString()
+            .padStart(9, "0")}`;
         const created = await User.create({
             phone,
             name: "Test Player",
@@ -55,7 +57,9 @@ describe("GET /api/auth/me", () => {
 
     it("includes profileImage string when user has one set", async () => {
         const User = (await import("@/models/User")).default;
-        const phone = `7${Math.floor(Math.random() * 1e9).toString().padStart(9, "0")}`;
+        const phone = `7${Math.floor(Math.random() * 1e9)
+            .toString()
+            .padStart(9, "0")}`;
         const created = await User.create({
             phone,
             name: "Has Avatar",

@@ -47,7 +47,7 @@ export async function POST(req: Request) {
                     name: admin.name,
                     purpose: "admin_otp",
                 },
-                "5m"
+                "5m",
             );
             return ok({
                 requireOtp: true,

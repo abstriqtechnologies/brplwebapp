@@ -3,7 +3,11 @@ import Coupon from "@/models/Coupon";
 import { buildCrudRoutes } from "@/lib/adminCrud";
 
 const schema = z.object({
-    code: z.string().min(1).max(40).transform((v) => v.toUpperCase()),
+    code: z
+        .string()
+        .min(1)
+        .max(40)
+        .transform((v) => v.toUpperCase()),
     description: z.string().max(500).optional(),
     type: z.enum(["flat", "percent"]).default("percent"),
     amount: z.number().min(0).max(100000),

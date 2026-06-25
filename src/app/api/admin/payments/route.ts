@@ -36,9 +36,7 @@ export async function GET(req: Request) {
             items: items.map((p: any) => ({
                 ...p,
                 _id: p._id.toString(),
-                userId: p.userId
-                    ? { ...p.userId, _id: p.userId._id.toString() }
-                    : null,
+                userId: p.userId ? { ...p.userId, _id: p.userId._id.toString() } : null,
             })),
             pagination: { page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) },
             summary: {

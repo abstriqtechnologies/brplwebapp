@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { connectDB } from "@/lib/mongodb";
+import { env } from "@/lib/env";
 import Media from "@/models/Media";
 import { requireAdmin, ok, fail, serverError } from "@/lib/adminApi";
 import { revalidateSite, TAGS } from "@/lib/revalidate";
@@ -10,13 +11,11 @@ import path from "path";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const STORAGE_ROOT = process.env.MEDIA_STORAGE_PATH || "public/uploads";
-
 export async function POST(req: Request) {
     try {
         const session = await requireAdmin();
         if (session instanceof Response) return session;
-        if (!session.email) return fail("Missing admin email on session", 401);
+        if (!session.session.email) return fail("Missing admin email on session", 401);
 
         let form: FormData;
         try {
@@ -58,9 +57,13 @@ export async function POST(req: Request) {
         let webpUrl: string | undefined;
         if (kind === "image" && width && height) {
             try {
-                const resized = await sharp(buffer).rotate().resize({ width: 1920, withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
+                const resized = await sharp(buffer)
+                    .rotate()
+                    .resize({ width: 1920, withoutEnlargement: true })
+                    .webp({ quality: 82 })
+                    .toBuffer();
                 const webpRel = relativePath.replace(/\.[^.]+$/, ".webp");
-                const webpAbs = path.join(process.cwd(), STORAGE_ROOT, webpRel);
+                const webpAbs = path.join(process.cwd(), env.MEDIA_STORAGE_PATH, webpRel);
                 await fs.mkdir(path.dirname(webpAbs), { recursive: true });
                 await fs.writeFile(webpAbs, resized);
                 webpUrl = `/uploads/${webpRel.split(path.sep).join("/")}`;
@@ -80,7 +83,7 @@ export async function POST(req: Request) {
             height,
             folder: typeof form.get("folder") === "string" ? (form.get("folder") as string) : undefined,
             tags: form.getAll("tags").filter((t): t is string => typeof t === "string"),
-            uploadedBy: session.email,
+            uploadedBy: session.session.email,
         });
 
         revalidateSite(TAGS.MEDIA);

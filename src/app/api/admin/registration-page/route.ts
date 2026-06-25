@@ -31,11 +31,7 @@ export async function PATCH(req: Request) {
             return ok({ error: "Invalid body" }, { status: 400 });
         }
         await connectDB();
-        const doc = await RegistrationCms.findOneAndUpdate(
-            {},
-            { $set: body },
-            { new: true, upsert: true }
-        ).lean();
+        const doc = await RegistrationCms.findOneAndUpdate({}, { $set: body }, { new: true, upsert: true }).lean();
         revalidateSite(TAGS.REGISTRATION);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
     } catch (err) {

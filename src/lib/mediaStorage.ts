@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
+import { env } from "@/lib/env";
 
 /**
  * Local-disk storage adapter for admin uploads. Files live under
@@ -8,27 +9,23 @@ import crypto from "crypto";
  * as static assets.
  */
 
-const STORAGE_ROOT = process.env.MEDIA_STORAGE_PATH || "public/uploads";
+const STORAGE_ROOT = env.MEDIA_STORAGE_PATH;
 const PUBLIC_PREFIX = "/uploads"; // what's in the URL after the host
 
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 
-const IMAGE_MIMES = new Set([
-    "image/png",
-    "image/jpeg",
-    "image/webp",
-    "image/gif",
-    "image/avif",
-    "image/svg+xml",
-]);
+const IMAGE_MIMES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif", "image/svg+xml"]);
 
 const VIDEO_MIMES = new Set(["video/mp4", "video/webm"]);
 
 export type UploadKind = "image" | "video";
 
 export class UploadValidationError extends Error {
-    constructor(public status: number, message: string) {
+    constructor(
+        public status: number,
+        message: string,
+    ) {
         super(message);
         this.name = "UploadValidationError";
     }
@@ -71,7 +68,7 @@ function extFromMime(mime: string): string {
  */
 export async function writeUpload(
     buffer: Buffer,
-    mime: string
+    mime: string,
 ): Promise<{ url: string; absolutePath: string; relativePath: string }> {
     const now = new Date();
     const yyyy = String(now.getFullYear());

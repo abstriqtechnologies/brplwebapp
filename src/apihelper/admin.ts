@@ -145,8 +145,14 @@ export const deleteContactLead = (id: string) => api.delete(`/api/admin/contact-
 export const getSettings = () => api.get("/api/admin/settings");
 export const updateSettings = (body: any) => api.patch("/api/admin/settings", body);
 
-export const getSocialContact = () => api.get("/api/admin/social-contact");
-export const updateSocialContact = (body: any) => api.patch("/api/admin/social-contact", body);
+/**
+ * @deprecated The `/api/admin/social-contact` endpoint was removed in
+ * Phase 2.7 — these now proxy through `/api/admin/settings`, which is the
+ * canonical SiteSettings endpoint. Prefer `getSettings` / `updateSettings`
+ * for new code.
+ */
+export const getSocialContact = () => api.get("/api/admin/settings");
+export const updateSocialContact = (body: any) => api.patch("/api/admin/settings", body);
 
 export const listPageBanners = () => api.get<{ items: any[] }>("/api/admin/page-banner");
 export const getPageBanner = (key: string) => api.get(`/api/admin/page-banner?key=${encodeURIComponent(key)}`);

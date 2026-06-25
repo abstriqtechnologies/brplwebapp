@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI;
+import { env } from "./env";
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -14,12 +13,13 @@ const globalForMongoose = global as MongooseGlobal;
 const cached = globalForMongoose.mongoose ?? (globalForMongoose.mongoose = { conn: null, promise: null });
 
 export async function connectDB(): Promise<typeof mongoose> {
-    if (!MONGODB_URI) {
+    const uri = env.MONGODB_URI;
+    if (!uri || uri.startsWith("dev-placeholder-")) {
         throw new Error("Please define MONGODB_URI in .env.local");
     }
     if (cached.conn) return cached.conn;
     if (!cached.promise) {
-        cached.promise = mongoose.connect(MONGODB_URI, {
+        cached.promise = mongoose.connect(uri, {
             bufferCommands: false,
             serverSelectionTimeoutMS: 10000,
         });

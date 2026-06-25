@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
-import { defaultAdminEnabled, isProduction } from "@/lib/featureFlags";
+import { env, isProduction } from "@/lib/env";
 
 const DEFAULT_EMAIL = "admin@brpl.com";
 const DEFAULT_PASSWORD = "Admin@123";
@@ -12,9 +12,10 @@ let seeded = false;
 /** Idempotent. Only runs in dev/staging or when ALLOW_DEFAULT_ADMIN=1. */
 export async function ensureDefaultAdmin() {
     if (seeded) return;
-    if (!defaultAdminEnabled()) {
+    if (!env.ALLOW_DEFAULT_ADMIN) {
         seeded = true;
         if (isProduction()) {
+            // eslint-disable-next-line no-console
             console.warn("[admin-bootstrap] Skipped default admin (production).");
         }
         return;
@@ -32,14 +33,14 @@ export async function ensureDefaultAdmin() {
                 active: true,
                 totpEnabled: false,
             });
-            if (process.env.NODE_ENV !== "production") {
-                console.info(
-                    `[admin-bootstrap] Seeded default admin: ${DEFAULT_EMAIL} / ${DEFAULT_PASSWORD}`
-                );
+            if (!isProduction()) {
+                // eslint-disable-next-line no-console
+                console.info(`[admin-bootstrap] Seeded default admin: ${DEFAULT_EMAIL} / ${DEFAULT_PASSWORD}`);
             }
         }
         seeded = true;
     } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("[admin-bootstrap] failed", err);
     }
 }

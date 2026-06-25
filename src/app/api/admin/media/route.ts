@@ -20,11 +20,12 @@ export async function GET(req: Request) {
         const query: Record<string, unknown> = {};
         if (folder) query.folder = folder;
         if (kind === "image" || kind === "video") query.kind = kind;
-        if (search) query.$or = [
-            { originalName: { $regex: escapeRegex(search), $options: "i" } },
-            { folder: { $regex: escapeRegex(search), $options: "i" } },
-            { tags: { $regex: escapeRegex(search), $options: "i" } },
-        ];
+        if (search)
+            query.$or = [
+                { originalName: { $regex: escapeRegex(search), $options: "i" } },
+                { folder: { $regex: escapeRegex(search), $options: "i" } },
+                { tags: { $regex: escapeRegex(search), $options: "i" } },
+            ];
 
         const skip = (page - 1) * limit;
         const [items, total] = await Promise.all([

@@ -72,11 +72,7 @@ export async function PATCH(req: Request, { params }: { params: { section: strin
         const body = await req.json().catch(() => ({}));
         await connectDB();
         const update: Record<string, unknown> = { [field]: body };
-        const doc = await RegistrationCms.findOneAndUpdate(
-            {},
-            { $set: update },
-            { new: true, upsert: true }
-        ).lean();
+        const doc = await RegistrationCms.findOneAndUpdate({}, { $set: update }, { new: true, upsert: true }).lean();
         revalidateSite(TAGS.REGISTRATION);
         return ok({ section, data: (doc as any)[field] });
     } catch (err) {

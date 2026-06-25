@@ -55,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: { key: string } 
         const doc = await SitePage.findOneAndUpdate(
             { key: params.key },
             { ...parsed.data, key: params.key },
-            { upsert: true, new: true }
+            { upsert: true, new: true },
         ).lean();
         revalidateSite();
         return ok({ ...doc, _id: (doc as any)._id.toString() });
@@ -67,11 +67,11 @@ export async function PATCH(req: Request, { params }: { params: { key: string } 
 function defaultTitleFor(key: SitePageKey): string {
     const map: Record<SitePageKey, string> = {
         "about-us": "About Us",
-        "teams": "Teams",
-        "career": "Career",
+        teams: "Teams",
+        career: "Career",
         "contact-us": "Contact Us",
         "events-page": "Events",
-        "partners": "Partners",
+        partners: "Partners",
         "registration-page": "Registration",
         "types-of-partners": "Types of Partners",
         "blog-index": "Blog",

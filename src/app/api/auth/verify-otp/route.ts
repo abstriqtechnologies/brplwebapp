@@ -1,92 +1,79 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import OtpRecord from "@/models/OtpRecord";
-import User from "@/models/User";
-import { signJwt, setAuthCookie, setPendingCookie } from "@/lib/jwt";
-import { normalizePhone } from "@/lib/phone";
+/**
+ * POST /api/auth/verify-otp
+ *
+ * Phase 3.6: business logic in `@/lib/domain/auth/service`. The route is
+ * a thin adapter that:
+ *   - parses input,
+ *   - calls the service,
+ *   - issues the right cookie (full auth vs pending) based on the result.
+ *
+ * Note: response shape preserved for the existing client (`{ exists, redirect }`).
+ */
+
+import { z } from "zod";
+import { withRequest, withRateLimit } from "@/lib/api/handlers";
+import { ok } from "@/lib/api/response";
+import { parse } from "@/lib/api/parse";
+import { limiterFor } from "@/lib/api/rate-limit";
+import { verifyOtp as verifyOtpService } from "@/lib/domain/auth/service";
+import { signAuth, signPending } from "@/lib/auth/crypto";
+import { setAuthCookie, setPendingCookie } from "@/lib/auth/cookies";
+import { MongooseUserRepo, MongooseOtpRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_ATTEMPTS = 5;
+const schema = z.object({
+    phone: z.string().min(10).max(20),
+    otp: z.string().regex(/^\d{6}$/),
+});
 
-export async function POST(req: Request) {
-    try {
-        const body = await req.json().catch(() => ({}));
-        const phone = normalizePhone(String(body.phone || ""));
-        const otp = String(body.otp || "").trim();
+const verifyLimiter = limiterFor("otp-verify");
 
-        if (!phone || otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-            return NextResponse.json({ error: "Invalid phone or OTP format" }, { status: 400 });
-        }
+export const POST = withRequest(
+    withRateLimit(
+        { capacity: 10, refillPerSec: 10 / 600 },
+        verifyLimiter,
+    )(async ({ req }) => {
+        const body = parse(await req.json().catch(() => ({})), schema);
 
-        await connectDB();
+        const result = await verifyOtpService({
+            phone: body.phone,
+            code: body.otp,
+            userRepo: new MongooseUserRepo(),
+            otpRepo: new MongooseOtpRepo(),
+        });
 
-        const record = await OtpRecord.findOne({ phone, verified: false })
-            .sort({ createdAt: -1 });
-        if (!record) {
-            return NextResponse.json({ error: "OTP not found or expired" }, { status: 400 });
-        }
-        if (record.expiresAt.getTime() < Date.now()) {
-            return NextResponse.json({ error: "OTP expired. Please request a new one." }, { status: 400 });
-        }
-        if (record.attempts >= MAX_ATTEMPTS) {
-            return NextResponse.json(
-                { error: "Too many attempts. Please request a new OTP." },
-                { status: 429 }
-            );
-        }
-        if (record.otp !== otp) {
-            record.attempts += 1;
-            await record.save();
-            return NextResponse.json(
-                { error: "Incorrect OTP", attemptsLeft: MAX_ATTEMPTS - record.attempts },
-                { status: 400 }
-            );
-        }
-
-        // Mark verified
-        record.verified = true;
-        await record.save();
-
-        // Check if user exists
-        const existingUser = await User.findOne({ phone });
-
-        if (existingUser) {
-            // Existing user — issue full auth cookie
-            const token = await signJwt({
-                sub: existingUser._id.toString(),
-                phone: existingUser.phone,
-                purpose: "auth",
+        if (result.kind === "existing") {
+            const token = await signAuth({
+                sub: result.user._id.toString(),
+                phone: result.user.phone,
             });
             await setAuthCookie(token);
-            return NextResponse.json({
+            return ok({
                 success: true,
                 exists: true,
                 user: {
-                    id: existingUser._id.toString(),
-                    phone: existingUser.phone,
-                    name: existingUser.name,
-                    role: existingUser.role,
-                    paymentStatus: existingUser.paymentStatus,
+                    id: result.user._id.toString(),
+                    phone: result.user.phone,
+                    name: result.user.name,
+                    role: result.user.role,
+                    paymentStatus: result.user.paymentStatus,
                 },
                 redirect: "/dashboard",
             });
         }
 
-        // New user — issue short-lived pending cookie
-        const token = await signJwt(
-            { sub: `pending:${phone}`, phone, purpose: "pending_reg" },
-            "30m"
-        );
+        // New user — issue short-lived pending cookie.
+        const token = await signPending({
+            sub: `pending:${result.phone}`,
+            phone: result.phone,
+        });
         await setPendingCookie(token);
-        return NextResponse.json({
+        return ok({
             success: true,
             exists: false,
             redirect: "/payment",
         });
-    } catch (err: any) {
-        console.error("[verify-otp]", err);
-        return NextResponse.json({ error: "Internal error" }, { status: 500 });
-    }
-}
+    }),
+);

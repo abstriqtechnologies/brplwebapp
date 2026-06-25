@@ -31,8 +31,8 @@ export async function GET(_req: Request, { params }: { params: { type: string } 
                     legalType === "privacy"
                         ? "Privacy Policy"
                         : legalType === "terms"
-                            ? "Terms & Conditions"
-                            : "Rule Book",
+                          ? "Terms & Conditions"
+                          : "Rule Book",
                 content: "",
                 version: "1.0",
             });
@@ -57,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: { type: string }
         const doc = await LegalPage.findOneAndUpdate(
             { type: legalType },
             { ...parsed.data, type: legalType },
-            { upsert: true, new: true }
+            { upsert: true, new: true },
         ).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.LEGAL);

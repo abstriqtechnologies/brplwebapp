@@ -38,7 +38,7 @@ export async function GET(_req: Request, { params }: { params: { section: string
         }
         return ok({
             section,
-            data: field ? (doc as any)[field] ?? {} : {},
+            data: field ? ((doc as any)[field] ?? {}) : {},
         });
     } catch (err) {
         return serverError(err);
