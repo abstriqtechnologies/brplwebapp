@@ -8,8 +8,11 @@
  *     record with source="coupon", then marks the user as paid and
  *     re-issues the auth cookie with paid:true.
  *
- * Auth: requires either a pending cookie (new user) or an auth cookie
- * with paid:false (returning unpaid user).
+ * Auth: accepts either a pending cookie (new user) or an auth cookie
+ * with paid:false (returning unpaid user). For pending sessions in
+ * consume mode, the route will look up the user by phone and create
+ * the User record on the fly when the coupon fully covers the fee
+ * (new-user + 100% coupon flow).
  */
 
 import { z } from "zod";
@@ -36,6 +39,14 @@ export const dynamic = "force-dynamic";
 const schema = z.object({
     code: z.string().min(1).max(64),
     orderAmountRupees: z.number().int().min(0).max(100_000),
+    // Profile fields — required only when the request comes from a
+    // pending-cookie session and no User record exists yet. For an
+    // existing-user redeem, all are ignored.
+    name: z.string().trim().min(2).max(80).optional(),
+    email: z.string().trim().email().max(120).optional(),
+    role: z.enum(["batsman", "bowler", "allrounder", "wicketkeeper"]).optional(),
+    state: z.string().trim().min(2).max(60).optional(),
+    city: z.string().trim().min(2).max(60).optional(),
 });
 
 async function readSession(): Promise<
@@ -74,7 +85,7 @@ export async function POST(req: NextRequest) {
             { status: 400 },
         );
     }
-    const { code, orderAmountRupees } = parsed.data;
+    const { code, orderAmountRupees, name, email, role, state, city } = parsed.data;
 
     let session;
     try {
@@ -94,16 +105,51 @@ export async function POST(req: NextRequest) {
     }
 
     // Consume mode.
-    if (session.kind === "pending") {
-        return NextResponse.json(
-            { error: "Complete profile before redeeming coupon" },
-            { status: 400 },
-        );
-    }
     await connectDB();
+
+    // Resolve a User from the session. For pending sessions, the User
+    // record may not exist yet (new user + 100% coupon), so we create
+    // it inline using the profile fields supplied in the body.
+    const userRepo = new MongooseUserRepo();
+    let userId: string;
+    let userPhone: string;
+
+    if (session.kind === "pending") {
+        userPhone = session.phone;
+        let user = await userRepo.findByPhone(userPhone);
+        if (!user) {
+            if (!name || !email || !role || !state || !city) {
+                return NextResponse.json(
+                    { error: "Profile required to redeem coupon for new user" },
+                    { status: 400 },
+                );
+            }
+            user = await userRepo.create({
+                phone: userPhone,
+                name,
+                email: email.toLowerCase(),
+                role,
+                state,
+                city,
+                paymentStatus: "completed",
+                paymentId: "",
+                orderId: "",
+                amount: 0,
+            } as any);
+        } else {
+            // Existing record (e.g., a ghost created by an earlier
+            // webhook). Mark it paid below after we know the orderId.
+            user = user;
+        }
+        userId = String(user!._id);
+    } else {
+        userId = session.userId;
+        userPhone = session.phone;
+    }
+
     const result = await redeemCouponService({
         code,
-        userId: session.userId,
+        userId,
         orderAmountRupees,
         couponRepo,
     });
@@ -113,7 +159,7 @@ export async function POST(req: NextRequest) {
     const paymentRepo = new MongoosePaymentRepo();
     const orderId = `coupon_${Date.now()}_${result.couponId.slice(-6)}`;
     await paymentRepo.create({
-        userId: session.userId,
+        userId,
         paymentId: orderId,
         orderId,
         amount: 0, // free via coupon
@@ -123,8 +169,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Mark user paid + re-issue auth cookie with paid:true.
-    const userRepo = new MongooseUserRepo();
-    const updated = await userRepo.update(session.userId, {
+    const updated = await userRepo.update(userId, {
         paymentStatus: "completed",
         paymentId: orderId,
         orderId,
@@ -135,17 +180,18 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await signAuth({
-        sub: session.userId,
-        phone: session.phone,
+        sub: userId,
+        phone: userPhone,
         paid: true,
     });
     await setAuthCookie(token);
     await clearPendingCookie();
 
     logger.info("coupon.redeemed", {
-        userId: session.userId,
+        userId,
         code: result.code,
         discount: result.discount,
+        fromPending: session.kind === "pending",
     });
 
     return NextResponse.json({

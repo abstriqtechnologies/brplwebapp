@@ -191,6 +191,17 @@ export default function CheckoutClient({
                     body: JSON.stringify({
                         code: coupon.code,
                         orderAmountRupees: registrationFeeRupees,
+                        // For new users, the redeem route creates the User
+                        // record inline so it must receive the profile fields.
+                        ...(isNewUser
+                            ? {
+                                  name: form.name,
+                                  email: form.email,
+                                  role: form.role,
+                                  state: form.state,
+                                  city: form.city,
+                              }
+                            : {}),
                     }),
                 });
                 const rData = await r.json().catch(() => ({}));
@@ -201,6 +212,13 @@ export default function CheckoutClient({
                         description: rData.error || "Try again",
                     });
                     setBusy(false);
+                    return;
+                }
+                // For new users, the redeem route has already created the
+                // User, persisted a coupon Payment, and issued an auth
+                // cookie with paid:true. Navigate straight to /dashboard.
+                if (isNewUser) {
+                    window.location.href = rData.redirect || next;
                     return;
                 }
             }
