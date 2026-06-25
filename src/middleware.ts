@@ -86,7 +86,9 @@ export async function middleware(req: NextRequest) {
         }
         const pending = await readPending(req);
         if (pending) return NextResponse.next();
-        if (session.valid && session.payload.paid === false) return NextResponse.next();
+        // Anything-not-paid (false OR undefined) is allowed at /checkout so that legacy
+        // tokens issued before the `paid` field was introduced don't get bounced to /login.
+        if (session.valid && session.payload.paid !== true) return NextResponse.next();
         return redirectTo(req, "/login", { next: pathname });
     }
 
