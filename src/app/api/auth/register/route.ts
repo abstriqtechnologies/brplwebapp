@@ -56,6 +56,7 @@ export const POST = withRequest(
         const authToken = await signAuth({
             sub: user._id.toString(),
             phone: user.phone,
+            paid: true,
         });
         await setAuthCookie(authToken);
         await clearPendingCookie();

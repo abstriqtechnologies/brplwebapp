@@ -45,9 +45,11 @@ export const POST = withRequest(
         });
 
         if (result.kind === "existing") {
+            const paid = result.user.paymentStatus === "completed";
             const token = await signAuth({
                 sub: result.user._id.toString(),
                 phone: result.user.phone,
+                paid,
             });
             await setAuthCookie(token);
             return ok({

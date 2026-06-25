@@ -23,6 +23,7 @@ const SECRET = new TextEncoder().encode(env.JWT_SECRET);
 export type AuthTokenPayload = {
     sub: string;
     phone?: string;
+    paid?: boolean; // mirror of User.paymentStatus === "completed" at issuance
     purpose: "auth";
     [key: string]: unknown;
 };
