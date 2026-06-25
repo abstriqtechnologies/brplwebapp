@@ -4,26 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Phone, ShieldCheck, KeyRound, Lock, ArrowLeft, User, Mail, MapPin, Trophy, Check } from "lucide-react";
+import { Loader2, Phone, ShieldCheck, KeyRound, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { loadRazorpayScript } from "@/hooks/useRazorpayScript";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
-const REGISTRATION_FEE_DISPLAY = "₹1,499";
 
-type Step = "phone" | "otp" | "register";
-
-type RegisterForm = {
-    name: string;
-    email: string;
-    role: "batsman" | "bowler" | "allrounder" | "wicketkeeper";
-    state: string;
-    city: string;
-};
+type Step = "phone" | "otp";
 
 export default function LoginPage() {
     return (
@@ -43,7 +32,6 @@ function LoginClient() {
     const router = useRouter();
     const params = useSearchParams();
     const next = params.get("next") || "/dashboard";
-    const { settings } = useSiteSettings();
     const { toast } = useToast();
 
     const [step, setStep] = useState<Step>("phone");
@@ -53,16 +41,6 @@ function LoginClient() {
     const [otpExpiresIn, setOtpExpiresIn] = useState(0);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const [orderId, setOrderId] = useState<string | null>(null);
-    const [paymentId, setPaymentId] = useState<string | null>(null);
-    const [form, setForm] = useState<RegisterForm>({
-        name: "",
-        email: "",
-        role: "batsman",
-        state: "",
-        city: "",
-    });
 
     /* countdown ticks */
     useEffect(() => {
@@ -75,8 +53,6 @@ function LoginClient() {
         const t = setTimeout(() => setOtpExpiresIn((s) => s - 1), 1000);
         return () => clearTimeout(t);
     }, [otpExpiresIn]);
-
-    /* --- API helpers --- */
 
     const sendOtp = async (): Promise<boolean> => {
         const cleaned = phone.replace(/\D/g, "").slice(-10);
@@ -124,101 +100,15 @@ function LoginClient() {
                 setOtp(Array(OTP_LENGTH).fill(""));
                 return;
             }
-            if (data.exists) {
-                toast({ title: "Welcome back!" });
-                router.replace(next);
-                return;
-            }
-            // New user: advance to register step (do NOT router.push)
-            setStep("register");
+            const target = data.redirect || (data.paid ? next : "/checkout");
+            toast({
+                title: data.paid ? "Welcome back!" : "Phone verified",
+            });
+            // Hard navigation so cookies are committed before middleware runs.
+            window.location.href = target;
         } catch (err: any) {
             setError(err.message || "Something went wrong");
             setOtp(Array(OTP_LENGTH).fill(""));
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const startPayment = async () => {
-        setBusy(true);
-        setError(null);
-        try {
-            const res = await fetch("/api/payment/create-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || "Could not start payment");
-
-            setOrderId(data.orderId);
-
-            // Lazily load Razorpay script via shared helper (promise-deduped, typed window.Razorpay).
-            const loaded = await loadRazorpayScript();
-            if (!loaded) throw new Error("Failed to load Razorpay");
-
-            const rzp = new window.Razorpay!({
-                key: data.key,
-                amount: data.amount,
-                currency: data.currency,
-                name: settings?.siteName || "BRPL",
-                description: "Player Registration",
-                order_id: data.orderId,
-                prefill: { contact: phone },
-                handler: async (resp: any) => {
-                    setPaymentId(resp.razorpay_payment_id);
-                    const v = await fetch("/api/payment/verify", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            orderId: resp.razorpay_order_id,
-                            paymentId: resp.razorpay_payment_id,
-                            signature: resp.razorpay_signature,
-                        }),
-                    });
-                    const vData = await v.json().catch(() => ({}));
-                    if (v.ok) {
-                        toast({ title: "Payment successful", description: "Now complete your details." });
-                    } else {
-                        toast({ variant: "destructive", title: "Verification failed", description: vData.error });
-                    }
-                },
-                modal: { ondismiss: () => setBusy(false) },
-            });
-            rzp.open();
-        } catch (err: any) {
-            toast({ variant: "destructive", title: "Payment error", description: err?.message || "Unknown" });
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    const submitRegister = async () => {
-        if (!form.name || !form.email || !form.state || !form.city) {
-            toast({ variant: "destructive", title: "Missing fields", description: "All fields are required." });
-            return;
-        }
-        if (!orderId || !paymentId) {
-            toast({ variant: "destructive", title: "Payment required", description: "Complete payment first." });
-            return;
-        }
-        setBusy(true);
-        try {
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...form, paymentId, orderId }),
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || "Registration failed");
-            toast({ title: "Welcome to BRPL!" });
-            // Hard navigation: `router.replace` from next/navigation can race
-            // with the Set-Cookie from this response, so the dashboard's
-            // middleware sometimes sees no auth cookie and bounces back to /login.
-            // A full document reload guarantees the cookie is committed before
-            // the middleware reads it.
-            window.location.href = data.redirect || next;
-        } catch (err: any) {
-            toast({ variant: "destructive", title: "Error", description: err?.message || "Network error" });
         } finally {
             setBusy(false);
         }
@@ -252,7 +142,6 @@ function LoginClient() {
         }
     };
 
-    /* --- Render --- */
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-md">
@@ -286,18 +175,6 @@ function LoginClient() {
                         onSubmit={() => void submitOtp(otp.join(""))}
                     />
                 )}
-                {step === "register" && (
-                    <RegisterStep
-                        phone={phone}
-                        orderId={orderId}
-                        paymentId={paymentId}
-                        busy={busy}
-                        form={form}
-                        setForm={setForm}
-                        onPay={() => void startPayment()}
-                        onSubmit={() => void submitRegister()}
-                    />
-                )}
                 <p className="text-center text-sm text-slate-600 dark:text-slate-400 mt-6">
                     By continuing, you agree to BRPL&apos;s{" "}
                     <Link href="/terms-and-conditions" className="text-amber-600 hover:underline font-semibold">
@@ -313,8 +190,6 @@ function LoginClient() {
         </div>
     );
 }
-
-/* ---------- Step subcomponents (presentation only) ---------- */
 
 function PhoneStep(props: {
     phone: string;
@@ -507,197 +382,5 @@ function OtpStep(props: {
                 </Button>
             </form>
         </>
-    );
-}
-
-const ROLES: Array<{ value: RegisterForm["role"]; label: string; description: string }> = [
-    { value: "batsman", label: "Batsman", description: "Specialist batter" },
-    { value: "bowler", label: "Bowler", description: "Specialist bowler" },
-    { value: "allrounder", label: "All-Rounder", description: "Bat & bowl" },
-    { value: "wicketkeeper", label: "Wicket-Keeper", description: "Keeper & batter" },
-];
-
-function RegisterStep(props: {
-    phone: string;
-    orderId: string | null;
-    paymentId: string | null;
-    busy: boolean;
-    form: RegisterForm;
-    setForm: (next: RegisterForm) => void;
-    onPay: () => void;
-    onSubmit: () => void;
-}) {
-    const { orderId, paymentId, busy, form, setForm, onPay, onSubmit } = props;
-
-    return (
-        <div className="w-full max-w-2xl">
-            <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 mb-4">
-                    <Check className="w-7 h-7 text-emerald-500" />
-                </div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Complete your profile</h1>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">
-                    {paymentId
-                        ? "Payment received ✓ — tell us a bit about you to finish registration."
-                        : "Complete payment to finish your registration."}
-                </p>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6">
-                {!paymentId && (
-                    <div className="rounded-xl border border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 p-5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs uppercase tracking-wider font-bold text-amber-700 dark:text-amber-300">
-                                Registration Fee
-                            </span>
-                            <span className="text-2xl font-bold text-amber-600 dark:text-amber-300">
-                                {REGISTRATION_FEE_DISPLAY}
-                            </span>
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                            Covers trials, official kit and processing.
-                        </p>
-                        <Button
-                            type="button"
-                            onClick={onPay}
-                            disabled={busy}
-                            className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-black font-bold text-base rounded-full"
-                        >
-                            {busy ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <>Pay {REGISTRATION_FEE_DISPLAY}</>
-                            )}
-                        </Button>
-                        {orderId && !paymentId && (
-                            <p className="text-xs text-slate-500 text-center mt-3">
-                                Complete the payment in the Razorpay window, then return here.
-                            </p>
-                        )}
-                    </div>
-                )}
-
-                {paymentId && (
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            onSubmit();
-                        }}
-                        className="space-y-5"
-                    >
-                        {/* Role */}
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-                                Your playing role
-                            </label>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {ROLES.map((r) => {
-                                    const active = form.role === r.value;
-                                    return (
-                                        <button
-                                            key={r.value}
-                                            type="button"
-                                            onClick={() => setForm({ ...form, role: r.value })}
-                                            className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border-2 transition-all ${
-                                                active
-                                                    ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 shadow-md"
-                                                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
-                                            }`}
-                                        >
-                                            <Trophy
-                                                className={`w-7 h-7 ${active ? "text-amber-600" : "text-slate-500"}`}
-                                            />
-                                            <span
-                                                className={`text-sm font-bold ${
-                                                    active
-                                                        ? "text-amber-700 dark:text-amber-300"
-                                                        : "text-slate-700 dark:text-slate-300"
-                                                }`}
-                                            >
-                                                {r.label}
-                                            </span>
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight text-center">
-                                                {r.description}
-                                            </span>
-                                            {active && (
-                                                <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                                                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                                                </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Personal */}
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                    <User className="w-4 h-4 inline mr-1" />
-                                    Full name
-                                </label>
-                                <Input
-                                    placeholder="Your full name"
-                                    value={form.name}
-                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                    className="h-11"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                    <Mail className="w-4 h-4 inline mr-1" />
-                                    Email
-                                </label>
-                                <Input
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    value={form.email}
-                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                    className="h-11"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                    <MapPin className="w-4 h-4 inline mr-1" />
-                                    State
-                                </label>
-                                <Input
-                                    placeholder="e.g. Maharashtra"
-                                    value={form.state}
-                                    onChange={(e) => setForm({ ...form, state: e.target.value })}
-                                    className="h-11"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                                    <MapPin className="w-4 h-4 inline mr-1" />
-                                    City
-                                </label>
-                                <Input
-                                    placeholder="e.g. Mumbai"
-                                    value={form.city}
-                                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                                    className="h-11"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <Button
-                            type="submit"
-                            size="lg"
-                            disabled={busy}
-                            className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-black font-bold text-base rounded-full"
-                        >
-                            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Registration"}
-                        </Button>
-                    </form>
-                )}
-            </div>
-        </div>
     );
 }
