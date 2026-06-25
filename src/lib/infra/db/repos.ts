@@ -121,8 +121,11 @@ export type CreateCouponUsageInput = Omit<ICouponUsage, "_id" | "createdAt" | "u
 
 export interface CouponRepo {
     findByCode(code: string): Promise<ICoupon | null>;
+    findById(id: string): Promise<ICoupon | null>;
     incrementUsage(couponId: string): Promise<ICoupon | null>;
     createUsage(data: CreateCouponUsageInput): Promise<ICouponUsage>;
+    /** Returns the existing usage if this user has already redeemed this coupon. */
+    findUsageForUser(couponId: string, userId: string): Promise<ICouponUsage | null>;
     listUsages(couponId: string, limit: number, skip: number): Promise<ICouponUsage[]>;
 }
 
@@ -152,6 +155,9 @@ export class InMemoryUserRepo implements UserRepo {
     async create(data: CreateUserInput): Promise<IUser> {
         const doc = {
             ...data,
+            // Mirror the Mongoose schema default (`paymentStatus: "pending"`)
+            // so in-memory tests exercise the same shape as production.
+            paymentStatus: data.paymentStatus ?? "pending",
             _id: idLike() as unknown as IUser["_id"],
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -347,5 +353,70 @@ export class InMemoryMediaRepo implements MediaRepo {
     }
     _clear(): void {
         this.items = [];
+    }
+}
+
+export class InMemoryCouponRepo implements CouponRepo {
+    private coupons: (ICoupon & { _id: string; createdAt: Date; updatedAt: Date })[] = [];
+    private usages: (ICouponUsage & { _id: string })[] = [];
+
+    private normalize(code: string): string {
+        return code.trim().toUpperCase();
+    }
+
+    async findByCode(code: string): Promise<ICoupon | null> {
+        const norm = this.normalize(code);
+        return this.coupons.find((c) => c.code === norm) ?? null;
+    }
+    async findById(id: string): Promise<ICoupon | null> {
+        return this.coupons.find((c) => String(c._id) === id) ?? null;
+    }
+    async create(data: CreateCouponInput): Promise<ICoupon> {
+        const doc = {
+            ...data,
+            code: this.normalize(data.code),
+            usedCount: data.usedCount ?? 0,
+            active: data.active ?? true,
+            _id: idLike() as unknown as ICoupon["_id"],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        } as unknown as ICoupon & { _id: string; createdAt: Date; updatedAt: Date };
+        this.coupons.push(doc);
+        return doc;
+    }
+    async incrementUsage(couponId: string): Promise<ICoupon | null> {
+        const idx = this.coupons.findIndex((c) => String(c._id) === couponId);
+        if (idx === -1) return null;
+        this.coupons[idx] = {
+            ...this.coupons[idx],
+            usedCount: this.coupons[idx].usedCount + 1,
+            updatedAt: new Date(),
+        };
+        return this.coupons[idx];
+    }
+    async createUsage(data: CreateCouponUsageInput): Promise<ICouponUsage> {
+        const doc = {
+            ...data,
+            usedAt: data.usedAt ?? new Date(),
+            _id: idLike(),
+        } as ICouponUsage & { _id: string };
+        this.usages.push(doc);
+        return doc;
+    }
+    async findUsageForUser(couponId: string, userId: string): Promise<ICouponUsage | null> {
+        return (
+            this.usages.find(
+                (u) => String(u.couponId) === couponId && String(u.userId) === userId,
+            ) ?? null
+        );
+    }
+    async listUsages(couponId: string, limit: number, skip: number): Promise<ICouponUsage[]> {
+        return this.usages
+            .filter((u) => String(u.couponId) === couponId)
+            .slice(skip, skip + limit);
+    }
+    _clear(): void {
+        this.coupons = [];
+        this.usages = [];
     }
 }

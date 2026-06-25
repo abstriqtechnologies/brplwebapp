@@ -13,11 +13,15 @@ import OtpRecord from "@/models/OtpRecord";
 import Payment from "@/models/Payment";
 import Media from "@/models/Media";
 import AdminUser from "@/models/AdminUser";
+import Coupon from "@/models/Coupon";
+import CouponUsage from "@/models/CouponUsage";
 import type { IUser } from "@/models/User";
 import type { IOtpRecord } from "@/models/OtpRecord";
 import type { IPayment } from "@/models/Payment";
 import type { IMedia } from "@/models/Media";
 import type { IAdminUser } from "@/models/AdminUser";
+import type { ICoupon } from "@/models/Coupon";
+import type { ICouponUsage } from "@/models/CouponUsage";
 import type {
     UserRepo,
     CreateUserInput,
@@ -30,6 +34,9 @@ import type {
     CreateMediaInput,
     AdminRepo,
     CreateAdminInput,
+    CouponRepo,
+    CreateCouponInput,
+    CreateCouponUsageInput,
 } from "./repos";
 
 function idToString(id: unknown): string {
@@ -195,5 +202,49 @@ export class MongooseAdminRepo implements AdminRepo {
         await connectDB();
         const found = await AdminUser.findOne({ email: email.toLowerCase() }).select("_id").lean();
         return !!found;
+    }
+}
+
+// ---------- MongooseCouponRepo ----------
+
+export class MongooseCouponRepo implements CouponRepo {
+    private normalize(code: string): string {
+        return code.trim().toUpperCase();
+    }
+    async findByCode(code: string): Promise<ICoupon | null> {
+        await connectDB();
+        return (await Coupon.findOne({ code: this.normalize(code) }).lean()) as ICoupon | null;
+    }
+    async findById(id: string): Promise<ICoupon | null> {
+        await connectDB();
+        return (await Coupon.findById(id).lean()) as ICoupon | null;
+    }
+    async incrementUsage(couponId: string): Promise<ICoupon | null> {
+        await connectDB();
+        const doc = await Coupon.findByIdAndUpdate(
+            couponId,
+            { $inc: { usedCount: 1 } },
+            { new: true },
+        ).lean();
+        return (doc as ICoupon | null) ?? null;
+    }
+    async createUsage(data: CreateCouponUsageInput): Promise<ICouponUsage> {
+        await connectDB();
+        const doc = await CouponUsage.create(data);
+        return doc.toObject() as ICouponUsage;
+    }
+    async findUsageForUser(couponId: string, userId: string): Promise<ICouponUsage | null> {
+        await connectDB();
+        const doc = await CouponUsage.findOne({ couponId, userId }).lean();
+        return (doc as ICouponUsage | null) ?? null;
+    }
+    async listUsages(couponId: string, limit: number, skip: number): Promise<ICouponUsage[]> {
+        await connectDB();
+        const docs = await CouponUsage.find({ couponId })
+            .sort({ usedAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+        return docs as unknown as ICouponUsage[];
     }
 }
