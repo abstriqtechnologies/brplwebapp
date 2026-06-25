@@ -12,6 +12,7 @@
  * implement it in both repos.
  */
 
+import type { Document } from "mongoose";
 import type { IUser } from "@/models/User";
 import type { IAdminUser } from "@/models/AdminUser";
 import type { IOtpRecord } from "@/models/OtpRecord";
@@ -116,8 +117,11 @@ export interface MediaRepo {
 
 // ---------- CouponRepo (for future payment work) ----------
 
-export type CreateCouponInput = Omit<ICoupon, "_id" | "createdAt" | "updatedAt">;
-export type CreateCouponUsageInput = Omit<ICouponUsage, "_id" | "createdAt" | "updatedAt">;
+export type CreateCouponInput = Omit<ICoupon, "_id" | "createdAt" | "updatedAt" | keyof Document>;
+export type CreateCouponUsageInput = Omit<
+    ICouponUsage,
+    "_id" | "createdAt" | "updatedAt" | keyof Document
+>;
 
 export interface CouponRepo {
     findByCode(code: string): Promise<ICoupon | null>;
