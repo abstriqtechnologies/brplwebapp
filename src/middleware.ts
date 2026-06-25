@@ -1,36 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyAuth, type AuthTokenPayload } from "@/lib/auth/crypto";
+import { verifyAuth, verifyPending, type AuthTokenPayload, type PendingTokenPayload } from "@/lib/auth/crypto";
 
 const PROTECTED_PREFIXES = ["/dashboard"];
+const PENDING_OR_UNPAID_PREFIXES = ["/checkout"];
 const AUTH_PATHS = ["/login"];
 
-function isProtected(pathname: string) {
-    return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
-}
-function isAuthPath(pathname: string) {
-    return AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+function matchesAny(pathname: string, list: string[]) {
+    return list.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 type SessionResult =
     | { valid: true; payload: AuthTokenPayload; expired: false }
     | { valid: false; expired: boolean };
 
-/**
- * Edge-runtime friendly session reader. Uses the shared verifyAuth helper
- * from `@/lib/auth/crypto` so the rules (signature + purpose + expiry) stay
- * consistent with the rest of the app.
- *
- * We distinguish "expired" from "missing/invalid" so the middleware can clear
- * stale cookies.
- */
 async function readSession(req: NextRequest): Promise<SessionResult> {
     const token = req.cookies.get("brpl_auth")?.value;
     if (!token) return { valid: false, expired: false };
     const payload = await verifyAuth(token);
     if (payload) return { valid: true, payload, expired: false };
-    // verifyAuth returns null for expired OR wrong-purpose OR tampered tokens.
-    // We can sniff expiry from the JWT without verifying (last segment is
-    // the signature, second segment is the payload).
     let expired = false;
     try {
         const parts = token.split(".");
@@ -43,31 +30,47 @@ async function readSession(req: NextRequest): Promise<SessionResult> {
             }
         }
     } catch {
-        /* ignore — treat as non-expired invalid */
+        /* ignore */
     }
     return { valid: false, expired };
 }
 
-/**
- * Validate `next` is a safe same-origin redirect target. Allows paths like
- * "/dashboard/profile" but rejects "//evil.com" and "http://evil.com".
- */
-function safeNext(next: string | null): string {
-    if (!next) return "/dashboard";
-    if (!next.startsWith("/")) return "/dashboard";
-    if (next.startsWith("//")) return "/dashboard";
+async function readPending(req: NextRequest): Promise<PendingTokenPayload | null> {
+    const token = req.cookies.get("brpl_pending")?.value;
+    if (!token) return null;
+    return verifyPending(token);
+}
+
+function safeNext(next: string | null, fallback: string): string {
+    if (!next) return fallback;
+    if (!next.startsWith("/")) return fallback;
+    if (next.startsWith("//")) return fallback;
     return next;
+}
+
+function redirectTo(req: NextRequest, pathname: string, search: Record<string, string>) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname;
+    url.search = "";
+    for (const [k, v] of Object.entries(search)) {
+        url.searchParams.set(k, v);
+    }
+    return NextResponse.redirect(url);
 }
 
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
+    const session = await readSession(req);
 
-    /* --- Authenticated user hitting /login → bounce to the next URL (or dashboard) --- */
-    if (isAuthPath(pathname)) {
-        const session = await readSession(req);
+    /* --- /login --- */
+    if (matchesAny(pathname, AUTH_PATHS)) {
         if (session.valid) {
+            const target = safeNext(
+                req.nextUrl.searchParams.get("next"),
+                session.payload.paid ? "/dashboard" : "/checkout",
+            );
             const url = req.nextUrl.clone();
-            url.pathname = safeNext(req.nextUrl.searchParams.get("next"));
+            url.pathname = target;
             url.search = "";
             return NextResponse.redirect(url);
         }
@@ -79,22 +82,37 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    /* --- Unauthenticated user hitting a protected page → bounce to /login --- */
-    if (isProtected(pathname)) {
-        const session = await readSession(req);
-        if (session.valid) return NextResponse.next();
+    /* --- /checkout: pending cookie OR auth+unpaid. Auth+paid → /dashboard. --- */
+    if (matchesAny(pathname, PENDING_OR_UNPAID_PREFIXES)) {
+        if (session.valid && session.payload.paid === true) {
+            return redirectTo(req, safeNext(req.nextUrl.searchParams.get("next"), "/dashboard"), {});
+        }
+        const pending = await readPending(req);
+        if (pending) return NextResponse.next();
+        if (session.valid && session.payload.paid === false) return NextResponse.next();
+        return redirectTo(req, "/login", { next: pathname });
+    }
 
-        const url = req.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set("next", pathname);
-        const res = NextResponse.redirect(url);
-        if (session.expired) res.cookies.delete("brpl_auth");
-        return res;
+    /* --- /dashboard: auth+paid only. --- */
+    if (matchesAny(pathname, PROTECTED_PREFIXES)) {
+        if (!session.valid) {
+            const res = redirectTo(req, "/login", { next: pathname });
+            if (session.expired) res.cookies.delete("brpl_auth");
+            return res;
+        }
+        if (session.payload.paid === true) return NextResponse.next();
+        return redirectTo(req, "/checkout", { next: pathname });
     }
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/login", "/login/:path*"],
+    matcher: [
+        "/dashboard/:path*",
+        "/login",
+        "/login/:path*",
+        "/checkout",
+        "/checkout/:path*",
+    ],
 };
