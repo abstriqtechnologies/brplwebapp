@@ -7,7 +7,7 @@ export interface ICouponUsage extends Document {
     code: string;
     discountApplied: number;
     orderId?: string;
-    usedAt: Date;
+    usedAt?: Date;
 }
 
 const CouponUsageSchema = new Schema<ICouponUsage>(
