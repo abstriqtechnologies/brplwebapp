@@ -53,6 +53,8 @@ export const POST = withRequest(
         );
 
         // Upgrade to full auth cookie and clear the pending one.
+        // registerUser always sets paymentStatus: "completed" (see service),
+        // so the new auth cookie can carry paid:true immediately.
         const authToken = await signAuth({
             sub: user._id.toString(),
             phone: user.phone,
