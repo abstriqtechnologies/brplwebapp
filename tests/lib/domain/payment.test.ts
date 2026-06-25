@@ -402,7 +402,7 @@ describe("domain/payment service", () => {
         });
     });
 
-    describe("verifyPayment re-issues user for unpaid returning user", () => {
+    describe("verifyPayment returns updated user", () => {
         it("returns updated user and payment", async () => {
             const { userRepo, paymentRepo, payment } = await load();
             const u = await userRepo.create({
@@ -418,11 +418,11 @@ describe("domain/payment service", () => {
                 status: "created",
                 source: "razorpay",
             });
-            const crypto = require("crypto");
-            const sig = crypto
-                .createHmac("sha256", "test-secret-for-hmac")
-                .update("order_1|pay_1")
-                .digest("hex");
+            const sig = makeCheckoutSignature({
+                orderId: "order_1",
+                paymentId: "pay_1",
+                secret: "test-secret-for-hmac",
+            });
 
             const result = await payment.verifyPayment({
                 paymentId: "pay_1",
