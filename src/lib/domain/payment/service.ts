@@ -48,8 +48,21 @@ export type CreateOrderResult = {
 };
 
 export async function createOrder(deps: CreateOrderDeps): Promise<CreateOrderResult> {
-    const user = await deps.userRepo.findByPhone(deps.phone);
-    if (!user) throw new NotFoundError("User not found");
+    let user = await deps.userRepo.findByPhone(deps.phone);
+    if (!user) {
+        // Login via OTP only issues a `pending` cookie — it does not create
+        // a User record. The payment flow is the first place we know the
+        // visitor is a real person about to pay, so create a minimal
+        // "pending payment" user here. The /api/auth/register step that
+        // runs after the Razorpay webhook will enrich the record with
+        // name/email/role/city. (This mirrors the webhook fallback further
+        // down in this file.)
+        logger.info("payment.create_order.user_auto_created", { phone: deps.phone });
+        user = await deps.userRepo.create({
+            phone: deps.phone,
+            paymentStatus: "pending",
+        } as any);
+    }
     if (user.paymentStatus === "completed") {
         throw new ConflictError("User already registered", { details: { redirect: "/dashboard" } });
     }

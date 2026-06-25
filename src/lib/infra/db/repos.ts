@@ -155,9 +155,6 @@ export class InMemoryUserRepo implements UserRepo {
     async create(data: CreateUserInput): Promise<IUser> {
         const doc = {
             ...data,
-            // Mirror the Mongoose schema default (`paymentStatus: "pending"`)
-            // so in-memory tests exercise the same shape as production.
-            paymentStatus: data.paymentStatus ?? "pending",
             _id: idLike() as unknown as IUser["_id"],
             createdAt: new Date(),
             updatedAt: new Date(),
