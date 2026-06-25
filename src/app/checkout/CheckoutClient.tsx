@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Loader2, Tag, CreditCard, User, Mail, MapPin, Trophy, Check, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Tag, CreditCard, User, Mail, MapPin, Trophy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -65,37 +65,9 @@ export default function CheckoutClient({
     const [orderId, setOrderId] = useState<string | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const finalAmount = coupon.status === "valid" ? coupon.finalAmount : registrationFeeRupees;
     const couponCoversAll = coupon.status === "valid" && coupon.finalAmount === 0;
-
-    /* --- Resumable payment polling: handles "closed tab mid-payment" case --- */
-    useEffect(() => {
-        let elapsed = 0;
-        const t = setInterval(async () => {
-            elapsed += POLL_INTERVAL_MS;
-            if (elapsed > POLL_DURATION_MS) {
-                clearInterval(t);
-                return;
-            }
-            try {
-                const res = await fetch("/api/auth/me", { cache: "no-store" });
-                if (!res.ok) return;
-                const data = await res.json();
-                if (data?.user?.paymentStatus === "completed") {
-                    clearInterval(t);
-                    // Webhook arrived while user was away — run the standard
-                    // complete path: if new user, register; then go home.
-                    await finishRegistration();
-                }
-            } catch {
-                /* network blip; ignore */
-            }
-        }, POLL_INTERVAL_MS);
-        return () => clearInterval(t);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     /* --- Coupon validation (does NOT consume) --- */
     const applyCoupon = async () => {
@@ -133,7 +105,6 @@ export default function CheckoutClient({
     /* --- Razorpay path --- */
     const startPayment = async () => {
         setBusy(true);
-        setError(null);
         try {
             const res = await fetch("/api/payment/create-order", {
                 method: "POST",
@@ -264,6 +235,32 @@ export default function CheckoutClient({
         }
     };
 
+    /* --- Resumable payment polling: handles "closed tab mid-payment" case --- */
+    useEffect(() => {
+        let elapsed = 0;
+        const t = setInterval(async () => {
+            elapsed += POLL_INTERVAL_MS;
+            if (elapsed > POLL_DURATION_MS) {
+                clearInterval(t);
+                return;
+            }
+            try {
+                const res = await fetch("/api/auth/me", { cache: "no-store" });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data?.user?.paymentStatus === "completed") {
+                    clearInterval(t);
+                    // Webhook arrived while user was away — run the standard
+                    // complete path: if new user, register; then go home.
+                    await finishRegistration();
+                }
+            } catch {
+                /* network blip; ignore */
+            }
+        }, POLL_INTERVAL_MS);
+        return () => clearInterval(t);
+    }, []);
+
     /* --- Render --- */
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -300,6 +297,7 @@ export default function CheckoutClient({
                                             <button
                                                 key={r.value}
                                                 type="button"
+                                                aria-pressed={active}
                                                 onClick={() => setForm({ ...form, role: r.value })}
                                                 className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border-2 transition-all ${
                                                     active
@@ -359,6 +357,8 @@ export default function CheckoutClient({
                     <section>
                         <button
                             type="button"
+                            aria-expanded={couponOpen}
+                            aria-controls="coupon-panel"
                             onClick={() => setCouponOpen((o) => !o)}
                             className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"
                         >
@@ -371,7 +371,7 @@ export default function CheckoutClient({
                             )}
                         </button>
                         {couponOpen && (
-                            <div className="mt-3 space-y-3">
+                            <div id="coupon-panel" className="mt-3 space-y-3">
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder="Enter code"
@@ -418,12 +418,6 @@ export default function CheckoutClient({
                                 ₹{finalAmount.toLocaleString("en-IN")}
                             </span>
                         </div>
-                        {error && (
-                            <p className="text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2 mb-3 flex items-start gap-2">
-                                <AlertTriangle className="w-4 h-4 mt-0.5" />
-                                {error}
-                            </p>
-                        )}
                         {couponCoversAll ? (
                             <Button
                                 type="button"
