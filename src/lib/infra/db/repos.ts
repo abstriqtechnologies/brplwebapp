@@ -388,11 +388,10 @@ export class InMemoryCouponRepo implements CouponRepo {
     async incrementUsage(couponId: string): Promise<ICoupon | null> {
         const idx = this.coupons.findIndex((c) => String(c._id) === couponId);
         if (idx === -1) return null;
-        this.coupons[idx] = {
-            ...this.coupons[idx],
+        Object.assign(this.coupons[idx], {
             usedCount: this.coupons[idx].usedCount + 1,
             updatedAt: new Date(),
-        };
+        });
         return this.coupons[idx];
     }
     async createUsage(data: CreateCouponUsageInput): Promise<ICouponUsage> {
