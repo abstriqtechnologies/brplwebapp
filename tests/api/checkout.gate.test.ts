@@ -51,6 +51,16 @@ describe("middleware /dashboard gate", () => {
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/checkout?next=%2Fdashboard");
     });
+
+    it("treats a token missing paid as unpaid (bounces to /checkout)", async () => {
+        // Legacy tokens issued before Task 1 don't have the `paid` field.
+        // Middleware must treat them as unpaid, not pass them through.
+        const token = await mintAuthToken({ sub: "u1", phone: "9876543210" });
+        const req = reqWithCookies("/dashboard", { brpl_auth: token });
+        const res = await callMiddleware(req);
+        expect([301, 302, 307, 308]).toContain(res.status);
+        expect(res.headers.get("location")).toContain("/checkout?next=%2Fdashboard");
+    });
 });
 
 describe("middleware /checkout gate", () => {
@@ -81,5 +91,12 @@ describe("middleware /checkout gate", () => {
         const res = await callMiddleware(req);
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/dashboard");
+    });
+
+    it("treats a token missing paid as unpaid (allows /checkout)", async () => {
+        const token = await mintAuthToken({ sub: "u1", phone: "9876543210" });
+        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const res = await callMiddleware(req);
+        expect(res.status).toBe(200);
     });
 });

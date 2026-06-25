@@ -69,10 +69,7 @@ export async function middleware(req: NextRequest) {
                 req.nextUrl.searchParams.get("next"),
                 session.payload.paid ? "/dashboard" : "/checkout",
             );
-            const url = req.nextUrl.clone();
-            url.pathname = target;
-            url.search = "";
-            return NextResponse.redirect(url);
+            return redirectTo(req, target, {});
         }
         if (session.expired) {
             const res = NextResponse.next();
