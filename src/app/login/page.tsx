@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Phone, ShieldCheck, KeyRound, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ export default function LoginPage() {
 }
 
 function LoginClient() {
-    const router = useRouter();
     const params = useSearchParams();
     const next = params.get("next") || "/dashboard";
     const { toast } = useToast();
