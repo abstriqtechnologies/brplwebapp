@@ -6,6 +6,32 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added — Checkout gate (Phase 4)
+
+- `/login` is now strictly phone + OTP. After verification, users are routed to `/checkout` (new users and unpaid returning users) or `/dashboard` (paid users), as computed server-side by `/api/auth/verify-otp`.
+- New `/checkout` route with server-side guard (pending cookie or auth+unpaid), profile form (for new users), coupon-code entry, Razorpay payment, and 60-second polling to auto-resume after a closed-tab payment.
+- New `/api/payment/redeem-coupon` endpoint with two modes: `?dryRun=1` validates without consuming; default mode consumes the coupon, creates a Payment row with `source: "coupon"`, marks the user paid, and re-issues the auth cookie.
+- JWT payloads now carry `paid: boolean` (mirror of `User.paymentStatus`). Middleware reads this at the edge for the `/dashboard` payment gate.
+- New `CouponRepo` interface and implementations (`MongooseCouponRepo`, `InMemoryCouponRepo`) plus a pure `validateCoupon` / `redeemCoupon` domain service.
+
+### Changed
+
+- The payment gate is enforced at three layers: middleware (edge, via `paid` JWT claim), `/dashboard` server component (DB re-check), and `User.paymentStatus` (data). Without payment, nobody reaches `/dashboard`.
+- `/payment` 308-redirects to `/checkout` (preserved for 30+ days for external links).
+- `/api/payment/verify` now re-issues the auth cookie with `paid:true` and returns `redirect: "/dashboard"` (no more `/login` loop after paying).
+- `/login` refactored from 703 to 386 lines: drops the inline "register" step that embedded payment, follows server-provided `redirect` via hard navigation.
+
+### Tests
+
+- 9 new tests in `tests/lib/auth.crypto.paid.test.ts`
+- 10 new tests in `tests/lib/domain/coupon.test.ts`
+- 1 new test in `tests/lib/domain/payment.test.ts`
+- 4 new tests in `tests/lib/infra/coupon-repo.test.ts`
+- 9 new tests in `tests/api/checkout.gate.test.ts`
+- 3 new tests in `tests/api/redeem-coupon.test.ts`
+
+**Cumulative: 262 tests across 31 files (was 224 across 24 files).**
+
 ### Added — Enterprise Refactor · Phase 3 (Architecture & Testability)
 
 #### New modules (`src/lib/api/` and `src/hooks/`)
