@@ -23,14 +23,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Tests
 
-- 9 new tests in `tests/lib/auth.crypto.paid.test.ts`
-- 10 new tests in `tests/lib/domain/coupon.test.ts`
+- 3 new tests in `tests/lib/auth.crypto.paid.test.ts`
+- 10 new tests in `tests/lib/domain/coupon.test.ts` (all 5 failure reasons covered)
 - 1 new test in `tests/lib/domain/payment.test.ts`
 - 4 new tests in `tests/lib/infra/coupon-repo.test.ts`
-- 9 new tests in `tests/api/checkout.gate.test.ts`
-- 3 new tests in `tests/api/redeem-coupon.test.ts`
+- 9 new tests in `tests/api/checkout.gate.test.ts` (including legacy-token regression cases)
+- 5 new tests in `tests/api/redeem-coupon.test.ts` (including new-user consume path)
 
-**Cumulative: 262 tests across 31 files (was 224 across 24 files).**
+**Cumulative: 264 tests across 31 files (was 224 across 24 files).**
 
 ### Added — Enterprise Refactor · Phase 3 (Architecture & Testability)
 
