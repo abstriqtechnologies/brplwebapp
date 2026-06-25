@@ -1,0 +1,157 @@
+/**
+ * POST /api/payment/redeem-coupon
+ *
+ * Two modes:
+ *   - ?dryRun=1 (default for the "Apply" button): validates without
+ *     consuming. Returns { valid, discount, finalAmount, reason? }.
+ *   - default (no dryRun): consumes the coupon and creates a Payment
+ *     record with source="coupon", then marks the user as paid and
+ *     re-issues the auth cookie with paid:true.
+ *
+ * Auth: requires either a pending cookie (new user) or an auth cookie
+ * with paid:false (returning unpaid user).
+ */
+
+import { z } from "zod";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyPending, verifyAuth } from "@/lib/auth/crypto";
+import { cookies } from "next/headers";
+import { COOKIE_NAMES, setAuthCookie, clearPendingCookie } from "@/lib/auth/cookies";
+import { signAuth } from "@/lib/auth/crypto";
+import {
+    validateCoupon,
+    redeemCoupon as redeemCouponService,
+} from "@/lib/domain/coupon/service";
+import {
+    MongooseUserRepo,
+    MongoosePaymentRepo,
+    MongooseCouponRepo,
+} from "@/lib/infra/db/mongoose-repos";
+import { connectDB } from "@/lib/mongodb";
+import { logger } from "@/lib/logger";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const schema = z.object({
+    code: z.string().min(1).max(64),
+    orderAmountRupees: z.number().int().min(0).max(100_000),
+});
+
+async function readSession(): Promise<
+    | { kind: "pending"; phone: string }
+    | { kind: "auth"; userId: string; phone: string; paid: false }
+> {
+    const c = await cookies();
+    const authToken = c.get(COOKIE_NAMES.AUTH)?.value;
+    const pendingToken = c.get(COOKIE_NAMES.PENDING)?.value;
+
+    if (authToken) {
+        const payload = await verifyAuth(authToken);
+        if (payload && payload.paid === false && payload.sub && payload.phone) {
+            return {
+                kind: "auth",
+                userId: payload.sub,
+                phone: payload.phone,
+                paid: false as const,
+            };
+        }
+    }
+    if (pendingToken) {
+        const payload = await verifyPending(pendingToken);
+        if (payload?.phone) return { kind: "pending", phone: payload.phone };
+    }
+    throw new Error("Authentication required");
+}
+
+export async function POST(req: NextRequest) {
+    const dryRun = new URL(req.url).searchParams.get("dryRun") === "1";
+    const body = await req.json().catch(() => ({}));
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+        return NextResponse.json(
+            { error: "Invalid input", issues: parsed.error.issues },
+            { status: 400 },
+        );
+    }
+    const { code, orderAmountRupees } = parsed.data;
+
+    let session;
+    try {
+        session = await readSession();
+    } catch {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    const couponRepo = new MongooseCouponRepo();
+
+    if (dryRun) {
+        const result = await validateCoupon({
+            code,
+            orderAmountRupees,
+            couponRepo,
+        });
+        return NextResponse.json(result);
+    }
+
+    // Consume mode.
+    if (session.kind === "pending") {
+        return NextResponse.json(
+            { error: "Complete profile before redeeming coupon" },
+            { status: 400 },
+        );
+    }
+    await connectDB();
+    const result = await redeemCouponService({
+        code,
+        userId: session.userId,
+        orderAmountRupees,
+        couponRepo,
+    });
+
+    // Record a Payment row with source="coupon" so the existing admin
+    // dashboards and analytics keep working.
+    const paymentRepo = new MongoosePaymentRepo();
+    const orderId = `coupon_${Date.now()}_${result.couponId.slice(-6)}`;
+    await paymentRepo.create({
+        userId: session.userId,
+        paymentId: orderId,
+        orderId,
+        amount: 0, // free via coupon
+        currency: "INR",
+        status: "completed",
+        source: "coupon",
+    });
+
+    // Mark user paid + re-issue auth cookie with paid:true.
+    const userRepo = new MongooseUserRepo();
+    const updated = await userRepo.update(session.userId, {
+        paymentStatus: "completed",
+        paymentId: orderId,
+        orderId,
+        amount: 0,
+    });
+    if (!updated) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const token = await signAuth({
+        sub: session.userId,
+        phone: session.phone,
+        paid: true,
+    });
+    await setAuthCookie(token);
+    await clearPendingCookie();
+
+    logger.info("coupon.redeemed", {
+        userId: session.userId,
+        code: result.code,
+        discount: result.discount,
+    });
+
+    return NextResponse.json({
+        success: true,
+        discount: result.discount,
+        finalAmount: result.finalAmount,
+        redirect: "/dashboard",
+    });
+}
