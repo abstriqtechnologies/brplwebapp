@@ -88,7 +88,9 @@ export type VerifyOtpDeps = {
     now?: () => number;
 };
 
-export type VerifyOtpResult = { kind: "existing"; user: IUser } | { kind: "new"; phone: string };
+export type VerifyOtpResult =
+    | { kind: "existing"; user: IUser; paid: boolean }
+    | { kind: "new"; phone: string };
 
 export async function verifyOtp(deps: VerifyOtpDeps): Promise<VerifyOtpResult> {
     const phone = normalizePhone(deps.phone);
@@ -107,7 +109,11 @@ export async function verifyOtp(deps: VerifyOtpDeps): Promise<VerifyOtpResult> {
 
     const existing = await deps.userRepo.findByPhone(phone);
     if (existing) {
-        return { kind: "existing", user: existing };
+        return {
+            kind: "existing",
+            user: existing,
+            paid: existing.paymentStatus === "completed",
+        };
     }
     return { kind: "new", phone };
 }

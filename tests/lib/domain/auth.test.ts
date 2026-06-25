@@ -213,6 +213,65 @@ describe("domain/auth service", () => {
         });
     });
 
+    describe("verifyOtp returns paid status", () => {
+        it("returns paid:true when existing user has paymentStatus=completed", async () => {
+            const { auth } = await load();
+            const userRepo = {
+                findByPhone: vi.fn().mockResolvedValue({
+                    _id: "u1",
+                    phone: "9876543210",
+                    paymentStatus: "completed",
+                }),
+            };
+            const otpRepo = {
+                findLatest: vi.fn().mockResolvedValue({
+                    phone: "9876543210",
+                    otp: "123456",
+                    verified: false,
+                    expiresAt: new Date(Date.now() + 60_000),
+                }),
+            };
+            const result = await auth.verifyOtp({
+                phone: "9876543210",
+                code: "123456",
+                userRepo: userRepo as any,
+                otpRepo: otpRepo as any,
+            });
+            expect(result.kind).toBe("existing");
+            if (result.kind === "existing") {
+                expect(result.paid).toBe(true);
+            }
+        });
+
+        it("returns paid:false when existing user has paymentStatus=pending", async () => {
+            const { auth } = await load();
+            const userRepo = {
+                findByPhone: vi.fn().mockResolvedValue({
+                    _id: "u1",
+                    phone: "9876543210",
+                    paymentStatus: "pending",
+                }),
+            };
+            const otpRepo = {
+                findLatest: vi.fn().mockResolvedValue({
+                    phone: "9876543210",
+                    otp: "123456",
+                    verified: false,
+                    expiresAt: new Date(Date.now() + 60_000),
+                }),
+            };
+            const result = await auth.verifyOtp({
+                phone: "9876543210",
+                code: "123456",
+                userRepo: userRepo as any,
+                otpRepo: otpRepo as any,
+            });
+            if (result.kind === "existing") {
+                expect(result.paid).toBe(false);
+            }
+        });
+    });
+
     describe("registerUser", () => {
         it("creates a user and returns it", async () => {
             const { userRepo, auth } = await load();

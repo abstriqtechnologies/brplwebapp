@@ -45,7 +45,7 @@ export const POST = withRequest(
         });
 
         if (result.kind === "existing") {
-            const paid = result.user.paymentStatus === "completed";
+            const paid = result.paid;
             const token = await signAuth({
                 sub: result.user._id.toString(),
                 phone: result.user.phone,
@@ -55,6 +55,7 @@ export const POST = withRequest(
             return ok({
                 success: true,
                 exists: true,
+                paid,
                 user: {
                     id: result.user._id.toString(),
                     phone: result.user.phone,
@@ -62,7 +63,7 @@ export const POST = withRequest(
                     role: result.user.role,
                     paymentStatus: result.user.paymentStatus,
                 },
-                redirect: "/dashboard",
+                redirect: paid ? "/dashboard" : "/checkout?next=/dashboard",
             });
         }
 
@@ -75,7 +76,8 @@ export const POST = withRequest(
         return ok({
             success: true,
             exists: false,
-            redirect: "/payment",
+            paid: false,
+            redirect: "/checkout?next=/dashboard",
         });
     }),
 );
