@@ -96,19 +96,38 @@ describe("domain/payment service", () => {
             expect(persisted?.userId.toString()).toBe(user!._id.toString());
         });
 
-        it("rejects when no user exists for the phone", async () => {
+        it("auto-creates a minimal user when none exists for the phone", async () => {
+            // Login via OTP issues a `pending` cookie but does NOT create a
+            // User record. The payment flow is the first place we know the
+            // visitor is a real person about to pay, so we create a
+            // `paymentStatus=pending` user here. The /auth/register step
+            // that runs after the Razorpay webhook enriches the record with
+            // name/email/role/city.
             const { userRepo, paymentRepo, payment } = await load();
-            await expect(
-                payment.createOrder({
-                    phone: "9876543210",
-                    amountPaise: 149900,
-                    currency: "INR",
-                    razorpay: { orders: { create: vi.fn() } },
-                    userRepo,
-                    paymentRepo,
-                    keyId: "x",
-                }),
-            ).rejects.toMatchObject({ code: "NOT_FOUND", status: 404 });
+            const razorpay = {
+                orders: {
+                    create: vi.fn().mockResolvedValue({
+                        id: "order_xyz",
+                        amount: 149900,
+                        currency: "INR",
+                    }),
+                },
+            };
+
+            const result = await payment.createOrder({
+                phone: "9876543210",
+                amountPaise: 1499 * 100,
+                currency: "INR",
+                razorpay,
+                userRepo,
+                paymentRepo,
+                keyId: "rzp_test_x",
+            });
+
+            expect(result.orderId).toBe("order_xyz");
+            const created = await userRepo.findByPhone("9876543210");
+            expect(created).not.toBeNull();
+            expect(created?.paymentStatus).toBe("pending");
         });
 
         it("rejects when the user is already paid", async () => {
@@ -380,6 +399,42 @@ describe("domain/payment service", () => {
                 paymentRepo: ctx.paymentRepo,
             });
             expect(result.handled).toBe(true);
+        });
+    });
+
+    describe("verifyPayment re-issues user for unpaid returning user", () => {
+        it("returns updated user and payment", async () => {
+            const { userRepo, paymentRepo, payment } = await load();
+            const u = await userRepo.create({
+                phone: "9876543210",
+                paymentStatus: "pending",
+            });
+            await paymentRepo.create({
+                userId: String(u._id),
+                paymentId: "pay_1",
+                orderId: "order_1",
+                amount: 149900,
+                currency: "INR",
+                status: "created",
+                source: "razorpay",
+            });
+            const crypto = require("crypto");
+            const sig = crypto
+                .createHmac("sha256", "test-secret-for-hmac")
+                .update("order_1|pay_1")
+                .digest("hex");
+
+            const result = await payment.verifyPayment({
+                paymentId: "pay_1",
+                orderId: "order_1",
+                signature: sig,
+                secret: "test-secret-for-hmac",
+                userRepo,
+                paymentRepo,
+            });
+            const reloaded = await userRepo.findByPhone("9876543210");
+            expect(reloaded?.paymentStatus).toBe("completed");
+            expect(result.user.paymentStatus).toBe("completed");
         });
     });
 });

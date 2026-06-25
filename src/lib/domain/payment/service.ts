@@ -15,6 +15,7 @@ import crypto from "crypto";
 import { ConflictError, NotFoundError, UnauthorizedError } from "@/lib/api/errors";
 import { logger } from "@/lib/logger";
 import type { UserRepo, PaymentRepo } from "@/lib/infra/db/repos";
+import type { IUser } from "@/models/User";
 
 export type RazorpayLike = {
     orders: {
@@ -106,6 +107,7 @@ export type VerifyPaymentDeps = {
 
 export type VerifyPaymentResult = {
     payment: Awaited<ReturnType<PaymentRepo["findByPaymentId"]>>;
+    user: IUser;
 };
 
 function constantTimeEqual(a: string, b: string): boolean {
@@ -144,13 +146,14 @@ export async function verifyPayment(deps: VerifyPaymentDeps): Promise<VerifyPaym
     }
 
     const updated = await deps.paymentRepo.updateStatus(deps.paymentId, "completed");
-    await deps.userRepo.update(String(payment.userId), {
+    const user = await deps.userRepo.update(String(payment.userId), {
         paymentStatus: "completed",
         paymentId: deps.paymentId,
         orderId: deps.orderId,
     });
+    if (!user) throw new NotFoundError("User for payment not found");
 
-    return { payment: updated };
+    return { payment: updated, user };
 }
 
 // ---------- handleWebhook (server-to-server, source of truth) ----------
