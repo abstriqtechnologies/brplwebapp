@@ -83,6 +83,26 @@ describe("domain/coupon validateCoupon", () => {
         expect(result.reason).toBe("exhausted");
     });
 
+    it("rejects when order amount is below minOrderAmount with reason 'min_order'", async () => {
+        const { repo, coupon } = await load();
+        await repo.create({
+            code: "BIGONLY",
+            type: "flat",
+            amount: 100,
+            usageLimit: 10,
+            usedCount: 0,
+            active: true,
+            minOrderAmount: 2000,
+        });
+        const result = await coupon.validateCoupon({
+            code: "BIGONLY",
+            orderAmountRupees: 1499, // below minOrderAmount: 2000
+            couponRepo: repo,
+        });
+        expect(result.valid).toBe(false);
+        expect(result.reason).toBe("min_order");
+    });
+
     it("accepts a flat-amount coupon and computes discount + finalAmount", async () => {
         const { repo, coupon } = await load();
         await repo.create({
