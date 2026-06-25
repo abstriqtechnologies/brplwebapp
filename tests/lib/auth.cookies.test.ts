@@ -5,7 +5,20 @@ import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
  * the three auth cookies.
  *
  * We mock `next/headers` so we don't need a real Next request context.
+ * The mock also provides a `headers()` shim that returns a configurable
+ * protocol header so we can test the protocol-based `Secure` flag logic.
  */
+
+type HeaderMap = Record<string, string | undefined>;
+
+function makeHeaders(headers: HeaderMap = {}) {
+    return {
+        get: (name: string) => {
+            const v = headers[name.toLowerCase()];
+            return v ?? null;
+        },
+    };
+}
 
 function makeCookieStore(initial: Record<string, string> = {}) {
     const jar = new Map(Object.entries(initial));
@@ -32,13 +45,17 @@ describe("auth/cookies", () => {
         process.env.MONGODB_URI = "mongodb://localhost:27017/test";
     });
 
-    async function load(store: ReturnType<typeof makeCookieStore>) {
+    async function load(store: ReturnType<typeof makeCookieStore>, headerMap: HeaderMap = {}) {
         // "server-only" is a marker package shipped inside `next`. The vitest
         // resolver doesn't know about that internal path, so we alias it to
         // a no-op module here.
         vi.doMock("server-only", () => ({}));
         const cookiesMock = vi.fn(async () => store);
-        vi.doMock("next/headers", () => ({ cookies: cookiesMock }));
+        const headersMock = vi.fn(async () => makeHeaders(headerMap));
+        vi.doMock("next/headers", () => ({
+            cookies: cookiesMock,
+            headers: headersMock,
+        }));
         return await import("@/lib/auth/cookies");
     }
 
@@ -126,25 +143,36 @@ describe("auth/cookies", () => {
         expect(store._jar.has("brpl_auth")).toBe(true);
     });
 
-    it("setAuthCookieOptions returns the standard cookie attributes (httpOnly, path, sameSite=lax)", async () => {
+    it("authCookieOptions returns the standard cookie attributes (httpOnly, path, sameSite=lax, secure based on protocol)", async () => {
         const store = makeCookieStore();
+        // No x-forwarded-proto header → not HTTPS → secure=false
         const cookies = await load(store);
-        // We can't easily inspect the options object passed to Next's
-        // cookies().set, but we can verify the helper exists and produces a
-        // valid value when fed through it.
-        const opts = cookies.authCookieOptions(60);
+        const opts = await cookies.authCookieOptions(60);
         expect(opts.httpOnly).toBe(true);
         expect(opts.path).toBe("/");
         expect(opts.sameSite).toBe("lax");
         expect(opts.maxAge).toBe(60);
-        expect(opts.secure).toBe(false); // NODE_ENV=test
+        expect(opts.secure).toBe(false);
     });
 
-    it("authCookieOptions sets secure=true in production", async () => {
-        process.env.NODE_ENV = "production";
+    it("authCookieOptions sets secure=true when x-forwarded-proto is https", async () => {
         const store = makeCookieStore();
-        const cookies = await load(store);
-        const opts = cookies.authCookieOptions(60);
+        const cookies = await load(store, { "x-forwarded-proto": "https" });
+        const opts = await cookies.authCookieOptions(60);
+        expect(opts.secure).toBe(true);
+    });
+
+    it("authCookieOptions sets secure=true when x-forwarded-ssl is on", async () => {
+        const store = makeCookieStore();
+        const cookies = await load(store, { "x-forwarded-ssl": "on" });
+        const opts = await cookies.authCookieOptions(60);
+        expect(opts.secure).toBe(true);
+    });
+
+    it("authCookieOptions handles a comma-separated x-forwarded-proto (first value wins)", async () => {
+        const store = makeCookieStore();
+        const cookies = await load(store, { "x-forwarded-proto": "https, http" });
+        const opts = await cookies.authCookieOptions(60);
         expect(opts.secure).toBe(true);
     });
 });

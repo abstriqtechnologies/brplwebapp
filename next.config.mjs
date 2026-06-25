@@ -27,12 +27,16 @@ const nextConfig = {
         key: "Content-Security-Policy",
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
-          "style-src 'self' 'unsafe-inline'",
+          // Razorpay scripts: checkout.js itself + the risk-detection bundle
+          // it loads from cdn.razorpay.com. Keep these in sync with the
+          // canonical source in src/lib/security-headers.ts.
+          "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
+          "style-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
           "img-src 'self' data: blob: https:",
           "font-src 'self' data:",
           "frame-src https://checkout.razorpay.com https://api.razorpay.com",
-          "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com",
+          // Razorpay APIs (incl. analytics/telemetry endpoints).
+          "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://lumberjack-metrics.razorpay.com",
           "media-src 'self'",
           "object-src 'none'",
           "base-uri 'self'",
@@ -40,9 +44,7 @@ const nextConfig = {
           "frame-ancestors 'self'",
         ].join("; "),
       },
-      ...(isProd
-        ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]
-        : []),
+      ...(isProd ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }] : []),
     ];
 
     return [

@@ -59,14 +59,18 @@ export function defaultSecurityHeaders(): Header[] {
 function buildCsp(): string {
     const directives = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
-        "style-src 'self' 'unsafe-inline'",
+        // Razorpay scripts: checkout.js itself + the risk-detection bundle
+        // it loads from cdn.razorpay.com. Without cdn.razorpay.com in
+        // script-src, the risk bundle is blocked and the checkout fails.
+        "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
+        // cdn.razorpay.com also serves inline styles for the checkout.
+        "style-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data:",
         // Razorpay's checkout iframe.
         "frame-src https://checkout.razorpay.com https://api.razorpay.com",
-        // Razorpay APIs.
-        "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com",
+        // Razorpay APIs (incl. analytics/telemetry endpoints).
+        "connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://lumberjack-metrics.razorpay.com",
         "media-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",

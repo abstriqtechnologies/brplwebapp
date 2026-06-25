@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { env } from "@/lib/env";
 
 // dev-insecure fallback is also in `env` when JWT_SECRET is missing in dev.
@@ -7,6 +7,28 @@ const JWT_SECRET = env.JWT_SECRET;
 const SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
 const ALG = "HS256";
+
+/**
+ * Detect HTTPS from request headers (x-forwarded-proto / x-forwarded-ssl).
+ * The canonical copy of this helper lives in `src/lib/auth/cookies.ts` —
+ * this is duplicated because `jwt.ts` is imported by the admin side of the
+ * app, and a few callers still pull their cookie helpers from here. Both
+ * copies must be kept in sync; consolidate them when the admin side moves
+ * to `@/lib/auth/cookies`.
+ *
+ * Outside a request context (e.g. background jobs) we default to secure=true.
+ */
+async function isHttpsRequest(): Promise<boolean> {
+    try {
+        const h = await headers();
+        const proto = h.get("x-forwarded-proto")?.toLowerCase().split(",")[0].trim();
+        if (proto === "https") return true;
+        if (h.get("x-forwarded-ssl") === "on") return true;
+        return false;
+    } catch {
+        return true;
+    }
+}
 
 export type SessionPayload = {
     sub: string; // userId (mongo _id as string) or "pending:<phone>"
@@ -39,31 +61,38 @@ export async function verifyJwt<T = SessionPayload>(token: string): Promise<T | 
 }
 
 // Cookie helpers
+//
+// NOTE: this file is a parallel implementation of the helpers in
+// `src/lib/auth/cookies.ts`, kept for backwards compatibility with admin
+// routes that import from here. The canonical source is `auth/cookies.ts`.
+// Both must use the same protocol-based `Secure` logic; see
+// `isHttpsRequest` above and its twin in `auth/cookies.ts`.
+
 export const COOKIE_NAMES = {
     AUTH: "brpl_auth",
     PENDING: "brpl_pending",
     ADMIN: "brpl_admin",
 } as const;
 
-export const COOKIE_OPTIONS = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-};
-
-export function authCookieOptions(maxAgeSec: number) {
-    return { ...COOKIE_OPTIONS, maxAge: maxAgeSec };
+/** Build a cookie-options object with the given TTL (seconds). */
+export async function authCookieOptions(maxAgeSec: number) {
+    return {
+        httpOnly: true,
+        secure: await isHttpsRequest(),
+        sameSite: "lax" as const,
+        path: "/",
+        maxAge: maxAgeSec,
+    };
 }
 
 export async function setAuthCookie(token: string) {
     const c = await cookies();
-    c.set(COOKIE_NAMES.AUTH, token, authCookieOptions(7 * 24 * 60 * 60));
+    c.set(COOKIE_NAMES.AUTH, token, await authCookieOptions(7 * 24 * 60 * 60));
 }
 
 export async function setPendingCookie(token: string) {
     const c = await cookies();
-    c.set(COOKIE_NAMES.PENDING, token, authCookieOptions(30 * 60)); // 30 min
+    c.set(COOKIE_NAMES.PENDING, token, await authCookieOptions(30 * 60)); // 30 min
 }
 
 export async function clearAuthCookies() {
@@ -92,7 +121,7 @@ export async function getPendingCookie(): Promise<string | undefined> {
 // Admin cookie helpers
 export async function setAdminCookie(token: string) {
     const c = await cookies();
-    c.set(COOKIE_NAMES.ADMIN, token, authCookieOptions(7 * 24 * 60 * 60));
+    c.set(COOKIE_NAMES.ADMIN, token, await authCookieOptions(7 * 24 * 60 * 60));
 }
 
 export async function getAdminCookie(): Promise<string | undefined> {
