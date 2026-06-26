@@ -10,9 +10,15 @@
  *   - proceed (valid)
  *   - clear the cookie + redirect (expired or user_missing)
  *   - ignore the cookie (invalid_token — treat as anonymous)
+ *
+ * On DB lookup failure, the helper degrades to `invalid_token` rather than
+ * throwing or clearing the cookie. This prevents a transient DB outage from
+ * clearing valid cookies and forcing re-login. The trade-off is silent
+ * degradation, which is logged at WARN level.
  */
 
 import "server-only";
+import { logger } from "@/lib/logger";
 import { verifyAuth, type AuthTokenPayload } from "@/lib/auth/crypto";
 
 export type AuthAndUserResult =
@@ -51,7 +57,8 @@ export async function verifyAuthAndUser(token: string | undefined, lookup: UserL
     let user;
     try {
         user = await lookup(payload.sub);
-    } catch {
+    } catch (err) {
+        logger.warn("auth.session_guard: user lookup threw", { err, sub: payload.sub });
         // DB error — don't clear a potentially-valid cookie on a transient blip.
         return { kind: "invalid_token", reason: "invalid_token" };
     }
