@@ -20,9 +20,16 @@ export function loadRazorpayScript(): Promise<boolean> {
     scriptPromise = new Promise<boolean>((resolve) => {
         const existing = document.querySelector(`script[src="${RAZORPAY_SCRIPT}"]`);
         if (existing) {
-            existing.addEventListener("load", () => resolve(true));
-            existing.addEventListener("error", () => resolve(false));
-            return;
+            // If the tag is in the DOM, its load/error event has already
+            // fired by the time we get here — `addEventListener` won't
+            // catch a past event, so we'd hang forever. Resolve based on
+            // current state instead: window.Razorpay set → success;
+            // otherwise remove the stale tag and try again.
+            if (window.Razorpay) {
+                resolve(true);
+                return;
+            }
+            existing.remove();
         }
         const script = document.createElement("script");
         script.src = RAZORPAY_SCRIPT;

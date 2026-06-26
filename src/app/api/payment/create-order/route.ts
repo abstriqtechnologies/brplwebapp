@@ -22,6 +22,15 @@ export const dynamic = "force-dynamic";
 
 export const POST = withRequest(
     withCheckoutSession(async ({ session }) => {
+        const keyId = env.NEXT_PUBLIC_RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID;
+        if (!keyId) {
+            // Fail loud: previously we silently returned `key: ""` and the
+            // client passed it to Razorpay, which threw "No key passed" —
+            // a confusing client-side error for a server misconfiguration.
+            // Throwing here surfaces the missing config as a 500 instead.
+            throw new Error("Razorpay key not configured on server");
+        }
+
         const result = await createOrderService({
             phone: session.phone,
             amountPaise: REGISTRATION_AMOUNT_PAISE,
@@ -29,7 +38,7 @@ export const POST = withRequest(
             razorpay,
             userRepo: new MongooseUserRepo(),
             paymentRepo: new MongoosePaymentRepo(),
-            keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID || env.RAZORPAY_KEY_ID || "",
+            keyId,
         });
         return ok({
             success: true,
