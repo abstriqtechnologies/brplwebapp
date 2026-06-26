@@ -17,6 +17,12 @@ describe("env module", () => {
         // Start each test from a known baseline.
         for (const k of Object.keys(process.env)) delete (process.env as Record<string, string>)[k];
         Object.assign(process.env, ORIGINAL_ENV);
+        // Explicitly delete env vars that have a booleanish schema — these
+        // have default-false semantics and tests should exercise that path
+        // without being affected by values set in .env.
+        delete process.env.ALLOW_DEFAULT_ADMIN;
+        delete process.env.CMS_LIVE;
+        delete process.env.BRPL_CSRF_REQUIRED;
         // Required defaults for the happy path
         process.env.NODE_ENV = "test";
         process.env.MONGODB_URI = "mongodb://localhost:27017/test";
