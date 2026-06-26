@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Loader2, Tag, CreditCard, User, Mail, MapPin, Trophy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,26 +109,32 @@ export default function CheckoutClient({
             const res = await fetch("/api/payment/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(
-                    coupon.status === "valid"
-                        ? { couponId: coupon.couponId, code: coupon.code }
-                        : {},
-                ),
+                body: JSON.stringify(coupon.status === "valid" ? { couponId: coupon.couponId, code: coupon.code } : {}),
             });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || "Could not start payment");
+            if (!res.ok) throw new Error(data.error || data?.message || "Could not start payment");
+            // Unwrap the standard API envelope. The route returns
+            // `{ ok: true, data: { success, orderId, key, ... } }`; older
+            // or non-enveloped routes may return the payload directly.
+            const payload = data?.data ?? data;
+            if (!payload.key) {
+                // Server returned a 200 but the Razorpay key was missing or
+                // empty. This used to reach the SDK and surface as the
+                // cryptic "No key passed" toast. Fail loud here instead.
+                throw new Error("Payment is not configured on the server. Please contact support.");
+            }
 
-            setOrderId(data.orderId);
+            setOrderId(payload.orderId);
             const loaded = await loadRazorpayScript();
             if (!loaded) throw new Error("Failed to load Razorpay");
 
             const rzp = new window.Razorpay!({
-                key: data.key,
-                amount: data.amount,
-                currency: data.currency,
+                key: payload.key,
+                amount: payload.amount,
+                currency: payload.currency,
                 name: settings?.siteName || "BRPL",
                 description: "Player Registration",
-                order_id: data.orderId,
+                order_id: payload.orderId,
                 prefill: { contact: phone },
                 handler: async (resp: any) => {
                     setPaymentId(resp.razorpay_payment_id);
@@ -287,9 +293,7 @@ export default function CheckoutClient({
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-500/15 border border-amber-500/30 mb-4">
                         <CreditCard className="w-7 h-7 text-amber-500" />
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                        Complete registration
-                    </h1>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Complete registration</h1>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
                         Pay ₹{registrationFeeRupees.toLocaleString("en-IN")} to unlock your BRPL dashboard.
                     </p>
@@ -299,9 +303,7 @@ export default function CheckoutClient({
                     {/* Profile */}
                     {isNewUser && (
                         <section className="space-y-5">
-                            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                                Your details
-                            </h2>
+                            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Your details</h2>
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
@@ -382,11 +384,7 @@ export default function CheckoutClient({
                         >
                             <Tag className="w-4 h-4" />
                             Have a coupon code?
-                            {couponOpen ? (
-                                <ChevronUp className="w-4 h-4" />
-                            ) : (
-                                <ChevronDown className="w-4 h-4" />
-                            )}
+                            {couponOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
                         {couponOpen && (
                             <div id="coupon-panel" className="mt-3 space-y-3">
@@ -413,8 +411,8 @@ export default function CheckoutClient({
                                 </div>
                                 {coupon.status === "valid" && (
                                     <p className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-md px-3 py-2">
-                                        Coupon <b>{coupon.code}</b> applied — ₹{coupon.discount} off.
-                                        New total: ₹{coupon.finalAmount}.
+                                        Coupon <b>{coupon.code}</b> applied — ₹{coupon.discount} off. New total: ₹
+                                        {coupon.finalAmount}.
                                     </p>
                                 )}
                                 {coupon.status === "invalid" && (
@@ -443,11 +441,7 @@ export default function CheckoutClient({
                                 disabled={busy}
                                 className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-black font-bold text-base rounded-full"
                             >
-                                {busy ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    "Complete registration"
-                                )}
+                                {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete registration"}
                             </Button>
                         ) : (
                             <Button
@@ -483,12 +477,14 @@ function Field({
     onChange: (v: string) => void;
     type?: string;
 }) {
+    const id = useId();
     return (
         <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor={id} className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {icon} <span className="ml-1">{label}</span>
             </label>
             <Input
+                id={id}
                 type={type}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
