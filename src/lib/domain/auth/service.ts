@@ -17,6 +17,8 @@ import { BadRequestError, ConflictError, RateLimitError, UnauthorizedError } fro
 import type { IUser } from "@/models/User";
 import type { IOtpRecord } from "@/models/OtpRecord";
 import type { UserRepo, OtpRepo } from "@/lib/infra/db/repos";
+import { logger } from "@/lib/logger";
+import { isDev } from "@/lib/env";
 
 const RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_TTL_MS = 5 * 60 * 1000;
@@ -68,6 +70,13 @@ export async function sendOtp(deps: SendOtpDeps): Promise<SendOtpResult> {
     const expiresAt = new Date(now + OTP_TTL_MS);
     await deps.otpRepo.create({ phone, otp, expiresAt });
 
+    // Dev/test bypass: skip SMS, skip DB OTP record (verifyOtp's dev
+    // bypass doesn't read from the OTP repo).
+    if (isDev()) {
+        logger.info("auth.send_otp.dev_bypass", { phone });
+        return { expiresInSec: OTP_TTL_MS / 1000 };
+    }
+
     const sent = await deps.sendSms(phone, otp, "registration");
     if (!sent) {
         // Don't leak SMS internals — bubble up a generic 502.
@@ -88,15 +97,28 @@ export type VerifyOtpDeps = {
     now?: () => number;
 };
 
-export type VerifyOtpResult =
-    | { kind: "existing"; user: IUser; paid: boolean }
-    | { kind: "new"; phone: string };
+export type VerifyOtpResult = { kind: "existing"; user: IUser; paid: boolean } | { kind: "new"; phone: string };
 
 export async function verifyOtp(deps: VerifyOtpDeps): Promise<VerifyOtpResult> {
     const phone = normalizePhone(deps.phone);
     if (!phone) throw new BadRequestError("Invalid phone number");
     if (!/^\d{6}$/.test(deps.code)) {
         throw new UnauthorizedError("Invalid OTP");
+    }
+
+    // Dev/test bypass: accept the well-known code '123456' regardless of
+    // OTP-repo state. This makes the registration flow end-to-end
+    // testable without SMS infrastructure.
+    if (isDev() && deps.code === "123456") {
+        const existing = await deps.userRepo.findByPhone(phone);
+        if (existing) {
+            return {
+                kind: "existing",
+                user: existing,
+                paid: existing.paymentStatus === "completed",
+            };
+        }
+        return { kind: "new", phone };
     }
 
     const now = (deps.now ?? Date.now)();

@@ -99,6 +99,23 @@ describe("domain/auth service", () => {
                 }),
             ).rejects.toMatchObject({ code: "BAD_REQUEST", status: 400 });
         });
+
+        it("skips SMS send when NODE_ENV is 'development' (dev bypass)", async () => {
+            process.env.NODE_ENV = "development";
+            const { userRepo, otpRepo, auth } = await load();
+            const sendSms = vi.fn().mockResolvedValue(true);
+            const result = await auth.sendOtp({
+                phone: "9876543210",
+                userRepo,
+                otpRepo,
+                generateOtp: () => "123456",
+                sendSms,
+            });
+            expect(result.expiresInSec).toBe(300);
+            expect(sendSms).not.toHaveBeenCalled();
+            // Restore for subsequent tests
+            process.env.NODE_ENV = "test";
+        });
     });
 
     describe("verifyOtp", () => {
@@ -210,6 +227,47 @@ describe("domain/auth service", () => {
                     findLatestOtp: async () => null,
                 }),
             ).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
+        });
+
+        it("accepts code '123456' as a dev bypass when NODE_ENV is 'development'", async () => {
+            process.env.NODE_ENV = "development";
+            const { userRepo, otpRepo, auth } = await load();
+            const result = await auth.verifyOtp({
+                phone: "9876543210",
+                code: "123456",
+                userRepo,
+                otpRepo,
+            });
+            expect(result.kind).toBe("new");
+            if (result.kind === "new") {
+                expect(result.phone).toBe("9876543210");
+            }
+            process.env.NODE_ENV = "test";
+        });
+
+        it("returns kind=existing for dev bypass when a user is already registered", async () => {
+            process.env.NODE_ENV = "development";
+            const { userRepo, otpRepo, auth } = await load();
+            await userRepo.create({
+                phone: "9876543210",
+                name: "Alice",
+                email: "a@x.com",
+                role: "batsman",
+                state: "MH",
+                city: "Mumbai",
+                paymentStatus: "pending",
+            });
+            const result = await auth.verifyOtp({
+                phone: "9876543210",
+                code: "123456",
+                userRepo,
+                otpRepo,
+            });
+            expect(result.kind).toBe("existing");
+            if (result.kind === "existing") {
+                expect(result.paid).toBe(false);
+            }
+            process.env.NODE_ENV = "test";
         });
     });
 
