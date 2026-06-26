@@ -1,8 +1,11 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 
 beforeAll(() => {
     process.env.JWT_SECRET = "test-jwt-secret-must-be-long-enough";
     process.env.NODE_ENV = "test";
+    // session-guard.ts (transitively imported via middleware) uses "server-only"
+    // to gate it to server contexts. Stub it for the test environment.
+    vi.doMock("server-only", () => ({}));
 });
 
 async function mintAuthToken(payload: { sub: string; phone: string; paid?: boolean }) {
