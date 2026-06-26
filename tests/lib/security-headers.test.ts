@@ -73,6 +73,41 @@ describe("security headers", () => {
             // SMSIndiaHub not loaded on the client.
             expect(csp).not.toContain("smsindiahub");
         });
+
+        it("allows 'unsafe-eval' in script-src in development (React Refresh)", async () => {
+            // Next.js's React Refresh runtime uses eval() to enable HMR.
+            // Without 'unsafe-eval' in script-src, `next dev` throws EvalError
+            // on every page load.
+            const origEnv = process.env.NODE_ENV;
+            process.env.NODE_ENV = "development";
+            vi.resetModules();
+            try {
+                const { defaultSecurityHeaders } = await load();
+                const byKey = Object.fromEntries(defaultSecurityHeaders().map((h) => [h.key, h.value]));
+                const csp = byKey["Content-Security-Policy"];
+                expect(csp).toMatch(/script-src[^;]*'unsafe-eval'/);
+            } finally {
+                process.env.NODE_ENV = origEnv;
+                vi.resetModules();
+            }
+        });
+
+        it("does NOT include 'unsafe-eval' in production script-src", async () => {
+            // Production builds don't ship the React Refresh runtime, so we
+            // keep the strict CSP.
+            const origEnv = process.env.NODE_ENV;
+            process.env.NODE_ENV = "production";
+            vi.resetModules();
+            try {
+                const { defaultSecurityHeaders } = await load();
+                const byKey = Object.fromEntries(defaultSecurityHeaders().map((h) => [h.key, h.value]));
+                const csp = byKey["Content-Security-Policy"];
+                expect(csp).not.toContain("'unsafe-eval'");
+            } finally {
+                process.env.NODE_ENV = origEnv;
+                vi.resetModules();
+            }
+        });
     });
 
     describe("nextHeadersConfig", () => {

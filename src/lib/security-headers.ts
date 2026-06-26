@@ -6,7 +6,7 @@
  * of next.config — `next.config.mjs` re-exports from here.
  */
 
-import { isProduction } from "@/lib/env";
+import { isProduction, isDev } from "@/lib/env";
 
 export type Header = { key: string; value: string };
 export type HeaderRule = {
@@ -47,6 +47,11 @@ export function defaultSecurityHeaders(): Header[] {
  *
  * Strict by default. Allowed exceptions:
  *   - `script-src`: 'unsafe-inline' for Next.js bootstrap + Razorpay inline.
+ *                   'unsafe-eval' is added in development ONLY — Next.js's
+ *                   React Refresh runtime uses `eval()` to enable HMR, and
+ *                   without it `next dev` throws `EvalError` on every page.
+ *                   Production builds don't ship React Refresh, so we keep
+ *                   'unsafe-eval' out of prod to preserve strict CSP.
  *   - `frame-src`:  Razorpay checkout iframe.
  *   - `img-src`:    'self', data: (for inline images), and any https source
  *                   (CMS uploads may live on CDNs).
@@ -57,12 +62,22 @@ export function defaultSecurityHeaders(): Header[] {
  * don't enable `report-only` — we enforce immediately.
  */
 function buildCsp(): string {
+    // Next.js's React Refresh runtime uses eval() to enable HMR. In dev only,
+    // allow it; in prod the runtime is not shipped, so we keep the strict CSP.
+    const scriptSrc = [
+        "'self'",
+        "'unsafe-inline'",
+        "https://checkout.razorpay.com",
+        "https://cdn.razorpay.com",
+        ...(isDev() ? ["'unsafe-eval'"] : []),
+    ];
+
     const directives = [
         "default-src 'self'",
         // Razorpay scripts: checkout.js itself + the risk-detection bundle
         // it loads from cdn.razorpay.com. Without cdn.razorpay.com in
         // script-src, the risk bundle is blocked and the checkout fails.
-        "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
+        `script-src ${scriptSrc.join(" ")}`,
         // cdn.razorpay.com also serves inline styles for the checkout.
         "style-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
         "img-src 'self' data: blob: https:",

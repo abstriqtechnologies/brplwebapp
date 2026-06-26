@@ -30,7 +30,10 @@ const nextConfig = {
           // Razorpay scripts: checkout.js itself + the risk-detection bundle
           // it loads from cdn.razorpay.com. Keep these in sync with the
           // canonical source in src/lib/security-headers.ts.
-          "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
+          // 'unsafe-eval' is dev-only — Next.js's React Refresh runtime uses
+          // eval() to enable HMR; without it `next dev` throws EvalError.
+          // Production builds don't ship the runtime, so prod stays strict.
+          `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com${isProd ? "" : " 'unsafe-eval'"}`,
           "style-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://cdn.razorpay.com",
           "img-src 'self' data: blob: https:",
           "font-src 'self' data:",
@@ -87,6 +90,22 @@ const nextConfig = {
       transform: "lucide-react/dist/esm/icons/{{member}}",
       preventFullImport: true,
     },
+  },
+
+  // Strip inline `//# sourceMappingURL=data:...` source maps from the edge
+  // (middleware) bundle. Next 14.2.35 emits them with `eval-source-map` in
+  // production, and the production edge sandbox runs modules via `vm.Script`
+  // with `codeGeneration.strings` disabled (see `server/web/sandbox/context.js`).
+  // The `eval()` of the bundled source map triggers
+  // `EvalError: Code generation from strings disallowed for this context`,
+  // which makes every request through middleware return HTTP 500.
+  // Forcing `devtool: false` for the edge compilation removes the inline
+  // source map and lets the bundle run in the strict prod sandbox.
+  webpack: (config, { isServer, nextRuntime }) => {
+    if (isServer && nextRuntime === "edge") {
+      config.devtool = false;
+    }
+    return config;
   },
 };
 
