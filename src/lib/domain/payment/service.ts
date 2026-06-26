@@ -139,13 +139,24 @@ function verifyCheckoutHmac({
 }
 
 export async function verifyPayment(deps: VerifyPaymentDeps): Promise<VerifyPaymentResult> {
-    const payment = await deps.paymentRepo.findByPaymentId(deps.paymentId);
+    // At order-creation time we stored the Razorpay *order id* in the
+    // `paymentId` field because no payment id exists yet. The client
+    // posts the real `razorpay_payment_id` from the checkout handler, so
+    // looking up by `paymentId` here would always miss. Look up by
+    // `orderId` (which both sides agree on), then persist the real
+    // payment id alongside the status update.
+    const payment = await deps.paymentRepo.findByOrderId(deps.orderId);
     if (!payment) throw new NotFoundError("Payment record not found");
     if (!verifyCheckoutHmac(deps)) {
         throw new UnauthorizedError("Invalid payment signature");
     }
 
-    const updated = await deps.paymentRepo.updateStatus(deps.paymentId, "completed");
+    // Stamp the real payment id onto the Payment row so subsequent
+    // queries (including the webhook fallback) can find it by paymentId.
+    const updated = await deps.paymentRepo.updateForVerify(deps.orderId, {
+        status: "completed",
+        paymentId: deps.paymentId,
+    });
     const user = await deps.userRepo.update(String(payment.userId), {
         paymentStatus: "completed",
         paymentId: deps.paymentId,

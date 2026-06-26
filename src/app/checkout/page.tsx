@@ -53,9 +53,10 @@ export default async function CheckoutPage({
     } else if (authToken) {
         const session = await getAuthSession();
         if (!session) {
-            // Stale JWT — the cookie is valid but the user is gone. Clear the
-            // cookie before redirecting so the next request doesn't loop.
-            await staleJwtRedirect(await cookies(), "/checkout");
+            // Stale JWT — the cookie is valid but the user is gone. Redirect
+            // to /login; the middleware clears the cookie on the next request.
+            await staleJwtRedirect("/checkout");
+            return null; // unreachable
         }
         if (session.paymentStatus === "completed") redirect(safeNext(searchParams.next, "/dashboard"));
         phone = session.phone;

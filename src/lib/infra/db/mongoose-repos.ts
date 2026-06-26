@@ -124,6 +124,18 @@ export class MongoosePaymentRepo implements PaymentRepo {
         const doc = await Payment.findOneAndUpdate({ paymentId }, { status }, { new: true }).lean();
         return (doc as IPayment | null) ?? null;
     }
+    async updateForVerify(
+        orderId: string,
+        patch: { status: CreatePaymentInput["status"]; paymentId: string },
+    ): Promise<IPayment | null> {
+        await connectDB();
+        const doc = await Payment.findOneAndUpdate(
+            { orderId },
+            { status: patch.status, paymentId: patch.paymentId },
+            { new: true },
+        ).lean();
+        return (doc as IPayment | null) ?? null;
+    }
 }
 
 // ---------- MongooseMediaRepo ----------

@@ -248,7 +248,7 @@ export default function DashboardClient() {
                             <p className="text-sm text-slate-500">Pay the registration fee to confirm your slot.</p>
                         </div>
                         <Button asChild className="bg-amber-500 text-black hover:bg-amber-400">
-                            <Link href="/login">Continue</Link>
+                            <Link href="/checkout?next=/dashboard">Continue</Link>
                         </Button>
                     </div>
                 )}

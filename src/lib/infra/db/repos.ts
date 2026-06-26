@@ -91,6 +91,17 @@ export interface PaymentRepo {
     findByUserId(userId: string): Promise<IPayment[]>;
     create(data: CreatePaymentInput): Promise<IPayment>;
     updateStatus(paymentId: string, status: CreatePaymentInput["status"]): Promise<IPayment | null>;
+    /**
+     * Verify-time update: marks the Payment row as completed AND stamps
+     * the real Razorpay payment id onto it. Looks up by `orderId` because
+     * the row was originally created with the order id in the `paymentId`
+     * field (no payment id exists at order-creation time). Implemented on
+     * both the in-memory and Mongoose repos.
+     */
+    updateForVerify(
+        orderId: string,
+        patch: { status: CreatePaymentInput["status"]; paymentId: string },
+    ): Promise<IPayment | null>;
 }
 
 // ---------- MediaRepo ----------
@@ -299,6 +310,17 @@ export class InMemoryPaymentRepo implements PaymentRepo {
         const p = this.items.find((x) => x.paymentId === paymentId);
         if (!p) return null;
         p.status = status;
+        p.updatedAt = new Date();
+        return p;
+    }
+    async updateForVerify(
+        orderId: string,
+        patch: { status: CreatePaymentInput["status"]; paymentId: string },
+    ): Promise<IPayment | null> {
+        const p = this.items.find((x) => x.orderId === orderId);
+        if (!p) return null;
+        p.status = patch.status;
+        p.paymentId = patch.paymentId;
         p.updatedAt = new Date();
         return p;
     }

@@ -14,27 +14,23 @@ beforeEach(() => {
 });
 
 describe("staleJwtRedirect", () => {
-    it("deletes the brpl_auth cookie and redirects to /login?next=<path>", async () => {
+    it("redirects to /login?next=<path> (does NOT mutate cookies — that is forbidden in Server Components)", async () => {
         const { staleJwtRedirect } = await import("@/lib/auth/stale-jwt");
-        const cookiesApi = { delete: vi.fn() };
         try {
-            await staleJwtRedirect(cookiesApi, "/checkout");
+            await staleJwtRedirect("/checkout");
             expect.fail("Expected redirect to throw");
         } catch (err: any) {
             expect(err.message).toBe("NEXT_REDIRECT:/login?next=/checkout");
-            expect(cookiesApi.delete).toHaveBeenCalledWith("brpl_auth");
         }
     });
 
     it("works for /dashboard path", async () => {
         const { staleJwtRedirect } = await import("@/lib/auth/stale-jwt");
-        const cookiesApi = { delete: vi.fn() };
         try {
-            await staleJwtRedirect(cookiesApi, "/dashboard");
+            await staleJwtRedirect("/dashboard");
             expect.fail("Expected redirect to throw");
         } catch (err: any) {
             expect(err.message).toBe("NEXT_REDIRECT:/login?next=/dashboard");
-            expect(cookiesApi.delete).toHaveBeenCalledWith("brpl_auth");
         }
     });
 });

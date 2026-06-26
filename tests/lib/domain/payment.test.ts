@@ -215,18 +215,68 @@ describe("domain/payment service", () => {
             ).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
         });
 
-        it("rejects when no payment record exists", async () => {
+        it("rejects when no payment record exists for the orderId", async () => {
             const ctx = await setup();
+            // The Payment row is stored with orderId "order_1" — query with
+            // a different orderId to simulate a missing record.
             await expect(
                 ctx.payment.verifyPayment({
                     paymentId: "pay_unknown",
-                    orderId: "order_1",
+                    orderId: "order_missing",
                     signature: "sig",
                     secret: "test-secret-for-hmac",
                     userRepo: ctx.userRepo,
                     paymentRepo: ctx.paymentRepo,
                 }),
             ).rejects.toMatchObject({ code: "NOT_FOUND", status: 404 });
+        });
+
+        // Regression: mirrors the real flow. `createOrder` persists the
+        // Payment row with `paymentId` set to the Razorpay *order id*
+        // (because no payment id exists at order-creation time). After the
+        // user pays, Razorpay's `handler` callback hands the client a
+        // different `razorpay_payment_id`. The client posts that real
+        // payment id to /api/payment/verify. The service must locate the
+        // Payment record by `orderId` (which both sides agree on) rather
+        // than by `paymentId`, then update the row with the real payment
+        // id and persist it on the User.
+        it("accepts the real razorpay payment id when the record was created with orderId as paymentId", async () => {
+            const ctx = await setup();
+            // Match what `createOrder` actually writes in production.
+            await ctx.paymentRepo.updateStatus("pay_1", "created"); // ensure status
+            // Simulate the production seed: paymentId holds the order id,
+            // orderId holds the order id. (Identical strings at this stage.)
+            await ctx.paymentRepo.create({
+                userId: (await ctx.userRepo.findByPhone("9876543210"))!._id.toString(),
+                paymentId: "order_real_1",
+                orderId: "order_real_1",
+                amount: 149900,
+                currency: "INR",
+                status: "created",
+                source: "razorpay",
+            });
+            const realRzpPaymentId = "pay_REAL_777";
+            const sig = makeCheckoutSignature({
+                orderId: "order_real_1",
+                paymentId: realRzpPaymentId,
+                secret: "test-secret-for-hmac",
+            });
+
+            const result = await ctx.payment.verifyPayment({
+                paymentId: realRzpPaymentId,
+                orderId: "order_real_1",
+                signature: sig,
+                secret: "test-secret-for-hmac",
+                userRepo: ctx.userRepo,
+                paymentRepo: ctx.paymentRepo,
+            });
+
+            expect(result.payment?.status).toBe("completed");
+            expect(result.payment?.paymentId).toBe(realRzpPaymentId);
+            const user = await ctx.userRepo.findByPhone("9876543210");
+            expect(user?.paymentStatus).toBe("completed");
+            expect(user?.paymentId).toBe(realRzpPaymentId);
+            expect(user?.orderId).toBe("order_real_1");
         });
     });
 
