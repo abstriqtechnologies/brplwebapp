@@ -28,9 +28,9 @@ async function callMiddleware(req: Request) {
     return middleware(req as any);
 }
 
-function reqWithCookies(pathname: string, cookies: Record<string, string>) {
+async function reqWithCookies(pathname: string, cookies: Record<string, string>) {
     const url = `https://example.test${pathname}`;
-    const { NextRequest } = require("next/server");
+    const { NextRequest } = await import("next/server");
     const headers = new Headers();
     for (const [k, v] of Object.entries(cookies)) headers.append("cookie", `${k}=${v}`);
     return new NextRequest(url, { headers });
@@ -38,7 +38,7 @@ function reqWithCookies(pathname: string, cookies: Record<string, string>) {
 
 describe("middleware /dashboard gate", () => {
     it("redirects unauth user to /login?next=/dashboard", async () => {
-        const req = reqWithCookies("/dashboard", {});
+        const req = await reqWithCookies("/dashboard", {});
         const res = await callMiddleware(req);
         expect(res.status).toBe(307);
         expect(res.headers.get("location")).toContain("/login?next=%2Fdashboard");
@@ -46,7 +46,7 @@ describe("middleware /dashboard gate", () => {
 
     it("allows auth+paid user through", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210", paid: true });
-        const req = reqWithCookies("/dashboard", { brpl_auth: token });
+        const req = await reqWithCookies("/dashboard", { brpl_auth: token });
         const res = await callMiddleware(req);
         // next() returns a passthrough response (status 200)
         expect(res.status).toBe(200);
@@ -54,7 +54,7 @@ describe("middleware /dashboard gate", () => {
 
     it("redirects auth+unpaid user to /checkout", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210", paid: false });
-        const req = reqWithCookies("/dashboard", { brpl_auth: token });
+        const req = await reqWithCookies("/dashboard", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/checkout?next=%2Fdashboard");
@@ -64,7 +64,7 @@ describe("middleware /dashboard gate", () => {
         // Legacy tokens issued before Task 1 don't have the `paid` field.
         // Middleware must treat them as unpaid, not pass them through.
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210" });
-        const req = reqWithCookies("/dashboard", { brpl_auth: token });
+        const req = await reqWithCookies("/dashboard", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/checkout?next=%2Fdashboard");
@@ -73,7 +73,7 @@ describe("middleware /dashboard gate", () => {
 
 describe("middleware /checkout gate", () => {
     it("redirects no-cookie user to /login?next=/checkout", async () => {
-        const req = reqWithCookies("/checkout", {});
+        const req = await reqWithCookies("/checkout", {});
         const res = await callMiddleware(req);
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/login?next=%2Fcheckout");
@@ -81,21 +81,21 @@ describe("middleware /checkout gate", () => {
 
     it("allows pending cookie through", async () => {
         const token = await mintPendingToken("9876543210");
-        const req = reqWithCookies("/checkout", { brpl_pending: token });
+        const req = await reqWithCookies("/checkout", { brpl_pending: token });
         const res = await callMiddleware(req);
         expect(res.status).toBe(200);
     });
 
     it("allows auth+unpaid through", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210", paid: false });
-        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const req = await reqWithCookies("/checkout", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect(res.status).toBe(200);
     });
 
     it("redirects auth+paid straight to /dashboard", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210", paid: true });
-        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const req = await reqWithCookies("/checkout", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect([301, 302, 307, 308]).toContain(res.status);
         expect(res.headers.get("location")).toContain("/dashboard");
@@ -103,7 +103,7 @@ describe("middleware /checkout gate", () => {
 
     it("treats a token missing paid as unpaid (allows /checkout)", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210" });
-        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const req = await reqWithCookies("/checkout", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect(res.status).toBe(200);
     });
@@ -122,7 +122,7 @@ describe("middleware /checkout gate", () => {
         expect(payload).not.toBeNull();
         expect(payload?.sub).toBe("nonexistent-user-id-xyz");
         expect(payload?.paid).toBe(false);
-        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const req = await reqWithCookies("/checkout", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect(res.status).toBe(200);
     });
