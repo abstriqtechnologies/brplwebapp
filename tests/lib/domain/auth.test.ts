@@ -269,6 +269,22 @@ describe("domain/auth service", () => {
             }
             process.env.NODE_ENV = "test";
         });
+
+        it("does NOT bypass for a different code in dev mode", async () => {
+            process.env.NODE_ENV = "development";
+            const { userRepo, otpRepo, auth } = await load();
+            // No OTP record exists — even in dev mode, code "111111" should fall
+            // through to the OTP-repo path and throw.
+            await expect(
+                auth.verifyOtp({
+                    phone: "9876543210",
+                    code: "111111",
+                    userRepo,
+                    otpRepo,
+                }),
+            ).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
+            process.env.NODE_ENV = "test";
+        });
     });
 
     describe("verifyOtp returns paid status", () => {

@@ -53,6 +53,13 @@ export async function sendOtp(deps: SendOtpDeps): Promise<SendOtpResult> {
     if (!phone) {
         throw new BadRequestError("Invalid phone number");
     }
+
+    // Dev/test bypass: skip SMS, skip DB OTP record, skip rate-limit.
+    if (isDev()) {
+        logger.info("auth.send_otp.dev_bypass", { phone });
+        return { expiresInSec: OTP_TTL_MS / 1000 };
+    }
+
     const now = (deps.now ?? Date.now)();
 
     // Rate-limit: don't allow resend within cooldown.
@@ -69,13 +76,6 @@ export async function sendOtp(deps: SendOtpDeps): Promise<SendOtpResult> {
     const otp = deps.generateOtp();
     const expiresAt = new Date(now + OTP_TTL_MS);
     await deps.otpRepo.create({ phone, otp, expiresAt });
-
-    // Dev/test bypass: skip SMS, skip DB OTP record (verifyOtp's dev
-    // bypass doesn't read from the OTP repo).
-    if (isDev()) {
-        logger.info("auth.send_otp.dev_bypass", { phone });
-        return { expiresInSec: OTP_TTL_MS / 1000 };
-    }
 
     const sent = await deps.sendSms(phone, otp, "registration");
     if (!sent) {
