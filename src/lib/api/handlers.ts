@@ -27,6 +27,9 @@ import { type AuthSession, type AdminSession } from "@/lib/auth/session";
 import { type AdminRole } from "@/lib/auth/rbac";
 import { type IUser } from "@/models/User";
 import { type IAdminUser } from "@/models/AdminUser";
+import { UnauthorizedError } from "@/lib/api/errors";
+import { getAuthCookie, getPendingCookie } from "@/lib/auth/cookies";
+import { verifyAuth, verifyPending, type AuthTokenPayload, type PendingTokenPayload } from "@/lib/auth/crypto";
 
 // ---------- Handler context types ----------
 
@@ -42,6 +45,22 @@ export type AdminHandler = (
     ctx: HandlerContext & { admin: IAdminUser; session: AdminSession["session"] },
 ) => Promise<Response> | Response;
 export type PendingHandler = (ctx: HandlerContext & { pending: PendingSession }) => Promise<Response> | Response;
+
+/**
+ * Context for a "checkout" route — accepts either a verified-pending cookie
+ * (new user, OTP-verified, not yet registered) OR an auth cookie for an
+ * unpaid user (returning user who signed in but hasn't paid).
+ *
+ * - `phone` is always present.
+ * - `userId` is set only when an auth session was used (the user already
+ *   exists in the DB). Pending cookies do NOT have a user id.
+ */
+export type CheckoutSession = {
+    phone: string;
+    userId?: string;
+};
+
+export type CheckoutHandler = (ctx: HandlerContext & { session: CheckoutSession }) => Promise<Response> | Response;
 
 // ---------- withRequest ----------
 
@@ -177,5 +196,62 @@ export function withPending<H extends PendingHandler>(handler: H) {
     return async (ctx: HandlerContext): Promise<Response> => {
         const pending = await requirePending();
         return handler({ ...ctx, pending });
+    };
+}
+
+// ---------- withCheckoutSession ----------
+
+/**
+ * Accept either:
+ *   - `brpl_auth` with `paid === false` (returning unpaid user), OR
+ *   - `brpl_pending` (new user, OTP-verified, registration not complete).
+ *
+ * Anything else (no cookie, expired, tampered, auth+paid) → 401.
+ *
+ * The handler receives a unified `session: { phone, userId? }`. `userId` is
+ * only present when the auth cookie matched — pending cookies don't have one.
+ *
+ * Optional `readCookies` parameter for tests — production omits it and the
+ * helper reads cookies from `next/headers`.
+ */
+export function withCheckoutSession<H extends CheckoutHandler>(
+    handler: H,
+    readCookies?: () => Promise<{ auth?: string; pending?: string }>,
+) {
+    return async (ctx: HandlerContext): Promise<Response> => {
+        let authToken: string | undefined;
+        let pendingToken: string | undefined;
+
+        if (readCookies) {
+            const got = await readCookies();
+            authToken = got.auth;
+            pendingToken = got.pending;
+        } else {
+            [authToken, pendingToken] = await Promise.all([getAuthCookie(), getPendingCookie()]);
+        }
+
+        // 1. Prefer auth+unpaid (returning user with DB record).
+        if (authToken) {
+            const payload: AuthTokenPayload | null = await verifyAuth(authToken);
+            if (payload && payload.paid === false && payload.sub && payload.phone) {
+                return handler({
+                    ...ctx,
+                    session: { phone: payload.phone, userId: payload.sub },
+                });
+            }
+        }
+
+        // 2. Fall back to pending (new user, OTP-verified, not registered yet).
+        if (pendingToken) {
+            const payload: PendingTokenPayload | null = await verifyPending(pendingToken);
+            if (payload?.phone) {
+                return handler({
+                    ...ctx,
+                    session: { phone: payload.phone },
+                });
+            }
+        }
+
+        throw new UnauthorizedError("Checkout session required");
     };
 }
