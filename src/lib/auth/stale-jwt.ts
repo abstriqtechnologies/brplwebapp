@@ -10,11 +10,12 @@
 
 import "server-only";
 import { redirect } from "next/navigation";
+import { COOKIE_NAMES } from "./cookies";
 
 export async function staleJwtRedirect(
     cookiesApi: { delete: (name: string) => void },
     pathname: string,
 ): Promise<never> {
-    cookiesApi.delete("brpl_auth");
+    cookiesApi.delete(COOKIE_NAMES.AUTH);
     redirect(`/login?next=${pathname}`);
 }
