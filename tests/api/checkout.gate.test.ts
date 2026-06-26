@@ -18,6 +18,11 @@ async function mintPendingToken(phone: string) {
     return signPending({ sub: `pending:${phone}`, phone });
 }
 
+async function mintAuthTokenForMissingUser(phone: string) {
+    const { signAuth } = await import("@/lib/auth/crypto");
+    return signAuth({ sub: "nonexistent-user-id-xyz", phone, paid: false });
+}
+
 async function callMiddleware(req: Request) {
     const { middleware } = await import("@/middleware");
     return middleware(req as any);
@@ -98,6 +103,25 @@ describe("middleware /checkout gate", () => {
 
     it("treats a token missing paid as unpaid (allows /checkout)", async () => {
         const token = await mintAuthToken({ sub: "u1", phone: "9876543210" });
+        const req = reqWithCookies("/checkout", { brpl_auth: token });
+        const res = await callMiddleware(req);
+        expect(res.status).toBe(200);
+    });
+
+    // Note: per the Task 2 architecture decision, the middleware uses a
+    // synthetic-user lookup stub, so the `user_missing` branch can never
+    // fire from production traffic through middleware. The actual stale-JWT
+    // cleanup happens at the page level — see tests/lib/auth.stale-jwt.test.ts.
+    // This test only exercises the helper to confirm it produces a valid
+    // token that middleware will accept (the page-level redirect then
+    // triggers cleanup when `User.findById` returns null).
+    it("mintAuthTokenForMissingUser produces a structurally valid token that middleware accepts", async () => {
+        const token = await mintAuthTokenForMissingUser("9876543210");
+        const { verifyAuth } = await import("@/lib/auth/crypto");
+        const payload = await verifyAuth(token);
+        expect(payload).not.toBeNull();
+        expect(payload?.sub).toBe("nonexistent-user-id-xyz");
+        expect(payload?.paid).toBe(false);
         const req = reqWithCookies("/checkout", { brpl_auth: token });
         const res = await callMiddleware(req);
         expect(res.status).toBe(200);

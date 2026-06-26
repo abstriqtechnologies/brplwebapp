@@ -4,6 +4,7 @@ import { verifyAuth } from "@/lib/auth/crypto";
 import { cookies } from "next/headers";
 import { COOKIE_NAMES } from "@/lib/auth/cookies";
 import { getAuthSession } from "@/lib/session";
+import { staleJwtRedirect } from "@/lib/auth/stale-jwt";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import CheckoutClient from "./CheckoutClient";
@@ -51,7 +52,11 @@ export default async function CheckoutPage({
         existingUser = await loadUser(phone);
     } else if (authToken) {
         const session = await getAuthSession();
-        if (!session) redirect("/login?next=/checkout");
+        if (!session) {
+            // Stale JWT — the cookie is valid but the user is gone. Clear the
+            // cookie before redirecting so the next request doesn't loop.
+            await staleJwtRedirect(await cookies(), "/checkout");
+        }
         if (session.paymentStatus === "completed") redirect(safeNext(searchParams.next, "/dashboard"));
         phone = session.phone;
         existingUser = {
