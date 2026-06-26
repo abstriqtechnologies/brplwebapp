@@ -36,23 +36,11 @@ function redirectTo(req: NextRequest, pathname: string, search: Record<string, s
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
-    // Edge-runtime safe DB lookup: only the bits we need (id + phone).
-    // We can't import MongooseUserRepo at the edge (it pulls Node-only deps),
-    // so use the existing REST endpoint. If that's down, fall back to
-    // treating the JWT as invalid (which is what we'd do anyway).
-    const lookup: UserLookup = async (id: string) => {
-        // Edge runtime doesn't support direct DB access. We have two options:
-        //   1. Use a server-only endpoint that the middleware can call.
-        //   2. Defer the DB check to the server component for /checkout and /dashboard.
-        // Option 2 is simpler — the page-level `getAuthSession()` already does
-        // the DB lookup. We just need the middleware to clear stale cookies.
-        // For now, treat all structurally valid JWTs as "valid" at the edge;
-        // the page-level check (already in place) catches missing users and
-        // returns null, which the page redirects with cookie cleared.
-        // We return a synthetic user so verifyAuthAndUser reports "valid";
-        // the real DB check happens in the server component.
-        return { _id: id, phone: "" };
-    };
+    // Edge-runtime: no MongoDB access. Treat any structurally valid JWT as
+    // "valid" here; the page-level `getAuthSession()` does the real DB check
+    // and redirects when the user is missing. This is intentional — see
+    // /docs/superpowers/specs/2026-06-26-registration-flow-happy-path-design.md.
+    const lookup: UserLookup = async (id: string) => ({ _id: id, phone: "" });
 
     const authResult = await verifyAuthAndUser(req.cookies.get("brpl_auth")?.value, lookup);
 
@@ -113,11 +101,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: [
-        "/dashboard/:path*",
-        "/login",
-        "/login/:path*",
-        "/checkout",
-        "/checkout/:path*",
-    ],
+    matcher: ["/dashboard/:path*", "/login", "/login/:path*", "/checkout", "/checkout/:path*"],
 };
