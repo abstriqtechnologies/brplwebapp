@@ -63,12 +63,12 @@ export class MongooseUserRepo implements UserRepo {
     }
     async update(id: string, data: UpdateUserInput): Promise<IUser | null> {
         await connectDB();
-        const doc = await User.findByIdAndUpdate(id, data, { new: true }).lean();
+        const doc = await User.findByIdAndUpdate(id, data, { returnDocument: "after" }).lean();
         return (doc as IUser | null) ?? null;
     }
     async updateByPhone(phone: string, data: UpdateUserInput): Promise<IUser | null> {
         await connectDB();
-        const doc = await User.findOneAndUpdate({ phone }, data, { new: true }).lean();
+        const doc = await User.findOneAndUpdate({ phone }, data, { returnDocument: "after" }).lean();
         return (doc as IUser | null) ?? null;
     }
 }
@@ -89,7 +89,7 @@ export class MongooseOtpRepo implements OtpRepo {
     }
     async markVerified(id: string): Promise<IOtpRecord | null> {
         await connectDB();
-        const doc = await OtpRecord.findByIdAndUpdate(id, { verified: true }, { new: true }).lean();
+        const doc = await OtpRecord.findByIdAndUpdate(id, { verified: true }, { returnDocument: "after" }).lean();
         return (doc as IOtpRecord | null) ?? null;
     }
     async cleanupExpired(): Promise<void> {
@@ -121,7 +121,7 @@ export class MongoosePaymentRepo implements PaymentRepo {
     }
     async updateStatus(paymentId: string, status: CreatePaymentInput["status"]): Promise<IPayment | null> {
         await connectDB();
-        const doc = await Payment.findOneAndUpdate({ paymentId }, { status }, { new: true }).lean();
+        const doc = await Payment.findOneAndUpdate({ paymentId }, { status }, { returnDocument: "after" }).lean();
         return (doc as IPayment | null) ?? null;
     }
     async updateForVerify(
@@ -132,7 +132,7 @@ export class MongoosePaymentRepo implements PaymentRepo {
         const doc = await Payment.findOneAndUpdate(
             { orderId },
             { status: patch.status, paymentId: patch.paymentId },
-            { new: true },
+            { returnDocument: "after" },
         ).lean();
         return (doc as IPayment | null) ?? null;
     }
@@ -171,7 +171,7 @@ export class MongooseMediaRepo implements MediaRepo {
     }
     async update(id: string, data: Partial<CreateMediaInput>): Promise<IMedia | null> {
         await connectDB();
-        const doc = await Media.findByIdAndUpdate(id, data, { new: true }).lean();
+        const doc = await Media.findByIdAndUpdate(id, data, { returnDocument: "after" }).lean();
         return (doc as IMedia | null) ?? null;
     }
     async delete(id: string): Promise<boolean> {
@@ -236,7 +236,7 @@ export class MongooseCouponRepo implements CouponRepo {
         const doc = await Coupon.findByIdAndUpdate(
             couponId,
             { $inc: { usedCount: 1 } },
-            { new: true },
+            { returnDocument: "after" },
         ).lean();
         return (doc as ICoupon | null) ?? null;
     }

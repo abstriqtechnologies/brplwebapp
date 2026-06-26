@@ -60,7 +60,7 @@ export async function PATCH(req: Request, { params }: { params: { section: strin
         await connectDB();
         const update: Record<string, unknown> = {};
         update[field] = body;
-        const doc = await AboutCms.findOneAndUpdate({}, { $set: update }, { new: true, upsert: true }).lean();
+        const doc = await AboutCms.findOneAndUpdate({}, { $set: update }, { returnDocument: "after", upsert: true }).lean();
         revalidateSite(TAGS.ABOUT);
         return ok({ section, data: (doc as any)[field] });
     } catch (err) {

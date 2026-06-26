@@ -174,6 +174,12 @@ export default function CheckoutClient({
 
     /* --- Coupon-only path (full coverage) OR post-Razorpay finish --- */
     const finishRegistration = async () => {
+        // Guard against double-trigger: both the polling (webhook-first
+        // path) and the Razorpay handler (verify-first path) can call
+        // finishRegistration. The second call would either hit a 409 on
+        // /api/auth/register (existing.name now set) or re-run the
+        // coupon redeem (which would increment usage a second time).
+        if (busy) return;
         setBusy(true);
         try {
             // For new users, we need profile data + paymentId/orderId.
@@ -229,14 +235,17 @@ export default function CheckoutClient({
                 }
             }
 
-            if (isNewUser && paymentId && orderId) {
+            if (isNewUser) {
+                // paymentId/orderId may be missing here if the webhook arrived
+                // before the Razorpay modal handler ran — the server resolves
+                // them from the User record in that case (see auth/service.ts).
                 const regRes = await fetch("/api/auth/register", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         ...form,
-                        paymentId,
-                        orderId,
+                        ...(paymentId ? { paymentId } : {}),
+                        ...(orderId ? { orderId } : {}),
                     }),
                 });
                 const regData = await regRes.json().catch(() => ({}));

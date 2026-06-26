@@ -20,7 +20,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         if (!parsed.success) return fail("Invalid input", 400);
 
         await connectDB();
-        const lead = await ContactLead.findByIdAndUpdate(params.id, parsed.data, { new: true }).lean();
+        const lead = await ContactLead.findByIdAndUpdate(params.id, parsed.data, { returnDocument: "after" }).lean();
         if (!lead) return notFound();
         return ok({ ...lead, _id: lead._id.toString() });
     } catch (err) {

@@ -62,6 +62,29 @@ export type CheckoutSession = {
 
 export type CheckoutHandler = (ctx: HandlerContext & { session: CheckoutSession }) => Promise<Response> | Response;
 
+/**
+ * Context for /api/auth/register. Accepts:
+ *   - `brpl_pending` (true new user, OTP-verified, never paid)
+ *   - `brpl_auth` with `paid === false` (existing user, paying now)
+ *   - `brpl_auth` with `paid === true` (webhook-first race: payment
+ *     confirmation landed but the profile fields haven't been written yet)
+ *
+ * In all three cases the handler should write name/email/role/state/city
+ * onto the existing (or freshly-created) User record. The session's `paid`
+ * claim tells the handler which side of the race it's on — useful for
+ * logging and for tightening the conflict guard inside registerUser.
+ *
+ * `phone` is always present. `userId` is set only when an auth cookie was
+ * used (the user already exists in the DB).
+ */
+export type RegisterSession = {
+    phone: string;
+    userId?: string;
+    paid: boolean;
+};
+
+export type RegisterHandler = (ctx: HandlerContext & { session: RegisterSession }) => Promise<Response> | Response;
+
 // ---------- withRequest ----------
 
 const HEADER_REQUEST_ID = "x-request-id";
@@ -253,5 +276,63 @@ export function withCheckoutSession<H extends CheckoutHandler>(
         }
 
         throw new UnauthorizedError("Checkout session required");
+    };
+}
+
+// ---------- withRegisterSession ----------
+
+/**
+ * Accept any of:
+ *   - `brpl_pending` (new user, OTP-verified)
+ *   - `brpl_auth` paid:false (returning unpaid user)
+ *   - `brpl_auth` paid:true (webhook-first race: cookie upgraded before
+ *     profile fields were written)
+ *
+ * Anything else → 401.
+ */
+export function withRegisterSession<H extends RegisterHandler>(
+    handler: H,
+    readCookies?: () => Promise<{ auth?: string; pending?: string }>,
+) {
+    return async (ctx: HandlerContext): Promise<Response> => {
+        let authToken: string | undefined;
+        let pendingToken: string | undefined;
+
+        if (readCookies) {
+            const got = await readCookies();
+            authToken = got.auth;
+            pendingToken = got.pending;
+        } else {
+            [authToken, pendingToken] = await Promise.all([getAuthCookie(), getPendingCookie()]);
+        }
+
+        // 1. Prefer auth (any paid state). Catches the webhook-first race
+        //    where the cookie has already been upgraded to paid:true.
+        if (authToken) {
+            const payload: AuthTokenPayload | null = await verifyAuth(authToken);
+            if (payload && payload.sub && payload.phone) {
+                return handler({
+                    ...ctx,
+                    session: {
+                        phone: payload.phone,
+                        userId: payload.sub,
+                        paid: payload.paid === true,
+                    },
+                });
+            }
+        }
+
+        // 2. Fall back to pending (new user, OTP-verified).
+        if (pendingToken) {
+            const payload: PendingTokenPayload | null = await verifyPending(pendingToken);
+            if (payload?.phone) {
+                return handler({
+                    ...ctx,
+                    session: { phone: payload.phone, paid: false },
+                });
+            }
+        }
+
+        throw new UnauthorizedError("Registration session required");
     };
 }

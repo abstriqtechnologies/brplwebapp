@@ -84,7 +84,7 @@ export async function PATCH(req: Request, { params }: { params: { section: strin
             return fail("No recognized fields in body", 400);
         }
 
-        const doc = await HomeCms.findOneAndUpdate({}, { $set: update }, { new: true, upsert: true }).lean();
+        const doc = await HomeCms.findOneAndUpdate({}, { $set: update }, { returnDocument: "after", upsert: true }).lean();
         revalidateSite(TAGS.HOME);
         return ok({
             section,

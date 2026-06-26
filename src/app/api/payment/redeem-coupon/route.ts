@@ -136,10 +136,21 @@ export async function POST(req: NextRequest) {
                 orderId: "",
                 amount: 0,
             } as any);
-        } else {
-            // Existing record (e.g., a ghost created by an earlier
-            // webhook). Mark it paid below after we know the orderId.
-            user = user;
+        } else if (name && email && role && state && city) {
+            // User record already exists — a createOrder pre-creation stub,
+            // an earlier webhook fallback, or a re-entry. Enrich it with
+            // the profile fields before marking paid below.
+            const enriched = await userRepo.update(String(user._id), {
+                name,
+                email: email.toLowerCase(),
+                role,
+                state,
+                city,
+            });
+            if (!enriched) {
+                return NextResponse.json({ error: "User not found" }, { status: 404 });
+            }
+            user = enriched;
         }
         userId = String(user!._id);
     } else {

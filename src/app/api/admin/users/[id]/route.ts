@@ -40,7 +40,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         }
 
         await connectDB();
-        const user = await User.findByIdAndUpdate(params.id, allowed, { new: true }).lean();
+        const user = await User.findByIdAndUpdate(params.id, allowed, { returnDocument: "after" }).lean();
         if (!user) return notFound("User not found");
         return ok({ ...user, _id: user._id.toString() });
     } catch (err) {

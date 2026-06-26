@@ -90,7 +90,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
             return fail(parsed.error.issues[0]?.message || "Invalid input", 400);
         }
         await connectDB();
-        const doc = await getModel().findByIdAndUpdate(params.id, parsed.data, { new: true }).lean();
+        const doc = await getModel().findByIdAndUpdate(params.id, parsed.data, { returnDocument: "after" }).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.COLLECTIONS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });

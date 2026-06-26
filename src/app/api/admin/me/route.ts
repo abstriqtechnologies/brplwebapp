@@ -56,7 +56,7 @@ export const PATCH = withRequest(
         if (!parsed.success) throw new BadRequestError("Invalid input");
         await connectDB();
         const updated = await AdminUser.findByIdAndUpdate(String(admin._id), parsed.data, {
-            new: true,
+            returnDocument: "after",
         }).lean();
         if (!updated) throw new NotFoundError("Admin not found");
 

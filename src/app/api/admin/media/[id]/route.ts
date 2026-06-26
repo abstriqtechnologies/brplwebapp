@@ -25,7 +25,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         if (!parsed.success) return fail(parsed.error.issues[0]?.message || "Invalid input", 400);
 
         await connectDB();
-        const doc = await Media.findByIdAndUpdate(params.id, parsed.data, { new: true }).lean();
+        const doc = await Media.findByIdAndUpdate(params.id, parsed.data, { returnDocument: "after" }).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.MEDIA);
         return ok({ ...doc, _id: doc._id.toString() });

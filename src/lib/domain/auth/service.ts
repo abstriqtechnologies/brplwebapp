@@ -13,7 +13,7 @@
  */
 
 import "server-only";
-import { BadRequestError, ConflictError, RateLimitError, UnauthorizedError } from "@/lib/api/errors";
+import { BadRequestError, ConflictError, NotFoundError, RateLimitError, UnauthorizedError } from "@/lib/api/errors";
 import type { IUser } from "@/models/User";
 import type { IOtpRecord } from "@/models/OtpRecord";
 import type { UserRepo, OtpRepo } from "@/lib/infra/db/repos";
@@ -144,13 +144,28 @@ export async function verifyOtp(deps: VerifyOtpDeps): Promise<VerifyOtpResult> {
 
 export type RegisterUserInput = {
     phone: string;
+    /**
+     * Optional. When present (auth-cookie path), the User record already
+     * exists — registerUser will look it up by phone and enrich it. The
+     * field is accepted here purely so callers that have a userId don't
+     * need to discard it; lookup is still keyed on phone to keep the
+     * service's contract phone-keyed (and to match pending-cookie callers
+     * that only have phone).
+     */
+    userId?: string;
     name: string;
     email: string;
     role: (typeof USER_ROLES)[number];
     state: string;
     city: string;
-    paymentId: string;
-    orderId: string;
+    /**
+     * Optional. The webhook-first race (server marks paid before the
+     * Razorpay modal handler runs) means the client sometimes lacks the
+     * paymentId/orderId. When missing, registerUser falls back to the
+     * values already stamped on the existing User record (if any).
+     */
+    paymentId?: string;
+    orderId?: string;
 };
 
 export type RegisterUserDeps = {
@@ -167,28 +182,57 @@ export async function registerUser(input: RegisterUserInput, deps: RegisterUserD
     }
     if (!input.state?.trim()) throw new BadRequestError("State is required");
     if (!input.city?.trim()) throw new BadRequestError("City is required");
-    if (!input.paymentId?.trim()) throw new BadRequestError("paymentId is required");
-    if (!input.orderId?.trim()) throw new BadRequestError("orderId is required");
 
     const phone = normalizePhone(input.phone);
     if (!phone) throw new BadRequestError("Invalid phone number");
 
     const existing = await deps.userRepo.findByPhone(phone);
-    if (existing) {
-        throw new ConflictError("User already registered for this phone");
-    }
 
-    const created = await deps.userRepo.create({
-        phone,
+    // Resolve paymentId/orderId from the client, falling back to whatever
+    // is already on the User record. The webhook-first race means the
+    // client sometimes doesn't have them (it never got the Razorpay
+    // handler to run), but the server already stamped them via
+    // verifyPayment or the webhook.
+    const paymentId = input.paymentId?.trim() || existing?.paymentId;
+    const orderId = input.orderId?.trim() || existing?.orderId;
+    if (!paymentId) throw new BadRequestError("paymentId is required");
+    if (!orderId) throw new BadRequestError("orderId is required");
+
+    const profile = {
         name: input.name.trim(),
         email: input.email.trim().toLowerCase(),
         role: input.role,
         state: input.state.trim(),
         city: input.city.trim(),
-        paymentStatus: "completed",
-        paymentId: input.paymentId,
-        orderId: input.orderId,
+        paymentStatus: "completed" as const,
+        paymentId,
+        orderId,
         amount: 1499,
+    };
+
+    if (existing) {
+        // User was already created — by createOrder's pre-payment stub, by
+        // the webhook fallback, or by a previous attempt that didn't
+        // complete. Enrich the existing record with the profile fields and
+        // payment confirmation instead of throwing, since the user just paid
+        // and expects registration to complete.
+        //
+        // Guard against a true double-submit (already fully registered)
+        // using `name` as the marker of "registration complete" rather
+        // than `paymentStatus`: `verifyPayment` already sets paymentStatus
+        // to "completed" before this point, so checking paymentStatus here
+        // would reject every legitimate first-time registration.
+        if (existing.name && existing.name.trim().length > 0) {
+            throw new ConflictError("User already registered for this phone");
+        }
+        const updated = await deps.userRepo.update(String(existing._id), profile);
+        if (!updated) throw new NotFoundError("User record disappeared mid-registration");
+        return updated;
+    }
+
+    const created = await deps.userRepo.create({
+        phone,
+        ...profile,
     } as any);
 
     return created;

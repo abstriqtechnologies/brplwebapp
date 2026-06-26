@@ -55,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: { key: string } 
         const doc = await SitePage.findOneAndUpdate(
             { key: params.key },
             { ...parsed.data, key: params.key },
-            { upsert: true, new: true },
+            { upsert: true, returnDocument: "after" },
         ).lean();
         revalidateSite();
         return ok({ ...doc, _id: (doc as any)._id.toString() });

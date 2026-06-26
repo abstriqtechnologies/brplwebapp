@@ -57,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: { type: string }
         const doc = await LegalPage.findOneAndUpdate(
             { type: legalType },
             { ...parsed.data, type: legalType },
-            { upsert: true, new: true },
+            { upsert: true, returnDocument: "after" },
         ).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.LEGAL);

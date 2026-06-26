@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         await connectDB();
         const doc = await PageBanner.findOneAndUpdate({ key: parsed.data.key }, parsed.data, {
             upsert: true,
-            new: true,
+            returnDocument: "after",
         }).lean();
         revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ ...doc, _id: (doc as any)._id.toString() });
@@ -70,7 +70,7 @@ export async function PATCH(req: Request) {
         const { id, ...rest } = body as { id?: string } & Record<string, unknown>;
         if (!id || !mongoose.Types.ObjectId.isValid(id)) return fail("Invalid id", 400);
         await connectDB();
-        const doc = await PageBanner.findByIdAndUpdate(id, rest, { new: true }).lean();
+        const doc = await PageBanner.findByIdAndUpdate(id, rest, { returnDocument: "after" }).lean();
         if (!doc) return notFound();
         revalidateSite(TAGS.PAGE_BANNERS);
         return ok({ ...doc, _id: doc._id.toString() });
