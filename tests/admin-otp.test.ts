@@ -266,7 +266,7 @@ describe("sendAdminOtp", () => {
         expect(findLatestCalls()).toBe(0);
     });
 
-    it("creates an OTP, calls sendSms with purpose 'admin', and returns { sent: true, expiresInSec: 300 } for an allowed phone", async () => {
+    it("creates an OTP, calls sendSms with purpose 'registration' (DLT template literal), and returns { sent: true, expiresInSec: 300 } for an allowed phone", async () => {
         const { repo: otpRepo, store } = makeOtpRepo();
         const sendSms = vi.fn(async () => true);
         const now = 1_700_000_000_000;
@@ -288,7 +288,7 @@ describe("sendAdminOtp", () => {
             verified: false,
         });
         expect(sendSms).toHaveBeenCalledTimes(1);
-        expect(sendSms).toHaveBeenCalledWith("9234894293", "4242", "admin");
+        expect(sendSms).toHaveBeenCalledWith("9234894293", "4242", "registration");
     });
 
     it("throws RateLimitError with waitSec on a second call within 60s", async () => {
@@ -360,7 +360,7 @@ describe("sendAdminOtp", () => {
 
         expect(store.length).toBe(1);
         expect(store[0].phone).toBe("9234894293");
-        expect(sendSms).toHaveBeenCalledWith("9234894293", "7777", "admin");
+        expect(sendSms).toHaveBeenCalledWith("9234894293", "7777", "registration");
     });
 });
 

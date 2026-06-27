@@ -110,7 +110,7 @@ export async function sendAdminOtp(deps: SendAdminOtpDeps): Promise<SendAdminOtp
     const expiresAt = new Date(now + OTP_TTL_MS);
     await deps.otpRepo.create({ phone, otp, expiresAt });
 
-    const sent = await deps.sendSms(phone, otp, "admin");
+    const sent = await deps.sendSms(phone, otp, "registration");
     if (!sent) {
         throw new UpstreamError("Failed to send OTP");
     }
