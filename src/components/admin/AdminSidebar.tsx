@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 import {
     Users,
     Settings,
-    UserCheck,
-    UserX,
     LayoutDashboard,
     CreditCard,
     X,
@@ -39,11 +37,9 @@ type NavItem = {
 
 const ALL_ITEMS: NavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
-    { icon: UserCheck, label: "Paid Users", path: "/admin/paid-users" },
-    { icon: UserX, label: "Unpaid Users", path: "/admin/unpaid-users" },
+    { icon: Users, label: "Players", path: "/admin/players" },
     { icon: CreditCard, label: "Coupons", path: "/admin/coupons" },
     { icon: LinkIcon, label: "Coupon Usage", path: "/admin/coupon-usage" },
-    { icon: Users, label: "Registered Users", path: "/admin/registered-users" },
     { icon: CreditCard, label: "Events", path: "/admin/events" },
     { icon: CreditCard, label: "Payments", path: "/admin/payments" },
     { icon: Briefcase, label: "Manage Jobs", path: "/admin/jobs" },

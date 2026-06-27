@@ -117,16 +117,14 @@ export class RateLimiter {
 // handler passes to `limiterFor(name)`.
 
 export type LimitName =
-    | "otp-send" // POST /api/auth/send-otp
-    | "otp-verify" // POST /api/auth/verify-otp
-    | "admin-login" // POST /api/admin/auth/login
+    | "otp-send" // POST /api/auth/send-otp, /api/admin/auth/send-otp
+    | "otp-verify" // POST /api/auth/verify-otp, /api/admin/auth/verify-otp
     | "admin-action" // any other admin POST/PATCH/DELETE
     | "public-write"; // POST /api/contact, partner forms
 
 const PRESETS: Record<LimitName, BucketOptions> = {
     "otp-send": { capacity: 5, refillPerSec: 5 / 600 }, // 5 per 10 min
     "otp-verify": { capacity: 10, refillPerSec: 10 / 600 }, // 10 per 10 min
-    "admin-login": { capacity: 5, refillPerSec: 5 / 300 }, // 5 per 5 min
     "admin-action": { capacity: 60, refillPerSec: 1 }, // 60 per min
     "public-write": { capacity: 10, refillPerSec: 10 / 60 }, // 10 per min
 };

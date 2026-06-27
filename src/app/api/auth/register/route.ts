@@ -19,8 +19,8 @@ import { withRequest, withRegisterSession } from "@/lib/api/handlers";
 import { ok } from "@/lib/api/response";
 import { parse } from "@/lib/api/parse";
 import { registerUser } from "@/lib/domain/auth/service";
-import { signAuth } from "@/lib/auth/crypto";
-import { setAuthCookie, clearPendingCookie } from "@/lib/auth/cookies";
+import { signAuth, signPending } from "@/lib/auth/crypto";
+import { setAuthCookie, setPendingCookie, clearPendingCookie } from "@/lib/auth/cookies";
 import { MongooseUserRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
@@ -69,13 +69,23 @@ export const POST = withRequest(
         // request came in on an auth cookie (webhook-first race), the cookie
         // is simply re-issued with the same paid:true and cleared pending
         // is a no-op.
-        const authToken = await signAuth({
-            sub: user._id.toString(),
-            phone: user.phone,
-            paid: true,
-        });
-        await setAuthCookie(authToken);
-        await clearPendingCookie();
+        if (user.paymentStatus === "completed") {
+            const authToken = await signAuth({
+                sub: user._id.toString(),
+                phone: user.phone,
+                paid: true,
+            });
+            await setAuthCookie(authToken);
+            await clearPendingCookie();
+        } else {
+            // Pre-payment save: keep the pending cookie so the user stays in the
+            // checkout flow and can complete payment.
+            const pendingToken = await signPending({
+                sub: `pending:${user.phone}`,
+                phone: user.phone,
+            });
+            await setPendingCookie(pendingToken);
+        }
 
         return ok({
             success: true,
@@ -89,7 +99,7 @@ export const POST = withRequest(
                 city: user.city,
                 paymentStatus: user.paymentStatus,
             },
-            redirect: "/dashboard",
+            redirect: user.paymentStatus === "completed" ? "/dashboard" : null,
         });
     }),
 );

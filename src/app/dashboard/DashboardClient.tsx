@@ -15,10 +15,13 @@ import {
     CheckCircle2,
     Download,
     IdCard,
+    FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TrialPass from "@/components/TrialPass";
 import { ROLE_LABELS, type UserRole } from "@/lib/roles";
+import { downloadBlob } from "@/utils/adminExport";
+import { useToast } from "@/hooks/use-toast";
 
 const ROLE_COLOR: Record<string, string> = {
     batsman: "from-red-500 to-orange-500",
@@ -45,7 +48,9 @@ export default function DashboardClient() {
     const [loading, setLoading] = useState(true);
     const [loggingOut, setLoggingOut] = useState(false);
     const [downloading, setDownloading] = useState(false);
+    const [downloadingInvoice, setDownloadingInvoice] = useState(false);
     const trialPassRef = useRef<HTMLDivElement | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         fetch("/api/auth/me")
@@ -88,6 +93,29 @@ export default function DashboardClient() {
             console.error("Download failed", err);
         } finally {
             setDownloading(false);
+        }
+    };
+
+    const handleDownloadInvoice = async () => {
+        if (!user) return;
+        setDownloadingInvoice(true);
+        try {
+            const res = await fetch("/api/user/invoice", { credentials: "same-origin" });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || "Failed to download invoice");
+            }
+            const blob = await res.blob();
+            downloadBlob(blob, `BRPL-Invoice-${user.phone || "player"}.pdf`);
+        } catch (err) {
+            console.error("Invoice download failed", err);
+            toast({
+                title: "Invoice download failed",
+                description: err instanceof Error ? err.message : "Please try again later.",
+                variant: "destructive",
+            });
+        } finally {
+            setDownloadingInvoice(false);
         }
     };
 
@@ -230,6 +258,33 @@ export default function DashboardClient() {
                                 </div>
                             </div>
                         </div>
+
+                        {user.paymentStatus === "completed" && (
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                                <div className="flex items-start gap-3 mb-4">
+                                    <FileText className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <h2 className="font-bold text-slate-900 dark:text-white mb-1">Payment invoice</h2>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                                            Official registration receipt with BRPL logo.
+                                        </p>
+                                    </div>
+                                </div>
+                                <Button
+                                    onClick={handleDownloadInvoice}
+                                    disabled={downloadingInvoice}
+                                    variant="outline"
+                                    className="w-full h-11 rounded-full font-semibold"
+                                >
+                                    {downloadingInvoice ? (
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <FileText className="w-4 h-4 mr-2" />
+                                    )}
+                                    {downloadingInvoice ? "Preparing invoice…" : "Download Payment Invoice"}
+                                </Button>
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-3 text-sm text-slate-500">
                             <span>Need help?</span>

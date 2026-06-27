@@ -1,19 +1,87 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { Loader2, Tag, CreditCard, User, Mail, MapPin, Trophy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import {
+    Loader2,
+    Tag,
+    CreditCard,
+    User,
+    Mail,
+    MapPin,
+    Trophy,
+    Check,
+    ChevronDown,
+    ChevronUp,
+    Swords,
+    Target,
+    ShieldHalf,
+    Hand,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { loadRazorpayScript } from "@/hooks/useRazorpayScript";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { CheckCircle2 } from "lucide-react";
 
 type Role = "batsman" | "bowler" | "allrounder" | "wicketkeeper";
-const ROLES: Array<{ value: Role; label: string; description: string }> = [
-    { value: "batsman", label: "Batsman", description: "Specialist batter" },
-    { value: "bowler", label: "Bowler", description: "Specialist bowler" },
-    { value: "allrounder", label: "All-Rounder", description: "Bat & bowl" },
-    { value: "wicketkeeper", label: "Wicket-Keeper", description: "Keeper & batter" },
+const ROLES: Array<{
+    value: Role;
+    label: string;
+    description: string;
+    Icon: React.ComponentType<{ className?: string }>;
+}> = [
+    { value: "batsman", label: "Batsman", description: "Specialist batter", Icon: Swords },
+    { value: "bowler", label: "Bowler", description: "Specialist bowler", Icon: Target },
+    { value: "allrounder", label: "All-Rounder", description: "Bat & bowl", Icon: Trophy },
+    { value: "wicketkeeper", label: "Wicket-Keeper", description: "Keeper & batter", Icon: Hand },
+];
+
+// 28 Indian states + 8 UTs (alphabetical, mixed).
+const INDIAN_STATES: string[] = [
+    "Andaman and Nicobar Islands",
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chandigarh",
+    "Chhattisgarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jammu and Kashmir",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Ladakh",
+    "Lakshadweep",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Puducherry",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
 ];
 
 type ExistingUser = {
@@ -65,6 +133,9 @@ export default function CheckoutClient({
     const [orderId, setOrderId] = useState<string | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    // Phase string drives the centered overlay's title/sub copy.
+    const [phase, setPhase] = useState<string>("");
+    const [subPhase, setSubPhase] = useState<string>("");
 
     const finalAmount = coupon.status === "valid" ? coupon.finalAmount : registrationFeeRupees;
     const couponCoversAll = coupon.status === "valid" && coupon.finalAmount === 0;
@@ -106,6 +177,34 @@ export default function CheckoutClient({
     const startPayment = async () => {
         setBusy(true);
         try {
+            // Save the profile to the DB before payment so attempters are
+            // captured even if payment fails or is abandoned.
+            if (isNewUser) {
+                if (!form.name || !form.email || !form.state || !form.city) {
+                    toast({
+                        variant: "destructive",
+                        title: "Missing fields",
+                        description: "All fields are required.",
+                    });
+                    setBusy(false);
+                    return;
+                }
+                setPhase("Saving your details");
+                setSubPhase("Securing your player profile");
+                const saveRes = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(form), // no paymentId/orderId
+                });
+                if (!saveRes.ok) {
+                    const err = await saveRes.json().catch(() => ({}));
+                    throw new Error(err.error || "Could not save profile");
+                }
+            }
+
+            setPhase("Preparing your order");
+            setSubPhase("Connecting to payment gateway");
+
             const res = await fetch("/api/payment/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -125,6 +224,8 @@ export default function CheckoutClient({
             }
 
             setOrderId(payload.orderId);
+            setPhase("Opening secure checkout");
+            setSubPhase("Loading Razorpay…");
             const loaded = await loadRazorpayScript();
             if (!loaded) throw new Error("Failed to load Razorpay");
 
@@ -138,6 +239,8 @@ export default function CheckoutClient({
                 prefill: { contact: phone },
                 handler: async (resp: any) => {
                     setPaymentId(resp.razorpay_payment_id);
+                    setPhase("Verifying payment");
+                    setSubPhase("Confirming with Razorpay…");
                     const v = await fetch("/api/payment/verify", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -149,6 +252,8 @@ export default function CheckoutClient({
                     });
                     const vData = await v.json().catch(() => ({}));
                     if (v.ok) {
+                        setPhase("Taking you to your dashboard");
+                        setSubPhase("Finalizing your registration…");
                         await finishRegistration();
                     } else {
                         toast({
@@ -157,9 +262,17 @@ export default function CheckoutClient({
                             description: vData.error,
                         });
                         setBusy(false);
+                        setPhase("");
+                        setSubPhase("");
                     }
                 },
-                modal: { ondismiss: () => setBusy(false) },
+                modal: {
+                    ondismiss: () => {
+                        setBusy(false);
+                        setPhase("");
+                        setSubPhase("");
+                    },
+                },
             });
             rzp.open();
         } catch (err: any) {
@@ -169,6 +282,8 @@ export default function CheckoutClient({
                 description: err?.message || "Unknown",
             });
             setBusy(false);
+            setPhase("");
+            setSubPhase("");
         }
     };
 
@@ -182,6 +297,8 @@ export default function CheckoutClient({
         if (busy) return;
         setBusy(true);
         try {
+            setPhase("Taking you to your dashboard");
+            setSubPhase("Finalizing your registration…");
             // For new users, we need profile data + paymentId/orderId.
             if (isNewUser) {
                 if (!form.name || !form.email || !form.state || !form.city) {
@@ -191,12 +308,16 @@ export default function CheckoutClient({
                         description: "All fields are required.",
                     });
                     setBusy(false);
+                    setPhase("");
+                    setSubPhase("");
                     return;
                 }
             }
 
             // If paying with a coupon that covers the full amount, redeem now.
             if (coupon.status === "valid" && couponCoversAll && !paymentId) {
+                setPhase("Redeeming your coupon");
+                setSubPhase("Applying 100% discount…");
                 const r = await fetch("/api/payment/redeem-coupon", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -224,6 +345,8 @@ export default function CheckoutClient({
                         description: rData.error || "Try again",
                     });
                     setBusy(false);
+                    setPhase("");
+                    setSubPhase("");
                     return;
                 }
                 // For new users, the redeem route has already created the
@@ -256,6 +379,8 @@ export default function CheckoutClient({
                         description: regData.error,
                     });
                     setBusy(false);
+                    setPhase("");
+                    setSubPhase("");
                     return;
                 }
             }
@@ -265,6 +390,8 @@ export default function CheckoutClient({
         } catch (err: any) {
             toast({ variant: "destructive", title: "Error", description: err?.message });
             setBusy(false);
+            setPhase("");
+            setSubPhase("");
         }
     };
 
@@ -283,8 +410,11 @@ export default function CheckoutClient({
                 const data = await res.json();
                 if (data?.user?.paymentStatus === "completed") {
                     clearInterval(t);
-                    // Webhook arrived while user was away — run the standard
-                    // complete path: if new user, register; then go home.
+                    // Webhook arrived while user was away — show the
+                    // "taking you to dashboard" overlay while we finish up.
+                    setBusy(true);
+                    setPhase("Payment received");
+                    setSubPhase("Bringing you back to your dashboard…");
                     await finishRegistration();
                 }
             } catch {
@@ -296,18 +426,87 @@ export default function CheckoutClient({
 
     /* --- Render --- */
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-            <div className="w-full max-w-2xl">
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-500/15 border border-amber-500/30 mb-4">
-                        <CreditCard className="w-7 h-7 text-amber-500" />
-                    </div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Complete registration</h1>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                        Pay ₹{registrationFeeRupees.toLocaleString("en-IN")} to unlock your BRPL dashboard.
-                    </p>
-                </div>
+        <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative">
+            {/* Keyframes for the loader. Scoped class names so they don't
+                collide with anything global. */}
+            <style>{`
+                @keyframes brpl-spin { to { transform: rotate(360deg); } }
+                @keyframes brpl-pulse {
+                    0%, 100% { opacity: 0.35; transform: scale(0.85); }
+                    50% { opacity: 1; transform: scale(1.1); }
+                }
+                @keyframes brpl-fade-in { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes brpl-pop-in {
+                    0% { opacity: 0; transform: scale(0.92); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+                .brpl-spin { animation: brpl-spin 0.9s linear infinite; }
+                .brpl-fade-in { animation: brpl-fade-in 0.2s ease-out; }
+                .brpl-pop-in { animation: brpl-pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+            `}</style>
 
+            {/* Animated loader overlay. Covers the entire checkout area while
+                a long-running operation (save / verify / finish) is in flight. */}
+            {busy && phase && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 backdrop-blur-md brpl-fade-in"
+                    role="status"
+                    aria-live="polite"
+                    aria-busy="true"
+                >
+                    <div className="relative w-full max-w-sm mx-4 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-black/40 border border-slate-200/60 dark:border-slate-800 px-8 py-9 text-center brpl-pop-in">
+                        {/* Triple-ring spinner: amber gradient ring + faint
+                            trailing rings. Conveys motion + payment context. */}
+                        <div className="relative mx-auto h-20 w-20 mb-6">
+                            <div className="absolute inset-0 rounded-full border-4 border-amber-500/20" />
+                            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500 border-r-amber-400 brpl-spin" />
+                            <div
+                                className="absolute inset-2 rounded-full border-2 border-transparent border-t-amber-300/70 brpl-spin"
+                                style={{ animationDuration: "1.4s", animationDirection: "reverse" }}
+                            />
+                            {/* Center dot */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="block h-3 w-3 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-md shadow-amber-500/40" />
+                            </div>
+                        </div>
+
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            {phase}
+                        </h2>
+                        {subPhase && (
+                            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                {subPhase}
+                            </p>
+                        )}
+
+                        {/* Cricket-ball dots row — three amber dots pulsing in
+                            sequence. Subtle motion keeps the user engaged
+                            during the longest wait. */}
+                        <div className="mt-6 flex items-center justify-center gap-1.5">
+                            {[0, 1, 2].map((i) => (
+                                <span
+                                    key={i}
+                                    className="block h-2 w-2 rounded-full bg-amber-500"
+                                    style={{
+                                        animation: "brpl-pulse 1.1s ease-in-out infinite",
+                                        animationDelay: `${i * 0.18}s`,
+                                    }}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Small reassurance note for the longest path */}
+                        {phase === "Taking you to your dashboard" && (
+                            <p className="mt-5 inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Payment confirmed — setting up your dashboard
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <div className="w-full max-w-2xl">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6">
                     {/* Profile */}
                     {isNewUser && (
@@ -322,27 +521,36 @@ export default function CheckoutClient({
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {ROLES.map((r) => {
                                         const active = form.role === r.value;
+                                        const Icon = r.Icon;
                                         return (
                                             <button
                                                 key={r.value}
                                                 type="button"
                                                 aria-pressed={active}
                                                 onClick={() => setForm({ ...form, role: r.value })}
-                                                className={`relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border-2 transition-all ${
+                                                className={`group relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl border-2 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md ${
                                                     active
-                                                        ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30"
-                                                        : "border-slate-200 dark:border-slate-700"
+                                                        ? "border-amber-500 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/40 dark:to-amber-900/20 shadow-sm ring-1 ring-amber-500/30"
+                                                        : "border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700"
                                                 }`}
                                             >
-                                                <Trophy
-                                                    className={`w-7 h-7 ${active ? "text-amber-600" : "text-slate-500"}`}
-                                                />
-                                                <span className="text-sm font-bold">{r.label}</span>
+                                                <span
+                                                    className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
+                                                        active
+                                                            ? "bg-amber-500 text-white shadow-sm shadow-amber-500/40"
+                                                            : "bg-slate-100 text-slate-500 group-hover:bg-amber-100 group-hover:text-amber-600 dark:bg-slate-800 dark:group-hover:bg-amber-950/40 dark:group-hover:text-amber-400"
+                                                    }`}
+                                                >
+                                                    <Icon className="w-5 h-5" />
+                                                </span>
+                                                <span className={`text-sm font-bold ${active ? "text-amber-900 dark:text-amber-100" : "text-slate-900 dark:text-white"}`}>
+                                                    {r.label}
+                                                </span>
                                                 <span className="text-[10px] text-slate-500 text-center leading-tight">
                                                     {r.description}
                                                 </span>
                                                 {active && (
-                                                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                                                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
                                                         <Check className="w-3 h-3 text-white" strokeWidth={3} />
                                                     </div>
                                                 )}
@@ -366,10 +574,12 @@ export default function CheckoutClient({
                                     value={form.email}
                                     onChange={(v) => setForm({ ...form, email: v })}
                                 />
-                                <Field
+                                <SelectField
                                     label="State"
                                     icon={<MapPin className="w-4 h-4" />}
                                     value={form.state}
+                                    placeholder="Select your state"
+                                    options={INDIAN_STATES}
                                     onChange={(v) => setForm({ ...form, state: v })}
                                 />
                                 <Field
@@ -500,6 +710,46 @@ function Field({
                 className="h-11"
                 required
             />
+        </div>
+    );
+}
+
+function SelectField({
+    label,
+    icon,
+    value,
+    placeholder,
+    options,
+    onChange,
+}: {
+    label: string;
+    icon: React.ReactNode;
+    value: string;
+    placeholder: string;
+    options: string[];
+    onChange: (v: string) => void;
+}) {
+    const id = useId();
+    return (
+        <div>
+            <label htmlFor={id} className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                {icon} <span className="ml-1">{label}</span>
+            </label>
+            <Select value={value || undefined} onValueChange={onChange}>
+                <SelectTrigger
+                    id={id}
+                    className="h-11 w-full min-w-0 rounded-lg border-border bg-secondary/50 px-4 text-xs text-foreground leading-tight focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent className="text-xs">
+                    {options.map((opt) => (
+                        <SelectItem key={opt} value={opt} className="text-xs">
+                            {opt}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
     );
 }

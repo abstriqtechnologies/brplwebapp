@@ -40,8 +40,10 @@ const schema = z.object({
     RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
     NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().optional(),
 
-    // SMS (SMSIndiaHub) — optional, app falls back to console-logging OTPs
-    SMS_API_KEY: z.string().optional(),
+    // SMS (SMSIndiaHub) — required in production, optional in dev
+    SMS_API_KEY: process.env.NODE_ENV === "production"
+        ? z.string().min(1, "SMS_API_KEY is required in production")
+        : z.string().optional(),
     SMS_SENDER_ID: z.string().default("SMSHUB"),
     SMS_GWID: z.string().default("2"),
 
@@ -56,6 +58,13 @@ const schema = z.object({
     // Feature flags
     ALLOW_DEFAULT_ADMIN: booleanish,
     CMS_LIVE: booleanish,
+
+    // Admin phone allowlist — comma-separated 10-digit Indian mobile numbers.
+    // Always present (defaults to the owner's number) so dev/staging boot
+    // without an explicit override. Empty values are treated as the default
+    // by `getAdminAllowedPhones()` to avoid locking out admins when the
+    // env var is set to "" in production.
+    ADMIN_PHONES: z.string().default("9234894293"),
 
     // Security knobs (used by Phase 1)
     BRPL_CSRF_REQUIRED: booleanish,

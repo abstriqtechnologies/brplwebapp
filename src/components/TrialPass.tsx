@@ -1,110 +1,41 @@
 "use client";
-import ReactBarcode from 'react-barcode';
+import QRCode from 'qrcode';
 import { useState, useEffect } from 'react';
 
 interface TrialPassProps {
     user?: any;
 }
 
-const DEFAULT_AVATAR = '/assets/avtar.webp';
-
-const blobToBase64 = (blob: Blob): Promise<string> =>
-    new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-
-const isExternalUrl = (url: string) =>
-    typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
-
 const TrialPass = ({ user }: TrialPassProps) => {
     // Support both our {name} shape and the legacy {fname, lname} shape
-    const derivedName = user
+    const fullName = user
         ? (user.name?.trim() ||
            `${user.fname || ''} ${user.lname || ''}`.trim() ||
            'Player')
         : 'Player';
-    const fullName = derivedName;
-    const profileImage = user?.profileImage || user?.avatar || DEFAULT_AVATAR;
-    const barcodeValue = String(user?.userId || user?._id || user?.id || '0000000000000');
 
-    // Display: URL or base64. Use base64 when possible so download (html-to-image) works.
-    const [imgSrc, setImgSrc] = useState<string>(DEFAULT_AVATAR);
-    // Only use crossOrigin for same-origin/base64 so S3 URLs can display without CORS
-    const useCrossOrigin = imgSrc.startsWith('data:') || imgSrc.startsWith('/') || imgSrc.startsWith('blob:');
+    const qrValue = String(user?.userId || user?._id || user?.id || '0000000000000');
 
+    // Generate QR code as a data URL so the downloaded PNG includes it cleanly.
+    const [qrSrc, setQrSrc] = useState<string>('');
     useEffect(() => {
-        if (!profileImage) {
-            setImgSrc(DEFAULT_AVATAR);
-            return;
-        }
-
-        // Already base64 — use directly
-        if (profileImage.startsWith('data:')) {
-            setImgSrc(profileImage);
-            return;
-        }
-
-        // Set URL immediately so <img> can display it (without crossOrigin, S3 works)
-        setImgSrc(profileImage);
-
-        let isMounted = true;
-
-        const loadImage = async () => {
-            // 1. Proxy first for S3/external — avoids CORS; works when bucket doesn't send CORS
-            if (isExternalUrl(profileImage)) {
-                try {
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(profileImage)}`;
-                    const res = await fetch(proxyUrl, { cache: 'no-cache' });
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        const base64 = await blobToBase64(blob);
-                        if (isMounted) { setImgSrc(base64); return; }
-                    }
-                } catch (_) {}
-            }
-
-            // 2. Direct CORS fetch — for CORS-enabled S3/CDN
-            try {
-                const res = await fetch(profileImage, { mode: 'cors', cache: 'no-cache' });
-                if (res.ok) {
-                    const blob = await res.blob();
-                    const base64 = await blobToBase64(blob);
-                    if (isMounted) { setImgSrc(base64); return; }
-                }
-            } catch (_) {}
-
-            // 3. Canvas extraction — for same-origin images (e.g. /assets/...)
-            try {
-                await new Promise<void>((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = () => {
-                        try {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.naturalWidth || 300;
-                            canvas.height = img.naturalHeight || 300;
-                            const ctx = canvas.getContext('2d')!;
-                            ctx.drawImage(img, 0, 0);
-                            const base64 = canvas.toDataURL('image/jpeg', 0.92);
-                            if (isMounted) setImgSrc(base64);
-                            resolve();
-                        } catch (e) { reject(e); }
-                    };
-                    img.onerror = reject;
-                    img.src = profileImage;
-                });
-                return;
-            } catch (_) {}
-
-            // Keep current imgSrc (already set to profileImage above for display)
+        let cancelled = false;
+        QRCode.toDataURL(qrValue, {
+            errorCorrectionLevel: 'M',
+            margin: 1,
+            width: 512,
+            color: { dark: '#000000', light: '#ffffff' },
+        })
+            .then((url) => {
+                if (!cancelled) setQrSrc(url);
+            })
+            .catch(() => {
+                if (!cancelled) setQrSrc('');
+            });
+        return () => {
+            cancelled = true;
         };
-
-        loadImage();
-        return () => { isMounted = false; };
-    }, [profileImage]);
+    }, [qrValue]);
 
     return (
         <div
@@ -123,30 +54,35 @@ const TrialPass = ({ user }: TrialPassProps) => {
                 {/* Top header area — reserve ~22% for logo/title/validity */}
                 <div style={{ height: '22%' }} />
 
-                {/* Profile Photo */}
-                <div className="flex justify-center" style={{ marginTop: '1%' }}>
-                    <div
-                        className="overflow-hidden bg-[#5c667a]"
-                        style={{
-                            width: '58%',
-                            aspectRatio: '1 / 1',
-                            borderRadius: '6%',
-                            border: '3px solid #24324a',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                        }}
-                    >
+                {/* QR Code */}
+                <div
+                    className="flex justify-center"
+                    style={{ marginTop: '6%', paddingLeft: '0' }}
+                >
+                    {qrSrc && (
                         <img
-                            src={imgSrc}
-                            alt={fullName}
-                            {...(useCrossOrigin ? { crossOrigin: 'anonymous' as const } : {})}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-                            onError={() => setImgSrc(DEFAULT_AVATAR)}
+                            src={qrSrc}
+                            alt={`BRPL QR for ${fullName}`}
+                            crossOrigin="anonymous"
+                            style={{
+                                display: 'block',
+                                width: '49%',
+                                height: 'auto',
+                                aspectRatio: '1 / 1',
+                                margin: '0 auto',
+                                background:
+                                    'linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #db2777 100%)',
+                                padding: '6px',
+                                borderRadius: '10px',
+                                boxShadow:
+                                    '0 4px 14px rgba(245, 158, 11, 0.35), inset 0 0 0 1px rgba(255,255,255,0.25)',
+                            }}
                         />
-                    </div>
+                    )}
                 </div>
 
                 {/* Name */}
-                <div className="flex justify-center" style={{ marginTop: '3%' }}>
+                <div className="flex justify-center" style={{ marginTop: '10%' }}>
                     <h2
                         className="text-[#000] font-semibold tracking-wide leading-none text-center"
                         style={{
@@ -156,19 +92,6 @@ const TrialPass = ({ user }: TrialPassProps) => {
                     >
                         {fullName}
                     </h2>
-                </div>
-
-                {/* Barcode */}
-                <div className="flex justify-center" style={{ marginTop: '2%', paddingLeft: '15%', paddingRight: '15%' }}>
-                    <ReactBarcode
-                        value={barcodeValue}
-                        width={0.9}
-                        height={40}
-                        displayValue={false}
-                        background="transparent"
-                        lineColor="#000000"
-                        margin={0}
-                    />
                 </div>
 
                 {/* Bottom tagline spacer */}

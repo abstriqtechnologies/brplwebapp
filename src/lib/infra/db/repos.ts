@@ -49,9 +49,17 @@ export type CreateAdminInput = {
 export interface AdminRepo {
     findById(id: string): Promise<IAdminUser | null>;
     findByEmail(email: string): Promise<IAdminUser | null>;
+    /** Lookup by 10-digit phone — used by the SMS-OTP login flow. */
+    findByPhone(phone: string): Promise<IAdminUser | null>;
     create(data: CreateAdminInput): Promise<IAdminUser>;
     updatePassword(id: string, passwordHash: string): Promise<void>;
     setActive(id: string, active: boolean): Promise<void>;
+    /**
+     * Partial update — used by bootstrap to stamp the phone on legacy admins,
+     * and (in tests) by anything else that needs a generic patch. Other call
+     * sites should prefer the dedicated methods when one fits.
+     */
+    update(id: string, patch: Partial<IAdminUser>): Promise<IAdminUser | null>;
     existsByEmail(email: string): Promise<boolean>;
 }
 
@@ -215,6 +223,9 @@ export class InMemoryAdminRepo implements AdminRepo {
     async findByEmail(email: string): Promise<IAdminUser | null> {
         return this.items.find((a) => a.email.toLowerCase() === email.toLowerCase()) ?? null;
     }
+    async findByPhone(phone: string): Promise<IAdminUser | null> {
+        return this.items.find((a) => a.phone === phone) ?? null;
+    }
     async create(data: CreateAdminInput): Promise<IAdminUser> {
         const doc = {
             ...data,
@@ -240,6 +251,12 @@ export class InMemoryAdminRepo implements AdminRepo {
             a.active = active;
             a.updatedAt = new Date();
         }
+    }
+    async update(id: string, patch: Partial<IAdminUser>): Promise<IAdminUser | null> {
+        const a = this.items.find((x) => String(x._id) === id);
+        if (!a) return null;
+        Object.assign(a, patch, { updatedAt: new Date() });
+        return a;
     }
     async existsByEmail(email: string): Promise<boolean> {
         return !!(await this.findByEmail(email));

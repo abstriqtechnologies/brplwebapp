@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
 
             {isSuperAdmin && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <QuickLink href="/admin/registered-users" label="Manage System Users" iconBg="bg-blue-100 text-blue-600" icon={Users} />
+                    <QuickLink href="/admin/players" label="Manage Players" iconBg="bg-blue-100 text-blue-600" icon={Users} />
                     <QuickLink href="/admin/campaigns" label="QR Campaigns" iconBg="bg-purple-100 text-purple-600" icon={QrCode} />
                     <QuickLink href="/admin/jobs" label="Manage Jobs" iconBg="bg-green-100 text-green-600" icon={Briefcase} />
                     <QuickLink href="/admin/partners" label="Partner Requests" iconBg="bg-orange-100 text-orange-600" icon={Users} />
@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
                         </CardContent>
                         <div className="p-4 border-t border-slate-100 dark:border-slate-800">
                             <Button variant="outline" className="w-full" asChild>
-                                <Link href="/admin/registered-users">View All Users</Link>
+                                <Link href="/admin/players">View All Players</Link>
                             </Button>
                         </div>
                     </Card>
@@ -283,7 +283,7 @@ export default function AdminDashboardPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-bold">Recent Registered Users</CardTitle>
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin/registered-users">View All</Link>
+                        <Link href="/admin/players">View All</Link>
                     </Button>
                 </CardHeader>
                 <CardContent className="p-0">

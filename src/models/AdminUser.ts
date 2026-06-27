@@ -10,6 +10,12 @@ export interface IAdminUser extends Document {
     name: string;
     role: AdminRole;
     active: boolean;
+    /**
+     * 10-digit Indian mobile used by the SMS-OTP login flow. Unique + sparse
+     * so legacy admins (no phone) don't collide on the index. The bootstrap
+     * stamps the phone from ADMIN_PHONES on first send-otp call.
+     */
+    phone?: string;
     totpSecret?: string;
     totpEnabled: boolean;
     createdAt: Date;
@@ -23,6 +29,7 @@ const AdminUserSchema = new Schema<IAdminUser>(
         name: { type: String, required: true, trim: true },
         role: { type: String, enum: ADMIN_ROLES, default: "subadmin", index: true },
         active: { type: Boolean, default: true },
+        phone: { type: String, required: false, unique: true, sparse: true, index: true, match: /^\d{10}$/ },
         totpSecret: { type: String },
         totpEnabled: { type: Boolean, default: false },
     },

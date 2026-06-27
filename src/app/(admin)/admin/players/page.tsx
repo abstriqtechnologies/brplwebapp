@@ -8,7 +8,7 @@ import { UserTable } from "@/components/admin/UserTable";
 import { FilterBar, type FilterValues } from "@/components/admin/FilterBar";
 import { toast } from "@/components/ui/use-toast";
 
-export default function UnpaidUsersPage() {
+export default function PlayersPage() {
     const [users, setUsers] = useState<AdminRecord[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -19,14 +19,14 @@ export default function UnpaidUsersPage() {
     const fetchData = async (f: FilterValues) => {
         setIsLoading(true);
         try {
-            const res = await getAdminRecords(page, 10, f.search || "", "unpaid", f.startDate, f.endDate);
+            const res = await getAdminRecords(page, 10, f.search || "", "users", f.startDate, f.endDate);
             if (res.ok && res.data) {
                 setUsers(res.data.items);
                 setTotalPages(res.data.pagination.pages);
                 setTotal(res.data.pagination.total);
             }
         } catch {
-            toast({ variant: "destructive", title: "Error", description: "Failed to fetch users" });
+            toast({ variant: "destructive", title: "Error", description: "Failed to fetch players" });
         } finally {
             setIsLoading(false);
         }
@@ -41,7 +41,6 @@ export default function UnpaidUsersPage() {
         if (filters.search) params.set("search", filters.search);
         if (filters.startDate) params.set("startDate", filters.startDate.toISOString());
         if (filters.endDate) params.set("endDate", filters.endDate.toISOString());
-        params.set("type", "unpaid");
         window.open(`/api/admin/users/export?${params.toString()}`, "_blank");
     };
 
@@ -49,16 +48,16 @@ export default function UnpaidUsersPage() {
         <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Unpaid Users</h1>
-                    <p className="text-slate-500 mt-1">Users who have registered but not yet paid.</p>
+                    <h1 className="text-3xl font-bold">Players</h1>
+                    <p className="text-slate-500 mt-1">All registered players — paid and unpaid.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button onClick={handleExport} variant="outline" className="gap-2">
                         <FileSpreadsheet className="w-4 h-4" />
                         Export CSV
                     </Button>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 text-orange-600 rounded-lg h-10">
-                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-600 rounded-lg h-10">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                         <span className="font-medium whitespace-nowrap">{total} Records</span>
                     </div>
                 </div>
@@ -69,7 +68,7 @@ export default function UnpaidUsersPage() {
             <UserTable
                 users={users}
                 isLoading={isLoading}
-                type="unpaid"
+                type="users"
                 page={page}
                 totalPages={totalPages}
                 totalRecords={total}

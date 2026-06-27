@@ -43,7 +43,7 @@ export default function UserDetailsPage() {
                     setUser(res.data);
                 } else {
                     toast({ variant: "destructive", title: "Error", description: "User not found" });
-                    router.replace("/admin/registered-users");
+                    router.replace("/admin/players");
                 }
             } catch {
                 toast({ variant: "destructive", title: "Error", description: "Failed to load user" });
@@ -79,7 +79,7 @@ export default function UserDetailsPage() {
 
     return (
         <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
-            <Link href="/admin/registered-users" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white">
+            <Link href="/admin/players" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white">
                 <ArrowLeft className="w-4 h-4" />
                 Back to users
             </Link>

@@ -192,6 +192,10 @@ export class MongooseAdminRepo implements AdminRepo {
         await connectDB();
         return (await AdminUser.findOne({ email: email.toLowerCase() }).lean()) as IAdminUser | null;
     }
+    async findByPhone(phone: string): Promise<IAdminUser | null> {
+        await connectDB();
+        return (await AdminUser.findOne({ phone }).lean()) as IAdminUser | null;
+    }
     async create(data: CreateAdminInput): Promise<IAdminUser> {
         await connectDB();
         const doc = await AdminUser.create({
@@ -209,6 +213,11 @@ export class MongooseAdminRepo implements AdminRepo {
     async setActive(id: string, active: boolean): Promise<void> {
         await connectDB();
         await AdminUser.findByIdAndUpdate(id, { active });
+    }
+    async update(id: string, patch: Partial<IAdminUser>): Promise<IAdminUser | null> {
+        await connectDB();
+        const doc = await AdminUser.findByIdAndUpdate(id, patch, { returnDocument: "after" }).lean();
+        return (doc as IAdminUser | null) ?? null;
     }
     async existsByEmail(email: string): Promise<boolean> {
         await connectDB();

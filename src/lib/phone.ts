@@ -14,11 +14,11 @@ export function normalizePhone(input: string): string | null {
 }
 
 /**
- * Generate a cryptographically random 6-digit OTP.
+ * Generate a cryptographically random 4-digit OTP.
  */
 export function generateOtp(): string {
     const buf = new Uint32Array(1);
     crypto.getRandomValues(buf);
-    const n = buf[0] % 1_000_000;
-    return n.toString().padStart(6, "0");
+    const n = buf[0] % 10_000;
+    return n.toString().padStart(4, "0");
 }

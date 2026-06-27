@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
     phone: z.string().min(10).max(20),
-    otp: z.string().regex(/^\d{6}$/),
+    otp: z.string().regex(/^\d{4}$/),
 });
 
 const verifyLimiter = limiterFor("otp-verify");

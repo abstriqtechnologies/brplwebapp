@@ -17,8 +17,6 @@ import { BadRequestError, ConflictError, NotFoundError, RateLimitError, Unauthor
 import type { IUser } from "@/models/User";
 import type { IOtpRecord } from "@/models/OtpRecord";
 import type { UserRepo, OtpRepo } from "@/lib/infra/db/repos";
-import { logger } from "@/lib/logger";
-import { isDev } from "@/lib/env";
 
 const RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_TTL_MS = 5 * 60 * 1000;
@@ -52,12 +50,6 @@ export async function sendOtp(deps: SendOtpDeps): Promise<SendOtpResult> {
     const phone = normalizePhone(deps.phone);
     if (!phone) {
         throw new BadRequestError("Invalid phone number");
-    }
-
-    // Dev/test bypass: skip SMS, skip DB OTP record, skip rate-limit.
-    if (isDev()) {
-        logger.info("auth.send_otp.dev_bypass", { phone });
-        return { expiresInSec: OTP_TTL_MS / 1000 };
     }
 
     const now = (deps.now ?? Date.now)();
@@ -102,23 +94,8 @@ export type VerifyOtpResult = { kind: "existing"; user: IUser; paid: boolean } |
 export async function verifyOtp(deps: VerifyOtpDeps): Promise<VerifyOtpResult> {
     const phone = normalizePhone(deps.phone);
     if (!phone) throw new BadRequestError("Invalid phone number");
-    if (!/^\d{6}$/.test(deps.code)) {
+    if (!/^\d{4}$/.test(deps.code)) {
         throw new UnauthorizedError("Invalid OTP");
-    }
-
-    // Dev/test bypass: accept the well-known code '123456' regardless of
-    // OTP-repo state. This makes the registration flow end-to-end
-    // testable without SMS infrastructure.
-    if (isDev() && deps.code === "123456") {
-        const existing = await deps.userRepo.findByPhone(phone);
-        if (existing) {
-            return {
-                kind: "existing",
-                user: existing,
-                paid: existing.paymentStatus === "completed",
-            };
-        }
-        return { kind: "new", phone };
     }
 
     const now = (deps.now ?? Date.now)();
@@ -188,43 +165,46 @@ export async function registerUser(input: RegisterUserInput, deps: RegisterUserD
 
     const existing = await deps.userRepo.findByPhone(phone);
 
-    // Resolve paymentId/orderId from the client, falling back to whatever
-    // is already on the User record. The webhook-first race means the
-    // client sometimes doesn't have them (it never got the Razorpay
-    // handler to run), but the server already stamped them via
-    // verifyPayment or the webhook.
-    const paymentId = input.paymentId?.trim() || existing?.paymentId;
-    const orderId = input.orderId?.trim() || existing?.orderId;
-    if (!paymentId) throw new BadRequestError("paymentId is required");
-    if (!orderId) throw new BadRequestError("orderId is required");
+    // "Already registered" guard: only block when the existing record is fully
+    // completed. A pending record (profile saved, payment not yet captured)
+    // can be safely upgraded when payment arrives.
+    if (existing?.name && existing.paymentStatus === "completed") {
+        // Already completed. If the caller is the polling path that fires
+        // finishRegistration with no payment identifiers (webhook-first
+        // race), don't downgrade the record. Return the existing user
+        // as-is instead of writing pending back over completed.
+        if (!input.paymentId?.trim() || !input.orderId?.trim()) {
+            return existing;
+        }
+        throw new ConflictError("User already registered for this phone");
+    }
 
-    const profile = {
+    const hasPayment = Boolean(input.paymentId?.trim() && input.orderId?.trim());
+
+    // Build the profile payload. paymentStatus depends on whether we have
+    // payment identifiers. When unpaid, we deliberately omit paymentId/orderId/
+    // amount so the User record reflects "tried to sign up, hasn't paid".
+    const profile: Record<string, unknown> = {
         name: input.name.trim(),
         email: input.email.trim().toLowerCase(),
         role: input.role,
         state: input.state.trim(),
         city: input.city.trim(),
-        paymentStatus: "completed" as const,
-        paymentId,
-        orderId,
-        amount: 1499,
+        paymentStatus: hasPayment ? "completed" : "pending",
     };
 
+    if (hasPayment) {
+        // Resolve paymentId/orderId from the client, falling back to whatever
+        // is already on the User record. The webhook-first race means the
+        // client sometimes doesn't have them.
+        const paymentId = input.paymentId!.trim();
+        const orderId = input.orderId!.trim();
+        profile.paymentId = paymentId || existing?.paymentId;
+        profile.orderId = orderId || existing?.orderId;
+        profile.amount = 1499;
+    }
+
     if (existing) {
-        // User was already created — by createOrder's pre-payment stub, by
-        // the webhook fallback, or by a previous attempt that didn't
-        // complete. Enrich the existing record with the profile fields and
-        // payment confirmation instead of throwing, since the user just paid
-        // and expects registration to complete.
-        //
-        // Guard against a true double-submit (already fully registered)
-        // using `name` as the marker of "registration complete" rather
-        // than `paymentStatus`: `verifyPayment` already sets paymentStatus
-        // to "completed" before this point, so checking paymentStatus here
-        // would reject every legitimate first-time registration.
-        if (existing.name && existing.name.trim().length > 0) {
-            throw new ConflictError("User already registered for this phone");
-        }
         const updated = await deps.userRepo.update(String(existing._id), profile);
         if (!updated) throw new NotFoundError("User record disappeared mid-registration");
         return updated;

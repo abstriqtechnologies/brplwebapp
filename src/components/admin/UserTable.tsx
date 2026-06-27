@@ -44,7 +44,7 @@ export interface AdminUserRow {
 interface UserTableProps {
     users: AdminUserRow[];
     isLoading: boolean;
-    type: "paid" | "unpaid" | "users";
+    type: "users";
     page: number;
     totalPages: number;
     totalRecords?: number;
@@ -55,7 +55,6 @@ interface UserTableProps {
 export function UserTable({
     users,
     isLoading,
-    type,
     page,
     totalPages,
     totalRecords,
@@ -167,113 +166,110 @@ export function UserTable({
     return (
         <div className="space-y-4">
             <div className="rounded-md border bg-white dark:bg-slate-900 overflow-x-auto">
-                <Table className="min-w-[1000px]">
+                <Table className="min-w-[900px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
                             <TableHead>Phone</TableHead>
                             <TableHead>Role</TableHead>
-                            <TableHead>Joined</TableHead>
-                            <TableHead>Amount</TableHead>
-                            {type === "paid" && <TableHead>Payment ID</TableHead>}
-                            {type === "paid" && <TableHead>Invoice</TableHead>}
                             <TableHead>Status</TableHead>
+                            <TableHead>Payment</TableHead>
+                            <TableHead>Joined</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {users.map((u) => (
-                            <TableRow key={u._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                <TableCell className="font-medium whitespace-nowrap">{u.name || "-"}</TableCell>
-                                <TableCell className="text-slate-500 max-w-[200px] truncate">{u.email || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap">{u.phone || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap">
-                                    <Badge variant="outline" className="capitalize">{u.role || "player"}</Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-500 text-sm whitespace-nowrap">{formatDate(u.createdAt)}</TableCell>
-                                <TableCell className="font-medium text-green-600 whitespace-nowrap">
-                                    {formatCurrencyINR(u.amount ?? 0)}
-                                </TableCell>
-                                {type === "paid" && (
-                                    <TableCell className="font-mono text-xs text-slate-500 max-w-[150px] truncate">
-                                        {u.paymentId || "-"}
+                        {users.map((u) => {
+                            const isPaid = u.paymentStatus === "completed";
+                            return (
+                                <TableRow key={u._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                    <TableCell className="font-medium whitespace-nowrap">{u.name || "-"}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{u.phone || "-"}</TableCell>
+                                    <TableCell className="whitespace-nowrap">
+                                        <Badge variant="outline" className="capitalize">{u.role || "player"}</Badge>
                                     </TableCell>
-                                )}
-                                {type === "paid" && (
                                     <TableCell>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-blue-600"
-                                            onClick={() => handleDownloadInvoice(u)}
-                                            title="Download Invoice"
+                                        <Badge
+                                            className={
+                                                isPaid
+                                                    ? "bg-green-500 hover:bg-green-600"
+                                                    : "bg-orange-500 hover:bg-orange-600 text-white"
+                                            }
                                         >
-                                            <Download className="h-4 w-4" />
-                                        </Button>
+                                            {isPaid ? "Active" : "Unpaid"}
+                                        </Badge>
                                     </TableCell>
-                                )}
-                                <TableCell>
-                                    <Badge
-                                        variant={type === "paid" ? "default" : "secondary"}
-                                        className={
-                                            type === "paid"
-                                                ? "bg-green-500 hover:bg-green-600"
-                                                : "bg-orange-500 hover:bg-orange-600 text-white"
-                                        }
-                                    >
-                                        {type === "paid" ? "Active" : "Unpaid"}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-1">
-                                        {type === "unpaid" && (
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-8 w-8 border-green-500 text-green-600 hover:bg-green-50"
-                                                onClick={() => openMarkPaid(u)}
-                                                title="Mark as Paid"
-                                            >
-                                                <CreditCard className="w-4 h-4" />
-                                            </Button>
+                                    <TableCell className="whitespace-nowrap">
+                                        {isPaid ? (
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-green-600">
+                                                    {formatCurrencyINR(u.amount ?? 0)}
+                                                </span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 text-blue-600"
+                                                    onClick={() => handleDownloadInvoice(u)}
+                                                    title="Download Invoice"
+                                                >
+                                                    <Download className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <span className="text-slate-400 text-sm">Unpaid</span>
                                         )}
-                                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                            <Link href={`/admin/users/${u._id}`} title="View User">
-                                                <Eye className="w-4 h-4" />
-                                            </Link>
-                                        </Button>
-                                        {type === "paid" && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-blue-600"
-                                                onClick={() => openEdit(u)}
-                                                title="Edit Payment"
-                                            >
-                                                <Edit className="w-4 h-4" />
+                                    </TableCell>
+                                    <TableCell className="text-slate-500 text-sm whitespace-nowrap">{formatDate(u.createdAt)}</TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-1">
+                                            {!isPaid && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8 border-green-500 text-green-600 hover:bg-green-50"
+                                                    onClick={() => openMarkPaid(u)}
+                                                    title="Mark as Paid"
+                                                >
+                                                    <CreditCard className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                <Link href={`/admin/users/${u._id}`} title="View User">
+                                                    <Eye className="w-4 h-4" />
+                                                </Link>
                                             </Button>
-                                        )}
-                                        {type === "paid" && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-green-600"
-                                                onClick={() => handleSendEmail(u)}
-                                                disabled={emailingId === u._id}
-                                                title="Send thank-you email"
-                                            >
-                                                {emailingId === u._id ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    <Mail className="w-4 h-4" />
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                            {isPaid && (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-blue-600"
+                                                        onClick={() => openEdit(u)}
+                                                        title="Edit Payment"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-green-600"
+                                                        onClick={() => handleSendEmail(u)}
+                                                        disabled={emailingId === u._id}
+                                                        title="Send thank-you email"
+                                                    >
+                                                        {emailingId === u._id ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        ) : (
+                                                            <Mail className="w-4 h-4" />
+                                                        )}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </div>
