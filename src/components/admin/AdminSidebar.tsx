@@ -21,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
     { label: "Referral", href: "/admin/referrals", icon: Link2 },
     { label: "Blogs", href: "/admin/blogs", icon: PenSquare },
     { label: "News", href: "/admin/news", icon: Newspaper },
+    { label: "Pages", href: "/admin/pages", icon: FileText },
     { label: "Seo", href: "/admin/seo", icon: Search },
     { label: "Legal", href: "/admin/legal", icon: FileText },
     { label: "AI Context", href: "/admin/ai-context", icon: Brain },
