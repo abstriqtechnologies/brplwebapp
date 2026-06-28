@@ -5,6 +5,7 @@ import { decodeHtmlEntities } from "@/utils/htmlHelper";
 import { SafeHtml } from "@/components/SafeHtml";
 import { getSiteContext, getLegal } from "@/lib/siteContext";
 import { SiteContextProvider } from "@/components/SiteContextProvider";
+import { DynamicPageRenderer } from "@/components/admin/page-editor/DynamicPageRenderer";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,17 @@ export default async function PrivacyPolicy() {
         getSiteContext(),
         getLegal(),
     ]);
+
+    const pageData = ctx.pages["privacy-page"] as any;
+    const sections = pageData?.sections || [];
+
+    if (sections.length > 0) {
+        return (
+            <SiteContextProvider value={ctx}>
+                <DynamicPageRenderer sections={sections} />
+            </SiteContextProvider>
+        );
+    }
 
     const privacyContent = (legal?.privacy?.content || "").trim();
 

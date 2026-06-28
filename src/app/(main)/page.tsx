@@ -3,6 +3,7 @@ import Banner from "@/components/Banner";
 import SEO from "@/components/SEO";
 import { getSiteContext } from "@/lib/siteContext";
 import { SiteContextProvider } from "@/components/SiteContextProvider";
+import { DynamicPageRenderer } from "@/components/admin/page-editor/DynamicPageRenderer";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,22 @@ const BroadcastingPartners = nextDynamic(() => import("@/components/Broadcasting
 
 export default async function Index() {
     const ctx = await getSiteContext();
+    const pageData = ctx.pages["home"] as any;
+    const sections = pageData?.sections || [];
+
+    if (sections.length > 0) {
+        return (
+            <SiteContextProvider value={ctx}>
+                <SEO
+                    title="India's T10 Cricket League"
+                    description="BRPL is India's grassroots T10 tennis-ball cricket league."
+                    keywords="T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League"
+                />
+                <DynamicPageRenderer sections={sections} />
+            </SiteContextProvider>
+        );
+    }
+
     return (
         <SiteContextProvider value={ctx}>
             <div className="min-h-screen bg-transparent relative flex flex-col font-sans">

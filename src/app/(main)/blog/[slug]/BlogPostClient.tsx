@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Helmet } from "react-helmet-async";
-import SEO from "@/components/SEO";
 import api from "@/apihelper/api";
 import { ArrowLeft, Loader2, Calendar } from "lucide-react";
 import { getImageUrl } from "@/utils/imageHelper";
@@ -97,57 +95,12 @@ export default function BlogPostClient({ slug }: { slug: string }) {
         );
     }
 
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const canonicalUrl = `${origin}/blog/${post.slug}`;
-    const title = post.metaTitle?.trim() || post.title;
-    const description = post.metaDescription?.trim() || post.title;
     const imageUrl = post.featuredImage
         ? (post.featuredImage.startsWith("http") ? post.featuredImage : getImageUrl(post.featuredImage))
         : undefined;
 
-    const articleSchema = post.enableSchema
-        ? {
-              "@context": "https://schema.org",
-              "@type": "Article",
-              headline: post.title,
-              description: description,
-              image: imageUrl ? [imageUrl] : undefined,
-              datePublished: post.createdAt,
-              dateModified: post.updatedAt || post.createdAt,
-              author: {
-                  "@type": "Organization",
-                  name: SITE_NAME,
-              },
-              publisher: {
-                  "@type": "Organization",
-                  name: SITE_NAME,
-                  logo: {
-                      "@type": "ImageObject",
-                      url: `${origin}/logo.webp`,
-                  },
-              },
-              mainEntityOfPage: {
-                  "@type": "WebPage",
-                  "@id": canonicalUrl,
-              },
-          }
-        : null;
-
     return (
         <>
-            <SEO
-                title={title}
-                description={description}
-                image={imageUrl}
-                url={canonicalUrl}
-                breadcrumbCurrentName={post.title}
-            />
-            {articleSchema && (
-                <Helmet>
-                    <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
-                </Helmet>
-            )}
-
             <div className="min-h-screen bg-white text-gray-900 pt-14 pb-12 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
                     <Link

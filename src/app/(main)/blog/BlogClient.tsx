@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PageBanner from "@/components/PageBanner";
-import SEO from "@/components/SEO";
 import api from "@/apihelper/api";
 import { Loader2, ArrowRight, Calendar } from "lucide-react";
 import { getImageUrl } from "@/utils/imageHelper";
@@ -58,11 +57,6 @@ const BlogClient = () => {
 
     return (
         <>
-            <SEO
-                title="Blog & News"
-                description="Latest news and articles from Beyond Reach Premier League (BRPL)."
-                url={origin + "/blog"}
-            />
             <PageBanner title="Blog & News" currentPage="Blog" pageKey="blog" />
             <div className="container mx-auto px-4 py-12 md:py-16">
                 {loading ? (

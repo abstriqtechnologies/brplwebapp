@@ -5,6 +5,7 @@ import { decodeHtmlEntities } from "@/utils/htmlHelper";
 import { SafeHtml } from "@/components/SafeHtml";
 import { getSiteContext, getLegal } from "@/lib/siteContext";
 import { SiteContextProvider } from "@/components/SiteContextProvider";
+import { DynamicPageRenderer } from "@/components/admin/page-editor/DynamicPageRenderer";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,17 @@ export default async function TermsAndConditions() {
         getSiteContext(),
         getLegal(),
     ]);
+
+    const pageData = ctx.pages["terms-page"] as any;
+    const sections = pageData?.sections || [];
+
+    if (sections.length > 0) {
+        return (
+            <SiteContextProvider value={ctx}>
+                <DynamicPageRenderer sections={sections} />
+            </SiteContextProvider>
+        );
+    }
 
     const termsContent = (legal?.terms?.content || "").trim();
 
