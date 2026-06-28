@@ -10,7 +10,7 @@ import type { DashboardPayload, Granularity } from "@/lib/infra/db/dashboard-agg
 import { KpiCards } from "./widgets/KpiCards";
 import { RegistrationTrendChart } from "./widgets/RegistrationTrendChart";
 import { RoleDistribution } from "./widgets/RoleDistribution";
-import { CouponUsageSection } from "./widgets/CouponUsageSection";
+import { CouponBarChart, CouponTable } from "./widgets/CouponUsageSection";
 import { GeoBreakdown } from "./widgets/GeoBreakdown";
 import { RecentActivity } from "./widgets/RecentActivity";
 import { GranularityToggle } from "./widgets/GranularityToggle";
@@ -181,9 +181,12 @@ export function DashboardClient() {
                         </div>
                         <RoleDistribution data={data.roles} />
                     </div>
-                    <CouponUsageSection data={data.coupons} />
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
                         <GeoBreakdown data={data.geo} />
+                        <CouponBarChart data={data.coupons} />
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+                        <CouponTable data={data.coupons} />
                         <RecentActivity rows={data.recent} />
                     </div>
                 </>
