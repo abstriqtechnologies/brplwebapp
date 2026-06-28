@@ -26,6 +26,7 @@ export type DashboardPayload = {
         trialCompleted: number;
         conversionRate: number;
         trialCompletionRate: number;
+        totalRevenue: number;
     };
     registrations: Array<{ bucket: string; count: number }>;
     coupons: {
@@ -83,6 +84,7 @@ export function computeDashboard(
         trialCompleted,
         conversionRate: totalPlayers === 0 ? 0 : registeredPlayers / totalPlayers,
         trialCompletionRate: totalPlayers === 0 ? 0 : trialCompleted / totalPlayers,
+        totalRevenue: users.reduce((sum, u) => sum + (u.amount ?? 0), 0),
     };
 
     return {

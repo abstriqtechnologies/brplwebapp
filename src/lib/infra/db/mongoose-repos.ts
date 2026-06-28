@@ -273,26 +273,14 @@ export class MongooseCouponRepo implements CouponRepo {
 
     async list(opts: { limit: number; skip: number; search?: string }): Promise<ICoupon[]> {
         await connectDB();
-        const query: Record<string, unknown> = {};
-        if (opts.search?.trim()) {
-            // Case-insensitive substring match on the (already-uppercased) code field.
-            query.code = { $regex: this.escapeRegex(opts.search.trim().toUpperCase()), $options: "i" };
-        }
-        const docs = await Coupon.find(query)
-            .sort({ createdAt: -1 })
-            .skip(opts.skip)
-            .limit(opts.limit)
-            .lean();
+        const query = this.adminCouponQuery(opts.search);
+        const docs = await Coupon.find(query).sort({ createdAt: -1 }).skip(opts.skip).limit(opts.limit).lean();
         return docs as unknown as ICoupon[];
     }
 
     async count(search?: string): Promise<number> {
         await connectDB();
-        const query: Record<string, unknown> = {};
-        if (search?.trim()) {
-            query.code = { $regex: this.escapeRegex(search.trim().toUpperCase()), $options: "i" };
-        }
-        return await Coupon.countDocuments(query);
+        return await Coupon.countDocuments(this.adminCouponQuery(search));
     }
 
     async create(data: CreateCouponInput): Promise<ICoupon> {
@@ -323,5 +311,16 @@ export class MongooseCouponRepo implements CouponRepo {
     /** Escape regex metachars so user input becomes a literal substring. */
     private escapeRegex(s: string): string {
         return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    private adminCouponQuery(search?: string): Record<string, unknown> {
+        const query: Record<string, unknown> = {
+            $nor: [{ source: "referral" }, { description: /^Referral:/i }],
+        };
+        if (search?.trim()) {
+            // Case-insensitive substring match on the (already-uppercased) code field.
+            query.code = { $regex: this.escapeRegex(search.trim().toUpperCase()), $options: "i" };
+        }
+        return query;
     }
 }

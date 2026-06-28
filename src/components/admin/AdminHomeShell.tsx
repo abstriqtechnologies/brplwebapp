@@ -1,26 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 /**
- * Minimal session-gated wrapper for the admin section.
+ * Persistent admin shell. Auth is checked by the server layout; this client
+ * shell keeps the sidebar mounted while switching between admin sections.
  *
- * Replaces the deleted AdminShell/AdminSidebar/AdminHeader trio. Verifies the
- * admin session via useAdminAuth, then renders children. The actual page
- * content (e.g. /admin/dashboard) owns its own visual chrome — there is no
- * sidebar or admin header.
+ * The shell uses `h-screen overflow-hidden` so the sidebar and content area
+ * are fixed-height. The sidebar never scrolls (it's short enough to fit);
+ * the content area scrolls independently when its children overflow.
  */
 export function AdminHomeShell({ children }: { children: React.ReactNode }) {
-    const { me, refresh } = useAdminAuth();
-
-    useEffect(() => {
-        // The (admin) layout already redirects unauthenticated users via
-        // getAdminSession(), but the client-side hook needs to hydrate so
-        // child pages can read `me` without an extra request.
-        if (!me) refresh();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return <>{children}</>;
+    return (
+        <div className="h-screen flex overflow-hidden bg-slate-50 dark:bg-slate-950">
+            <AdminSidebar />
+            <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+        </div>
+    );
 }

@@ -58,6 +58,7 @@ describe("computeDashboard", () => {
         expect(out.totals.trialCompleted).toBe(0);
         expect(out.totals.conversionRate).toBe(0);
         expect(out.totals.trialCompletionRate).toBe(0);
+        expect(out.totals.totalRevenue).toBe(0);
         expect(out.registrations).toEqual([]);
         expect(out.coupons.rows).toEqual([]);
         expect(out.coupons.topByUsage).toEqual([]);
@@ -88,6 +89,17 @@ describe("computeDashboard — populated inputs", () => {
         expect(out.totals.pendingPayments).toBe(1);
         expect(out.totals.trialCompleted).toBe(1);
         expect(out.totals.conversionRate).toBeCloseTo(2 / 3);
+        expect(out.totals.totalRevenue).toBe(0);
+    });
+
+    it("includes total revenue from user amounts", () => {
+        const users = [
+            makeUser({ createdAt: new Date("2026-06-10"), paymentStatus: "completed", amount: 500 }),
+            makeUser({ createdAt: new Date("2026-06-11"), paymentStatus: "completed", amount: 300 }),
+            makeUser({ createdAt: new Date("2026-06-12"), paymentStatus: "pending", amount: 0 }),
+        ];
+        const out = computeDashboard(users, [], { from, to, granularity: "day" });
+        expect(out.totals.totalRevenue).toBe(800);
     });
 
     it("buckets daily registrations with sorted keys", () => {

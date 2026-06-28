@@ -17,14 +17,43 @@ import { GranularityToggle } from "./widgets/GranularityToggle";
 import { DateRangePicker } from "./widgets/DateRangePicker";
 import { DashboardSkeleton } from "./widgets/DashboardSkeleton";
 
-function defaultRange(): DateRange {
-    const now = new Date();
-    const from = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-    return { from, to: now };
+/**
+ * Each granularity picks a sensible date preset. Clicking "Day" snaps to
+ * today, "Month" to the current month, "Year" to the current calendar year.
+ * The DateRangePicker still works as an override on top of the preset.
+ */
+function rangeForGranularity(g: Granularity, anchor: Date = new Date()): DateRange {
+    if (g === "day") {
+        const from = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+        return { from, to: anchor };
+    }
+    if (g === "month") {
+        const from = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        return { from, to: anchor };
+    }
+    // year
+    const from = new Date(anchor.getFullYear(), 0, 1);
+    return { from, to: anchor };
 }
 
-function rangeToParams(range: DateRange | undefined, granularity: Granularity): URLSearchParams {
-    const params = new URLSearchParams({ granularity });
+/**
+ * Derive the chart-bucket granularity from the date-range length.
+ * A short range (≤31 days) is bucketed daily; a medium range (≤365 days)
+ * is bucketed monthly; anything longer is bucketed yearly.
+ */
+function bucketGranularity(range: DateRange | undefined): Granularity {
+    if (!range?.from || !range?.to) return "month";
+    const diffDays = (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24);
+    if (diffDays <= 31) return "day";
+    if (diffDays <= 365) return "month";
+    return "year";
+}
+
+function rangeToParams(
+    range: DateRange | undefined,
+    bucket: Granularity,
+): URLSearchParams {
+    const params = new URLSearchParams({ granularity: bucket });
     if (range?.from) params.set("from", range.from.toISOString());
     if (range?.to) {
         const endOfDay = new Date(range.to);
@@ -35,16 +64,21 @@ function rangeToParams(range: DateRange | undefined, granularity: Granularity): 
 }
 
 export function DashboardClient() {
-    const [granularity, setGranularity] = useState<Granularity>("month");
-    const [range, setRange] = useState<DateRange | undefined>(defaultRange);
+    const [granularityPreset, setGranularityPreset] = useState<Granularity>("month");
+    const [range, setRange] = useState<DateRange | undefined>(() =>
+        rangeForGranularity("month"),
+    );
     const [data, setData] = useState<DashboardPayload | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // The bucket size sent to the API is auto-derived from the range.
+    const bucketGran = useMemo(() => bucketGranularity(range), [range]);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
-        const params = rangeToParams(range, granularity);
+        const params = rangeToParams(range, bucketGran);
         const res = await api.get<{ ok: true; data: DashboardPayload }>(
             `/api/admin/dashboard?${params.toString()}`,
         );
@@ -54,24 +88,30 @@ export function DashboardClient() {
             setError(res.error || "Failed to load dashboard");
         }
         setLoading(false);
-    }, [granularity, range]);
+    }, [range, bucketGran]);
 
     useEffect(() => {
         void fetchData();
     }, [fetchData]);
 
+    const handleGranularityChange = (g: Granularity) => {
+        setGranularityPreset(g);
+        // Snap the date range to a sensible preset for the new granularity.
+        setRange(rangeForGranularity(g));
+    };
+
     const filtersActive = useMemo(
-        () => Boolean(range?.from || range?.to) || granularity !== "month",
-        [range, granularity],
+        () => granularityPreset !== "month",
+        [granularityPreset],
     );
 
     const clearFilters = () => {
-        setGranularity("month");
-        setRange(defaultRange());
+        setGranularityPreset("month");
+        setRange(rangeForGranularity("month"));
     };
 
     return (
-        <main className="p-6 min-w-0 space-y-4">
+        <div className="p-6 space-y-3">
             <header className="flex items-center justify-between gap-3 flex-wrap">
                 <div>
                     <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
@@ -82,7 +122,10 @@ export function DashboardClient() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                    <GranularityToggle value={granularity} onChange={setGranularity} />
+                    <GranularityToggle
+                        value={granularityPreset}
+                        onChange={handleGranularityChange}
+                    />
                     <DateRangePicker value={range} onChange={setRange} />
                     {filtersActive && (
                         <Button
@@ -147,6 +190,6 @@ export function DashboardClient() {
             ) : null}
 
             {loading && data && <p className="text-xs text-slate-400">Refreshing…</p>}
-        </main>
+        </div>
     );
 }
