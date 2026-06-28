@@ -30,6 +30,10 @@ export async function GET() {
                 state: user.state,
                 city: user.city,
                 paymentStatus: user.paymentStatus,
+                couponId: user.couponId ? user.couponId.toString() : null,
+                couponCode: user.couponCode ?? null,
+                couponDiscount: user.couponDiscount ?? null,
+                couponAppliedAt: user.couponAppliedAt ? new Date(user.couponAppliedAt).toISOString() : null,
                 profileImage: user.profileImage ?? null,
             },
         });

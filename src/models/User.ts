@@ -16,6 +16,10 @@ export interface IUser extends Document {
     paymentId?: string;
     orderId?: string;
     amount?: number;
+    couponId?: mongoose.Types.ObjectId | string;
+    couponCode?: string;
+    couponDiscount?: number;
+    couponAppliedAt?: Date;
     profileImage?: string; // URL or data URI; TrialPass falls back to /assets/avtar.webp when absent
     createdAt: Date;
     updatedAt: Date;
@@ -33,9 +37,13 @@ const UserSchema = new Schema<IUser>(
         paymentId: { type: String },
         orderId: { type: String, index: true },
         amount: { type: Number },
+        couponId: { type: Schema.Types.ObjectId, ref: "Coupon", index: true },
+        couponCode: { type: String, uppercase: true, trim: true, index: true },
+        couponDiscount: { type: Number },
+        couponAppliedAt: { type: Date },
         profileImage: { type: String }, // unvalidated URL or data URI; optional
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 const User: Model<IUser> = (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>("User", UserSchema);

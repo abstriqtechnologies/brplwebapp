@@ -4,7 +4,7 @@
  *   PATCH  /api/admin/coupons/[id]   — partial update
  *   DELETE /api/admin/coupons/[id]   — hard delete
  *
- * Auth: superadmin or subadmin.
+ * Auth: superadmin.
  *
  * NOTE: `withRequest` doesn't forward Next.js route params, so we extract
  * `id` from the URL path here. This matches the rest of the
@@ -88,7 +88,7 @@ export const PATCH = withRequest(
     withAdmin({
         getAdminCookie,
         lookup: adminLookup,
-        allowedRoles: ["superadmin", "subadmin"],
+        allowedRoles: ["superadmin"],
     })(async ({ req }) => {
         const body = await req.json().catch(() => ({}));
         const parsed = patchSchema.safeParse(body);
@@ -126,7 +126,7 @@ export const DELETE = withRequest(
     withAdmin({
         getAdminCookie,
         lookup: adminLookup,
-        allowedRoles: ["superadmin", "subadmin"],
+        allowedRoles: ["superadmin"],
     })(async ({ req }) => {
         const repo = new MongooseCouponRepo();
         const deleted = await repo.remove(extractId(req));

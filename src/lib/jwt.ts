@@ -137,7 +137,7 @@ export async function clearAdminCookie() {
 export type AdminSession = {
     sub: string;
     email: string;
-    role: "superadmin" | "subadmin" | "seo_content";
+    role: "superadmin";
     name?: string;
     purpose: "admin";
 };

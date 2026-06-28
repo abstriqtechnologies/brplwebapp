@@ -40,7 +40,7 @@ export type CreateAdminInput = {
     email: string;
     passwordHash: string;
     name: string;
-    role: "superadmin" | "subadmin" | "seo_content";
+    role: "superadmin";
     active?: boolean;
     totpSecret?: string;
     totpEnabled?: boolean;
@@ -91,6 +91,9 @@ export type CreatePaymentInput = {
     currency: string;
     status: "created" | "completed" | "failed" | "refunded";
     source: "razorpay" | "manual" | "coupon";
+    couponId?: string;
+    couponCode?: string;
+    couponDiscount?: number;
 };
 
 export interface PaymentRepo {
@@ -137,10 +140,7 @@ export interface MediaRepo {
 // ---------- CouponRepo (for future payment work) ----------
 
 export type CreateCouponInput = Omit<ICoupon, "_id" | "createdAt" | "updatedAt" | keyof Document>;
-export type CreateCouponUsageInput = Omit<
-    ICouponUsage,
-    "_id" | "createdAt" | "updatedAt" | keyof Document
->;
+export type CreateCouponUsageInput = Omit<ICouponUsage, "_id" | "createdAt" | "updatedAt" | keyof Document>;
 
 export interface CouponRepo {
     findByCode(code: string): Promise<ICoupon | null>;
@@ -456,27 +456,17 @@ export class InMemoryCouponRepo implements CouponRepo {
         return doc;
     }
     async findUsageForUser(couponId: string, userId: string): Promise<ICouponUsage | null> {
-        return (
-            this.usages.find(
-                (u) => String(u.couponId) === couponId && String(u.userId) === userId,
-            ) ?? null
-        );
+        return this.usages.find((u) => String(u.couponId) === couponId && String(u.userId) === userId) ?? null;
     }
     async listUsages(couponId: string, limit: number, skip: number): Promise<ICouponUsage[]> {
-        return this.usages
-            .filter((u) => String(u.couponId) === couponId)
-            .slice(skip, skip + limit);
+        return this.usages.filter((u) => String(u.couponId) === couponId).slice(skip, skip + limit);
     }
     // ---------- Admin CRUD ----------
 
     async list(opts: { limit: number; skip: number; search?: string }): Promise<ICoupon[]> {
         const search = opts.search?.trim().toUpperCase();
-        const filtered = search
-            ? this.coupons.filter((c) => c.code.includes(search))
-            : this.coupons;
-        const sorted = [...filtered].sort(
-            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-        );
+        const filtered = search ? this.coupons.filter((c) => c.code.includes(search)) : this.coupons;
+        const sorted = [...filtered].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         return sorted.slice(opts.skip, opts.skip + opts.limit);
     }
     async count(search?: string): Promise<number> {

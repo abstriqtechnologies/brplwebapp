@@ -58,8 +58,7 @@ export const POST = withRequest(
         const { couponId, code } = parsed.data;
 
         let amountPaise = REGISTRATION_AMOUNT_PAISE;
-        let appliedCoupon: { id: string; code: string; discount: number; finalAmount: number } | null =
-            null;
+        let appliedCoupon: { id: string; code: string; discount: number; finalAmount: number } | null = null;
 
         // If the client claims a coupon is applied, re-validate it server-side.
         // We require both `couponId` and `code` together (one without the
@@ -84,7 +83,7 @@ export const POST = withRequest(
             }
             appliedCoupon = {
                 id: validation.couponId,
-                code,
+                code: code.trim().toUpperCase(),
                 discount: validation.discount,
                 finalAmount: validation.finalAmount,
             };
@@ -99,6 +98,15 @@ export const POST = withRequest(
             userRepo: new MongooseUserRepo(),
             paymentRepo: new MongoosePaymentRepo(),
             keyId,
+            ...(appliedCoupon
+                ? {
+                      coupon: {
+                          id: appliedCoupon.id,
+                          code: appliedCoupon.code,
+                          discount: appliedCoupon.discount,
+                      },
+                  }
+                : {}),
         });
         return ok({
             success: true,

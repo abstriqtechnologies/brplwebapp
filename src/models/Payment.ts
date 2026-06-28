@@ -9,6 +9,9 @@ export interface IPayment extends Document {
     currency: string;
     status: "created" | "completed" | "failed" | "refunded";
     source: "razorpay" | "manual" | "coupon";
+    couponId?: mongoose.Types.ObjectId | string;
+    couponCode?: string;
+    couponDiscount?: number;
     method?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -28,9 +31,12 @@ const PaymentSchema = new Schema<IPayment>(
             index: true,
         },
         source: { type: String, enum: ["razorpay", "manual", "coupon"], default: "razorpay" },
+        couponId: { type: Schema.Types.ObjectId, ref: "Coupon", index: true },
+        couponCode: { type: String, uppercase: true, trim: true, index: true },
+        couponDiscount: { type: Number },
         method: { type: String },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 const Payment: Model<IPayment> =

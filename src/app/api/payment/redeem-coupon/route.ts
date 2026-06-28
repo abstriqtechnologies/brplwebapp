@@ -21,15 +21,8 @@ import { verifyPending, verifyAuth } from "@/lib/auth/crypto";
 import { cookies } from "next/headers";
 import { COOKIE_NAMES, setAuthCookie, clearPendingCookie } from "@/lib/auth/cookies";
 import { signAuth } from "@/lib/auth/crypto";
-import {
-    validateCoupon,
-    redeemCoupon as redeemCouponService,
-} from "@/lib/domain/coupon/service";
-import {
-    MongooseUserRepo,
-    MongoosePaymentRepo,
-    MongooseCouponRepo,
-} from "@/lib/infra/db/mongoose-repos";
+import { validateCoupon, redeemCoupon as redeemCouponService } from "@/lib/domain/coupon/service";
+import { MongooseUserRepo, MongoosePaymentRepo, MongooseCouponRepo } from "@/lib/infra/db/mongoose-repos";
 import { connectDB } from "@/lib/mongodb";
 import { logger } from "@/lib/logger";
 
@@ -50,8 +43,7 @@ const schema = z.object({
 });
 
 async function readSession(): Promise<
-    | { kind: "pending"; phone: string }
-    | { kind: "auth"; userId: string; phone: string; paid: false }
+    { kind: "pending"; phone: string } | { kind: "auth"; userId: string; phone: string; paid: false }
 > {
     const c = await cookies();
     const authToken = c.get(COOKIE_NAMES.AUTH)?.value;
@@ -80,10 +72,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
-        return NextResponse.json(
-            { error: "Invalid input", issues: parsed.error.issues },
-            { status: 400 },
-        );
+        return NextResponse.json({ error: "Invalid input", issues: parsed.error.issues }, { status: 400 });
     }
     const { code, orderAmountRupees, name, email, role, state, city } = parsed.data;
 
@@ -119,10 +108,7 @@ export async function POST(req: NextRequest) {
         let user = await userRepo.findByPhone(userPhone);
         if (!user) {
             if (!name || !email || !role || !state || !city) {
-                return NextResponse.json(
-                    { error: "Profile required to redeem coupon for new user" },
-                    { status: 400 },
-                );
+                return NextResponse.json({ error: "Profile required to redeem coupon for new user" }, { status: 400 });
             }
             user = await userRepo.create({
                 phone: userPhone,
@@ -131,10 +117,7 @@ export async function POST(req: NextRequest) {
                 role,
                 state,
                 city,
-                paymentStatus: "completed",
-                paymentId: "",
-                orderId: "",
-                amount: 0,
+                paymentStatus: "pending",
             } as any);
         } else if (name && email && role && state && city) {
             // User record already exists — a createOrder pre-creation stub,
@@ -177,6 +160,9 @@ export async function POST(req: NextRequest) {
         currency: "INR",
         status: "completed",
         source: "coupon",
+        couponId: result.couponId,
+        couponCode: result.code,
+        couponDiscount: result.discount,
     });
 
     // Mark user paid + re-issue auth cookie with paid:true.
@@ -185,6 +171,10 @@ export async function POST(req: NextRequest) {
         paymentId: orderId,
         orderId,
         amount: 0,
+        couponId: result.couponId as any,
+        couponCode: result.code,
+        couponDiscount: result.discount,
+        couponAppliedAt: new Date(),
     });
     if (!updated) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });

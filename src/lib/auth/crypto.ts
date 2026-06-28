@@ -38,7 +38,7 @@ export type PendingTokenPayload = {
 export type AdminTokenPayload = {
     sub: string;
     email: string;
-    role: "superadmin" | "subadmin" | "seo_content";
+    role: "superadmin";
     name?: string;
     purpose: "admin";
     [key: string]: unknown;

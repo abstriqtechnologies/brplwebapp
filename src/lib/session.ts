@@ -16,6 +16,10 @@ export type AuthSession = {
     paymentId?: string;
     orderId?: string;
     amount?: number;
+    couponId?: string;
+    couponCode?: string;
+    couponDiscount?: number;
+    couponAppliedAt?: Date;
     profileImage?: string;
 };
 
@@ -42,6 +46,10 @@ export async function getAuthSession(): Promise<AuthSession | null> {
         paymentId: user.paymentId,
         orderId: user.orderId,
         amount: user.amount,
+        couponId: user.couponId ? user.couponId.toString() : undefined,
+        couponCode: user.couponCode,
+        couponDiscount: user.couponDiscount,
+        couponAppliedAt: user.couponAppliedAt,
         profileImage: user.profileImage,
     };
 }

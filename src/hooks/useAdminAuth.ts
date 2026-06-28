@@ -7,7 +7,7 @@ import api from "@/apihelper/api";
 export type AdminMe = {
     email: string;
     name?: string;
-    role: "superadmin" | "subadmin" | "seo_content";
+    role: "superadmin";
     sub?: string;
 };
 

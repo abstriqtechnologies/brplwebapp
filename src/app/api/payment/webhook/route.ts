@@ -15,7 +15,7 @@ import { withRequest } from "@/lib/api/handlers";
 import { ok } from "@/lib/api/response";
 import { handleWebhook as handleWebhookService } from "@/lib/domain/payment/service";
 import { env } from "@/lib/env";
-import { MongooseUserRepo, MongoosePaymentRepo } from "@/lib/infra/db/mongoose-repos";
+import { MongooseUserRepo, MongoosePaymentRepo, MongooseCouponRepo } from "@/lib/infra/db/mongoose-repos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +30,7 @@ export const POST = withRequest(async ({ req }) => {
         secret: env.RAZORPAY_WEBHOOK_SECRET || "",
         userRepo: new MongooseUserRepo(),
         paymentRepo: new MongoosePaymentRepo(),
+        couponRepo: new MongooseCouponRepo(),
     });
 
     return ok({ received: true });

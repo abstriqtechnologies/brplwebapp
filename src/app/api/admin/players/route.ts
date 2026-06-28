@@ -28,6 +28,8 @@ export type AdminPlayer = {
     city: string;
     state: string;
     paymentStatus: "pending" | "completed" | "—";
+    couponCode: string;
+    couponDiscount: number | null;
     registrationDate: string; // ISO 8601, derived from createdAt
 };
 
@@ -39,7 +41,16 @@ export const GET = withRequest(
         await connectDB();
         const docs = await User.find(
             {},
-            { name: 1, phone: 1, city: 1, state: 1, paymentStatus: 1, createdAt: 1 }
+            {
+                name: 1,
+                phone: 1,
+                city: 1,
+                state: 1,
+                paymentStatus: 1,
+                couponCode: 1,
+                couponDiscount: 1,
+                createdAt: 1,
+            },
         )
             .sort({ createdAt: -1 })
             .lean();
@@ -51,6 +62,8 @@ export const GET = withRequest(
             city: d.city?.trim() || "—",
             state: d.state?.trim() || "—",
             paymentStatus: (d.paymentStatus as "pending" | "completed") || "—",
+            couponCode: d.couponCode?.trim() || "—",
+            couponDiscount: typeof d.couponDiscount === "number" ? d.couponDiscount : null,
             registrationDate:
                 d.createdAt instanceof Date
                     ? d.createdAt.toISOString()

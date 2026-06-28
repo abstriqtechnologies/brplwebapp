@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import {
-    Search,
-    ChevronLeft,
-    ChevronRight,
-    Pencil,
-    Trash2,
-    Plus,
-    Ticket,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Pencil, Trash2, Plus, Ticket } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +51,7 @@ const PAGE_SIZE = 15;
 
 export default function AdminCouponsPage() {
     const { me } = useAdminAuth();
-    const canManage = me?.role === "superadmin" || me?.role === "subadmin";
+    const canManage = me?.role === "superadmin";
 
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [total, setTotal] = useState(0);
@@ -90,30 +82,42 @@ export default function AdminCouponsPage() {
         setPage(1);
     }, [debouncedQuery]);
 
-    const fetchCoupons = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        const qs = new URLSearchParams({
-            page: String(page),
-            pageSize: String(PAGE_SIZE),
-        });
-        if (debouncedQuery) qs.set("search", debouncedQuery);
+    const fetchCoupons = useCallback(
+        async (opts: { silent?: boolean } = {}) => {
+            if (!opts.silent) {
+                setLoading(true);
+                setError(null);
+            }
+            const qs = new URLSearchParams({
+                page: String(page),
+                pageSize: String(PAGE_SIZE),
+            });
+            if (debouncedQuery) qs.set("search", debouncedQuery);
 
-        const res = await api.get<{
-            ok: true;
-            data: { coupons: Coupon[]; total: number };
-        }>(`/api/admin/coupons?${qs.toString()}`);
-        if (res.ok && res.data?.data) {
-            setCoupons(res.data.data.coupons);
-            setTotal(res.data.data.total);
-        } else {
-            setError(res.error || "Failed to load coupons");
-        }
-        setLoading(false);
-    }, [page, debouncedQuery]);
+            const res = await api.get<{
+                ok: true;
+                data: { coupons: Coupon[]; total: number };
+            }>(`/api/admin/coupons?${qs.toString()}`);
+            if (res.ok && res.data?.data) {
+                setCoupons(res.data.data.coupons);
+                setTotal(res.data.data.total);
+            } else if (!opts.silent) {
+                setError(res.error || "Failed to load coupons");
+            }
+            if (!opts.silent) setLoading(false);
+        },
+        [page, debouncedQuery],
+    );
 
     useEffect(() => {
         void fetchCoupons();
+    }, [fetchCoupons]);
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            void fetchCoupons({ silent: true });
+        }, 15_000);
+        return () => window.clearInterval(timer);
     }, [fetchCoupons]);
 
     const openCreate = () => {
@@ -162,12 +166,9 @@ export default function AdminCouponsPage() {
         const code = values.code.trim().toUpperCase();
         const amount = Number(values.amount);
         const usageLimit = values.usageLimit === "" ? 0 : Number(values.usageLimit);
-        const minOrderAmount =
-            values.minOrderAmount === "" ? undefined : Number(values.minOrderAmount);
+        const minOrderAmount = values.minOrderAmount === "" ? undefined : Number(values.minOrderAmount);
         const expiresAt =
-            values.expiresAt === ""
-                ? undefined
-                : new Date(`${values.expiresAt}T23:59:59.999Z`).toISOString();
+            values.expiresAt === "" ? undefined : new Date(`${values.expiresAt}T23:59:59.999Z`).toISOString();
 
         if (!code || code.length < 2) {
             setFormError("Code is required (min 2 characters)");
@@ -205,10 +206,7 @@ export default function AdminCouponsPage() {
             await fetchCoupons();
         } else {
             // Try to surface a useful message.
-            const msg =
-                (res.data as { message?: string } | null)?.message ||
-                res.error ||
-                "Failed to save coupon";
+            const msg = (res.data as { message?: string } | null)?.message || res.error || "Failed to save coupon";
             setFormError(msg);
         }
         setSubmitting(false);
@@ -231,9 +229,7 @@ export default function AdminCouponsPage() {
                             Coupons
                         </h1>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {loading
-                                ? "Loading…"
-                                : `${total} coupon${total === 1 ? "" : "s"}`}
+                            {loading ? "Loading…" : `${total} coupon${total === 1 ? "" : "s"}`}
                         </p>
                     </div>
 
@@ -249,11 +245,7 @@ export default function AdminCouponsPage() {
                             />
                         </div>
                         {canManage && (
-                            <Button
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                onClick={openCreate}
-                            >
+                            <Button size="sm" className="h-8 px-3 text-xs" onClick={openCreate}>
                                 <Plus className="h-3.5 w-3.5 mr-1" />
                                 New Coupon
                             </Button>
@@ -309,10 +301,7 @@ export default function AdminCouponsPage() {
                                     </tr>
                                 )}
                                 {coupons.map((c) => (
-                                    <tr
-                                        key={c.id}
-                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                    >
+                                    <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800">
                                             <div className="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
                                                 {c.code}
@@ -324,18 +313,13 @@ export default function AdminCouponsPage() {
                                             )}
                                         </td>
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                                            {c.type === "percent"
-                                                ? `${c.amount}%`
-                                                : `₹${c.amount}`}
+                                            {c.type === "percent" ? `${c.amount}%` : `₹${c.amount}`}
                                         </td>
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                            {c.usedCount} /{" "}
-                                            {c.usageLimit === 0 ? "∞" : c.usageLimit}
+                                            {c.usedCount} / {c.usageLimit === 0 ? "∞" : c.usageLimit}
                                         </td>
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                            {c.minOrderAmount !== null
-                                                ? `₹${c.minOrderAmount}`
-                                                : "—"}
+                                            {c.minOrderAmount !== null ? `₹${c.minOrderAmount}` : "—"}
                                         </td>
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800">
                                             <Switch
@@ -382,14 +366,10 @@ export default function AdminCouponsPage() {
                     <div
                         className={cn(
                             "flex items-center justify-between gap-3 px-3 py-2 border-t border-slate-200 dark:border-slate-800",
-                            "bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-400"
+                            "bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-400",
                         )}
                     >
-                        <span>
-                            {total === 0
-                                ? "0 results"
-                                : `Showing ${showingFrom}–${showingTo} of ${total}`}
-                        </span>
+                        <span>{total === 0 ? "0 results" : `Showing ${showingFrom}–${showingTo} of ${total}`}</span>
                         <div className="flex items-center gap-2">
                             <span className="text-xs">
                                 Page {safePage} of {totalPages}
@@ -464,8 +444,7 @@ function CouponDialog({
                 type: initial.type,
                 amount: String(initial.amount),
                 usageLimit: String(initial.usageLimit),
-                minOrderAmount:
-                    initial.minOrderAmount !== null ? String(initial.minOrderAmount) : "",
+                minOrderAmount: initial.minOrderAmount !== null ? String(initial.minOrderAmount) : "",
                 active: initial.active,
                 expiresAt: initial.expiresAt ? toDateInputValue(initial.expiresAt) : "",
             });
@@ -598,13 +577,8 @@ function CouponDialog({
                     </div>
 
                     <label className="flex items-center justify-between gap-3 px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                            Active
-                        </span>
-                        <Switch
-                            checked={values.active}
-                            onCheckedChange={(v) => set("active", v)}
-                        />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Active</span>
+                        <Switch checked={values.active} onCheckedChange={(v) => set("active", v)} />
                     </label>
 
                     {error && (

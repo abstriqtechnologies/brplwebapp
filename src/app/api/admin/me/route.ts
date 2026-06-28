@@ -65,7 +65,7 @@ export const PATCH = withRequest(
             sub: String(updated._id),
             email: updated.email,
             name: updated.name,
-            role: updated.role as "superadmin" | "subadmin" | "seo_content",
+            role: updated.role as "superadmin",
         });
         await setAdminCookie(token);
         return ok({

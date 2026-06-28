@@ -7,18 +7,14 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import api from "@/apihelper/api";
 
 const PAYMENT_FILTER_ALL = "all";
 const STATE_FILTER_ALL = "all";
+const COUPON_FILTER_ALL = "all";
+const COUPON_FILTER_NONE = "none";
 
 type Player = {
     id: string;
@@ -27,6 +23,8 @@ type Player = {
     city: string;
     state: string;
     paymentStatus: "pending" | "completed" | "—";
+    couponCode: string;
+    couponDiscount: number | null;
     registrationDate: string;
 };
 
@@ -39,6 +37,7 @@ export default function AdminPlayersPage() {
     const [query, setQuery] = useState("");
     const [stateFilter, setStateFilter] = useState<string>(STATE_FILTER_ALL);
     const [paymentFilter, setPaymentFilter] = useState<string>(PAYMENT_FILTER_ALL);
+    const [couponFilter, setCouponFilter] = useState<string>(COUPON_FILTER_ALL);
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const [page, setPage] = useState(1);
 
@@ -47,6 +46,14 @@ export default function AdminPlayersPage() {
         const set = new Set<string>();
         for (const p of players) {
             if (p.state && p.state !== "—") set.add(p.state);
+        }
+        return Array.from(set).sort((a, b) => a.localeCompare(b));
+    }, [players]);
+
+    const couponOptions = useMemo(() => {
+        const set = new Set<string>();
+        for (const p of players) {
+            if (p.couponCode && p.couponCode !== "—") set.add(p.couponCode);
         }
         return Array.from(set).sort((a, b) => a.localeCompare(b));
     }, [players]);
@@ -74,16 +81,20 @@ export default function AdminPlayersPage() {
         const q = query.trim().toLowerCase();
         const { from, to } = dateRange ?? {};
         // Inclusive end-of-day for `to`, so a player registered on `to` is included.
-        const toEnd = to
-            ? new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999)
-            : undefined;
-        const fromStart = from
-            ? new Date(from.getFullYear(), from.getMonth(), from.getDate(), 0, 0, 0, 0)
-            : undefined;
+        const toEnd = to ? new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999) : undefined;
+        const fromStart = from ? new Date(from.getFullYear(), from.getMonth(), from.getDate(), 0, 0, 0, 0) : undefined;
 
         return players.filter((p) => {
             if (stateFilter !== STATE_FILTER_ALL && p.state !== stateFilter) return false;
             if (paymentFilter !== PAYMENT_FILTER_ALL && p.paymentStatus !== paymentFilter) return false;
+            if (couponFilter === COUPON_FILTER_NONE && p.couponCode !== "—") return false;
+            if (
+                couponFilter !== COUPON_FILTER_ALL &&
+                couponFilter !== COUPON_FILTER_NONE &&
+                p.couponCode !== couponFilter
+            ) {
+                return false;
+            }
             if (fromStart || toEnd) {
                 const d = new Date(p.registrationDate);
                 if (Number.isNaN(d.getTime())) return false;
@@ -97,22 +108,24 @@ export default function AdminPlayersPage() {
                 p.city,
                 p.state,
                 p.paymentStatus,
+                p.couponCode,
                 formatRegistrationDate(p.registrationDate),
             ]
                 .join(" ")
                 .toLowerCase()
                 .includes(q);
         });
-    }, [players, query, stateFilter, paymentFilter, dateRange]);
+    }, [players, query, stateFilter, paymentFilter, couponFilter, dateRange]);
 
     // Reset to page 1 when the filtered set shrinks/grows (e.g. on search).
     useEffect(() => {
         setPage(1);
-    }, [query, stateFilter, paymentFilter, dateRange]);
+    }, [query, stateFilter, paymentFilter, couponFilter, dateRange]);
 
     const filtersActive =
         stateFilter !== STATE_FILTER_ALL ||
         paymentFilter !== PAYMENT_FILTER_ALL ||
+        couponFilter !== COUPON_FILTER_ALL ||
         query.length > 0 ||
         Boolean(dateRange?.from || dateRange?.to);
 
@@ -130,9 +143,7 @@ export default function AdminPlayersPage() {
             <main className="flex-1 p-6 min-w-0">
                 <div className="flex items-center justify-between gap-4 mb-4">
                     <div>
-                        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                            Players
-                        </h1>
+                        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Players</h1>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
                             {loading
                                 ? "Loading…"
@@ -176,6 +187,21 @@ export default function AdminPlayersPage() {
                             </SelectContent>
                         </Select>
 
+                        <Select value={couponFilter} onValueChange={setCouponFilter}>
+                            <SelectTrigger className="h-8 w-36 text-xs px-2">
+                                <SelectValue placeholder="Coupon" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={COUPON_FILTER_ALL}>All coupons</SelectItem>
+                                <SelectItem value={COUPON_FILTER_NONE}>No coupon</SelectItem>
+                                {couponOptions.map((code) => (
+                                    <SelectItem key={code} value={code}>
+                                        {code}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
                         <DateRangePicker value={dateRange} onChange={setDateRange} />
 
                         {filtersActive && (
@@ -187,6 +213,7 @@ export default function AdminPlayersPage() {
                                     setQuery("");
                                     setStateFilter(STATE_FILTER_ALL);
                                     setPaymentFilter(PAYMENT_FILTER_ALL);
+                                    setCouponFilter(COUPON_FILTER_ALL);
                                     setDateRange(undefined);
                                 }}
                             >
@@ -223,6 +250,9 @@ export default function AdminPlayersPage() {
                                         Payment
                                     </th>
                                     <th className="px-3 py-2 font-medium border-b border-slate-200 dark:border-slate-700">
+                                        Coupon
+                                    </th>
+                                    <th className="px-3 py-2 font-medium border-b border-slate-200 dark:border-slate-700">
                                         Registration Date
                                     </th>
                                 </tr>
@@ -231,7 +261,7 @@ export default function AdminPlayersPage() {
                                 {!loading && filtered.length === 0 && (
                                     <tr>
                                         <td
-                                            colSpan={6}
+                                            colSpan={7}
                                             className="px-3 py-6 text-center text-slate-500 dark:text-slate-400"
                                         >
                                             No players found.
@@ -239,10 +269,7 @@ export default function AdminPlayersPage() {
                                     </tr>
                                 )}
                                 {pageRows.map((p) => (
-                                    <tr
-                                        key={p.id}
-                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                    >
+                                    <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 whitespace-nowrap">
                                             {p.name}
                                         </td>
@@ -258,6 +285,9 @@ export default function AdminPlayersPage() {
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 whitespace-nowrap">
                                             <PaymentBadge status={p.paymentStatus} />
                                         </td>
+                                        <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 whitespace-nowrap">
+                                            <CouponBadge code={p.couponCode} discount={p.couponDiscount} />
+                                        </td>
                                         <td className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                             {formatRegistrationDate(p.registrationDate)}
                                         </td>
@@ -271,7 +301,7 @@ export default function AdminPlayersPage() {
                     <div
                         className={cn(
                             "flex items-center justify-between gap-3 px-3 py-2 border-t border-slate-200 dark:border-slate-800",
-                            "bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-400"
+                            "bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-400",
                         )}
                     >
                         <span>
@@ -330,8 +360,7 @@ function DateRangePicker({
     value: DateRange | undefined;
     onChange: (range: DateRange | undefined) => void;
 }) {
-    const fmt = (d: Date) =>
-        d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
     const label = (() => {
         if (value?.from && value.to) return `${fmt(value.from)} – ${fmt(value.to)}`;
@@ -351,7 +380,7 @@ function DateRangePicker({
                         "focus:outline-none focus:ring-2 focus:ring-amber-400",
                         active
                             ? "border-amber-400 text-amber-800 dark:text-amber-200"
-                            : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                            : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300",
                     )}
                     aria-label="Registration date range"
                 >
@@ -362,13 +391,7 @@ function DateRangePicker({
                 </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                    mode="range"
-                    numberOfMonths={2}
-                    selected={value}
-                    onSelect={onChange}
-                    initialFocus
-                />
+                <Calendar mode="range" numberOfMonths={2} selected={value} onSelect={onChange} initialFocus />
                 {active && (
                     <div className="border-t border-slate-200 dark:border-slate-700 p-2 flex justify-end">
                         <Button
@@ -405,5 +428,21 @@ function PaymentBadge({ status }: { status: Player["paymentStatus"] }) {
         <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
             —
         </span>
+    );
+}
+
+function CouponBadge({ code, discount }: { code: string; discount: number | null }) {
+    if (!code || code === "—") {
+        return <span className="text-slate-400 dark:text-slate-500">—</span>;
+    }
+    return (
+        <div className="inline-flex items-center gap-1.5">
+            <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-sky-50 text-sky-700 border border-sky-100 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900">
+                {code}
+            </span>
+            {typeof discount === "number" && discount > 0 && (
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">₹{discount}</span>
+            )}
+        </div>
     );
 }

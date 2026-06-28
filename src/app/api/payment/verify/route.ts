@@ -18,14 +18,11 @@ import { ok } from "@/lib/api/response";
 import { parse } from "@/lib/api/parse";
 import { verifyPayment as verifyPaymentService } from "@/lib/domain/payment/service";
 import { env } from "@/lib/env";
-import {
-    MongooseUserRepo,
-    MongoosePaymentRepo,
-    MongooseCouponRepo,
-} from "@/lib/infra/db/mongoose-repos";
+import { MongooseUserRepo, MongoosePaymentRepo, MongooseCouponRepo } from "@/lib/infra/db/mongoose-repos";
 import { signAuth } from "@/lib/auth/crypto";
 import { setAuthCookie, clearPendingCookie } from "@/lib/auth/cookies";
 import { logger } from "@/lib/logger";
+import { REGISTRATION_AMOUNT_PAISE } from "@/lib/razorpay";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,13 +37,14 @@ const schema = z.object({
 
 export const POST = withRequest(async ({ req }) => {
     const body = parse(await req.json().catch(() => ({})), schema);
+    const userRepo = new MongooseUserRepo();
 
     const result = await verifyPaymentService({
         paymentId: body.paymentId,
         orderId: body.orderId,
         signature: body.signature,
         secret: env.RAZORPAY_KEY_SECRET || "",
-        userRepo: new MongooseUserRepo(),
+        userRepo,
         paymentRepo: new MongoosePaymentRepo(),
     });
 
@@ -54,12 +52,17 @@ export const POST = withRequest(async ({ req }) => {
     // At this point the Razorpay payment is confirmed, so we just need
     // to guard against double-counting (`findUsageForUser`) and ensure
     // the coupon still exists.
-    if (body.couponId && body.couponCode) {
+    const paymentCouponId = body.couponId ?? result.payment?.couponId?.toString();
+    const paymentCouponCode = body.couponCode ?? result.payment?.couponCode;
+    if (paymentCouponId && paymentCouponCode) {
         const couponRepo = new MongooseCouponRepo();
-        const code = body.couponCode.trim().toUpperCase();
+        const code = paymentCouponCode.trim().toUpperCase();
         const coupon = await couponRepo.findByCode(code);
-        if (coupon && String(coupon._id) === String(body.couponId)) {
+        if (coupon && String(coupon._id) === String(paymentCouponId)) {
             const userId = String(result.user._id);
+            const paidAmountPaise = Number(result.payment?.amount ?? 0);
+            const discountApplied =
+                result.payment?.couponDiscount ?? Math.max(0, REGISTRATION_AMOUNT_PAISE - paidAmountPaise) / 100;
             const existing = await couponRepo.findUsageForUser(String(coupon._id), userId);
             if (!existing) {
                 await couponRepo.incrementUsage(String(coupon._id));
@@ -67,19 +70,26 @@ export const POST = withRequest(async ({ req }) => {
                     couponId: String(coupon._id) as any,
                     userId: userId as any,
                     code,
-                    discountApplied: coupon.amount, // accurate since validateCoupon was called at order-creation time
+                    discountApplied,
+                    orderId: body.orderId,
                 });
                 logger.info("coupon.used_for_payment", {
                     userId,
                     code,
-                    discount: coupon.amount,
+                    discount: discountApplied,
                     paymentId: body.paymentId,
                 });
             }
+            await userRepo.update(userId, {
+                couponId: String(coupon._id) as any,
+                couponCode: code,
+                couponDiscount: discountApplied,
+                couponAppliedAt: new Date(),
+            });
         } else {
             logger.warn("coupon.verify_mismatch", {
                 code,
-                couponId: body.couponId,
+                couponId: paymentCouponId,
                 found: !!coupon,
                 paymentId: body.paymentId,
             });

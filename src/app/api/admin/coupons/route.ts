@@ -4,8 +4,7 @@
  *   GET  /api/admin/coupons?search=&page=&pageSize=
  *   POST /api/admin/coupons
  *
- * Auth: any admin with role >= subadmin (superadmin or subadmin).
- * seo_content role is rejected by the middleware.
+ * Auth: superadmin.
  */
 
 import { z } from "zod";
@@ -58,7 +57,7 @@ export const GET = withRequest(
     withAdmin({
         getAdminCookie,
         lookup: adminLookup,
-        allowedRoles: ["superadmin", "subadmin"],
+        allowedRoles: ["superadmin"],
     })(async ({ req }) => {
         const url = new URL(req.url);
         const parsed = listQuerySchema.safeParse({
@@ -100,7 +99,7 @@ export const POST = withRequest(
     withAdmin({
         getAdminCookie,
         lookup: adminLookup,
-        allowedRoles: ["superadmin", "subadmin"],
+        allowedRoles: ["superadmin"],
     })(async ({ req }) => {
         const body = await req.json().catch(() => ({}));
         const parsed = createSchema.safeParse(body);

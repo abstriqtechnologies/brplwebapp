@@ -16,7 +16,7 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
     options?: {
         sort?: Record<string, 1 | -1>;
         searchFields?: string[];
-        allowedRoles?: ("superadmin" | "subadmin" | "seo_content")[];
+        allowedRoles?: "superadmin"[];
     },
 ) {
     const sort = options?.sort ?? ({ createdAt: -1 } as any);
@@ -100,9 +100,6 @@ export function buildCrudRoutes<T extends { _id: any; createdAt?: Date; updatedA
         const session = await requireAdminDb();
         if (session instanceof Response) return session;
         if (allowedRoles && !hasRole(session, allowedRoles)) return fail("Forbidden", 403);
-        if (session.session.role !== "superadmin" && allowedRoles?.includes("superadmin")) {
-            return fail("Forbidden", 403);
-        }
         await connectDB();
         const doc = await getModel().findByIdAndDelete(params.id).lean();
         if (!doc) return notFound();

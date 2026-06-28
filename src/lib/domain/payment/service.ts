@@ -14,7 +14,7 @@ import "server-only";
 import crypto from "crypto";
 import { ConflictError, NotFoundError, UnauthorizedError } from "@/lib/api/errors";
 import { logger } from "@/lib/logger";
-import type { UserRepo, PaymentRepo } from "@/lib/infra/db/repos";
+import type { UserRepo, PaymentRepo, CouponRepo } from "@/lib/infra/db/repos";
 import type { IUser } from "@/models/User";
 
 export type RazorpayLike = {
@@ -38,6 +38,11 @@ export type CreateOrderDeps = {
     userRepo: UserRepo;
     paymentRepo: PaymentRepo;
     keyId: string;
+    coupon?: {
+        id: string;
+        code: string;
+        discount: number;
+    };
 };
 
 export type CreateOrderResult = {
@@ -83,6 +88,13 @@ export async function createOrder(deps: CreateOrderDeps): Promise<CreateOrderRes
         currency: order.currency,
         status: "created",
         source: "razorpay",
+        ...(deps.coupon
+            ? {
+                  couponId: deps.coupon.id,
+                  couponCode: deps.coupon.code,
+                  couponDiscount: deps.coupon.discount,
+              }
+            : {}),
     });
 
     return {
@@ -164,7 +176,7 @@ export async function verifyPayment(deps: VerifyPaymentDeps): Promise<VerifyPaym
     });
     if (!user) throw new NotFoundError("User for payment not found");
 
-    return { payment: updated, user };
+    return { payment: updated ?? payment, user };
 }
 
 // ---------- handleWebhook (server-to-server, source of truth) ----------
@@ -175,6 +187,7 @@ export type HandleWebhookDeps = {
     secret: string;
     userRepo: UserRepo;
     paymentRepo: PaymentRepo;
+    couponRepo?: CouponRepo;
 };
 
 export type WebhookResult = { handled: boolean; event?: string };
@@ -223,51 +236,111 @@ async function markPaidFromWebhook(
 ): Promise<WebhookResult> {
     const paymentId = entity.id;
     const phone = entity.notes?.phone;
-    const existing = await deps.paymentRepo.findByPaymentId(paymentId);
+    const existing =
+        (await deps.paymentRepo.findByPaymentId(paymentId)) ??
+        (entity.order_id ? await deps.paymentRepo.findByOrderId(entity.order_id) : null);
     if (!existing) {
         logger.warn("webhook.payment_not_found", { paymentId });
         return { handled: true, event: "payment.captured" };
     }
-    if (existing.status === "completed") {
-        return { handled: true, event: "payment.captured" };
-    }
-    await deps.paymentRepo.updateStatus(paymentId, "completed");
 
-    if (phone) {
-        // Existing-user path: mark them paid.
-        const u = await deps.userRepo.findByPhone(phone);
-        if (u) {
-            await deps.userRepo.update(String(u._id), {
-                paymentStatus: "completed",
-                paymentId,
-                ...(entity.order_id ? { orderId: entity.order_id } : {}),
-                ...(entity.amount ? { amount: entity.amount / 100 } : {}),
-            });
-        } else {
-            // The webhook may arrive BEFORE /api/auth/register completes.
-            // In that case, create a minimal "paid" user record so the
-            // registration flow can find it and complete. (The user will
-            // need to provide name/email/role/city later, but their
-            // payment is already confirmed.)
-            await deps.userRepo.create({
-                phone,
-                paymentStatus: "completed",
-                paymentId,
-                ...(entity.order_id ? { orderId: entity.order_id } : {}),
-                ...(entity.amount ? { amount: entity.amount / 100 } : {}),
-            } as any);
-        }
-    } else if (entity.order_id) {
-        // No phone in the webhook — try the order id.
-        const u = await deps.userRepo.findByPhone(""); // not a real lookup; just a placeholder
-        if (u) {
-            await deps.userRepo.update(String(u._id), {
-                paymentStatus: "completed",
-                paymentId,
-            });
-        }
+    const paymentForCoupon =
+        existing.status === "completed"
+            ? existing
+            : entity.order_id
+              ? ((await deps.paymentRepo.updateForVerify(entity.order_id, {
+                    status: "completed",
+                    paymentId,
+                })) ?? existing)
+              : ((await deps.paymentRepo.updateStatus(existing.paymentId, "completed")) ?? existing);
+
+    let user = await deps.userRepo.findById(String(existing.userId));
+    if (!user && phone) {
+        user = await deps.userRepo.findByPhone(phone);
     }
+
+    if (user) {
+        const updated = await deps.userRepo.update(String(user._id), {
+            paymentStatus: "completed",
+            paymentId,
+            ...(entity.order_id ? { orderId: entity.order_id } : {}),
+            ...(entity.amount ? { amount: entity.amount / 100 } : {}),
+        });
+        user = updated ?? user;
+    } else if (phone) {
+        // The webhook may arrive BEFORE /api/auth/register completes.
+        // In that case, create a minimal "paid" user record so the
+        // registration flow can find it and complete.
+        user = await deps.userRepo.create({
+            phone,
+            paymentStatus: "completed",
+            paymentId,
+            ...(entity.order_id ? { orderId: entity.order_id } : {}),
+            ...(entity.amount ? { amount: entity.amount / 100 } : {}),
+        } as any);
+    } else {
+        logger.warn("webhook.user_not_found", {
+            paymentId,
+            orderId: entity.order_id,
+            userId: String(existing.userId),
+        });
+    }
+
+    if (user) {
+        await recordCouponUsageFromPayment(paymentForCoupon, String(user._id), deps);
+    }
+
     return { handled: true, event: "payment.captured" };
+}
+
+type PaymentWithCoupon = NonNullable<Awaited<ReturnType<PaymentRepo["findByOrderId"]>>>;
+
+async function recordCouponUsageFromPayment(
+    payment: PaymentWithCoupon,
+    userId: string,
+    deps: HandleWebhookDeps,
+): Promise<void> {
+    if (!deps.couponRepo || !payment.couponId || !payment.couponCode) return;
+
+    const couponId = String(payment.couponId);
+    const code = payment.couponCode.trim().toUpperCase();
+    const coupon = await deps.couponRepo.findByCode(code);
+    if (!coupon || String(coupon._id) !== couponId) {
+        logger.warn("coupon.webhook_mismatch", {
+            code,
+            couponId,
+            found: !!coupon,
+            paymentId: payment.paymentId,
+            orderId: payment.orderId,
+        });
+        return;
+    }
+
+    const discountApplied = payment.couponDiscount ?? 0;
+    const existingUsage = await deps.couponRepo.findUsageForUser(couponId, userId);
+    if (!existingUsage) {
+        await deps.couponRepo.incrementUsage(couponId);
+        await deps.couponRepo.createUsage({
+            couponId: couponId as any,
+            userId: userId as any,
+            code,
+            discountApplied,
+            orderId: payment.orderId,
+        });
+        logger.info("coupon.used_for_webhook_payment", {
+            userId,
+            code,
+            discount: discountApplied,
+            paymentId: payment.paymentId,
+        });
+    }
+
+    await deps.userRepo.update(userId, {
+        couponId: couponId as any,
+        couponCode: code,
+        couponDiscount: discountApplied,
+        couponAppliedAt: new Date(),
+    });
 }
 
 async function markFailedFromWebhook(entity: { id: string }, deps: HandleWebhookDeps): Promise<WebhookResult> {
