@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
 
 function LoginInner() {
     const params = useSearchParams();
-    const next = params.get("next") || "/admin/dashboard";
+    const next = params.get("next") || "/admin";
     const { toast } = useToast();
 
     const [step, setStep] = useState<Step>("phone");
