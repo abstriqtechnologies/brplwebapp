@@ -20,9 +20,12 @@ export function useAdminAuth() {
     const refresh = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await api.get<AdminMe>("/api/admin/me");
-            if (res.ok) {
-                setMe(res.data);
+            // /api/admin/me returns the standard envelope `{ ok, data, ... }`.
+            // `res.data` is the whole envelope; the inner `{ email, role, ... }`
+            // lives at `res.data.data`.
+            const res = await api.get<{ ok: true; data: AdminMe }>("/api/admin/me");
+            if (res.ok && res.data?.data) {
+                setMe(res.data.data);
             } else if (res.status === 401) {
                 setMe(null);
                 if (!pathname?.startsWith("/admin/login")) {

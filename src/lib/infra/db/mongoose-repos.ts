@@ -268,4 +268,60 @@ export class MongooseCouponRepo implements CouponRepo {
             .lean();
         return docs as unknown as ICouponUsage[];
     }
+
+    // ---------- Admin CRUD ----------
+
+    async list(opts: { limit: number; skip: number; search?: string }): Promise<ICoupon[]> {
+        await connectDB();
+        const query: Record<string, unknown> = {};
+        if (opts.search?.trim()) {
+            // Case-insensitive substring match on the (already-uppercased) code field.
+            query.code = { $regex: this.escapeRegex(opts.search.trim().toUpperCase()), $options: "i" };
+        }
+        const docs = await Coupon.find(query)
+            .sort({ createdAt: -1 })
+            .skip(opts.skip)
+            .limit(opts.limit)
+            .lean();
+        return docs as unknown as ICoupon[];
+    }
+
+    async count(search?: string): Promise<number> {
+        await connectDB();
+        const query: Record<string, unknown> = {};
+        if (search?.trim()) {
+            query.code = { $regex: this.escapeRegex(search.trim().toUpperCase()), $options: "i" };
+        }
+        return await Coupon.countDocuments(query);
+    }
+
+    async create(data: CreateCouponInput): Promise<ICoupon> {
+        await connectDB();
+        const doc = await Coupon.create({
+            ...data,
+            code: this.normalize(data.code),
+        });
+        return doc.toObject() as ICoupon;
+    }
+
+    async update(id: string, data: Partial<CreateCouponInput>): Promise<ICoupon | null> {
+        await connectDB();
+        const patch: Record<string, unknown> = { ...data };
+        if (typeof patch.code === "string") {
+            patch.code = this.normalize(patch.code);
+        }
+        const doc = await Coupon.findByIdAndUpdate(id, patch, { returnDocument: "after" }).lean();
+        return (doc as ICoupon | null) ?? null;
+    }
+
+    async remove(id: string): Promise<boolean> {
+        await connectDB();
+        const res = await Coupon.deleteOne({ _id: id });
+        return res.deletedCount > 0;
+    }
+
+    /** Escape regex metachars so user input becomes a literal substring. */
+    private escapeRegex(s: string): string {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
 }

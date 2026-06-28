@@ -208,7 +208,19 @@ export default function CheckoutClient({
             const res = await fetch("/api/payment/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(coupon.status === "valid" ? { couponId: coupon.couponId, code: coupon.code } : {}),
+                body: JSON.stringify(
+                    coupon.status === "valid"
+                        ? {
+                              couponId: coupon.couponId,
+                              code: coupon.code,
+                              // Pass the discounted total in paise. The server
+                              // re-validates the coupon and ignores any
+                              // tampered value, but we send it so the client
+                              // and server agree on what we're charging.
+                              finalAmountPaise: coupon.finalAmount * 100,
+                          }
+                        : {},
+                ),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || data?.message || "Could not start payment");
@@ -248,6 +260,10 @@ export default function CheckoutClient({
                             orderId: resp.razorpay_order_id,
                             paymentId: resp.razorpay_payment_id,
                             signature: resp.razorpay_signature,
+                            // Pass coupon info so the server can record usage.
+                            ...(coupon.status === "valid"
+                                ? { couponId: coupon.couponId, couponCode: coupon.code }
+                                : {}),
                         }),
                     });
                     const vData = await v.json().catch(() => ({}));

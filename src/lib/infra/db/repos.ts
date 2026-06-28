@@ -150,6 +150,19 @@ export interface CouponRepo {
     /** Returns the existing usage if this user has already redeemed this coupon. */
     findUsageForUser(couponId: string, userId: string): Promise<ICouponUsage | null>;
     listUsages(couponId: string, limit: number, skip: number): Promise<ICouponUsage[]>;
+
+    // ---------- Admin CRUD (added for the /admin/coupons tab) ----------
+
+    /** Page through coupons, newest first. `search` is a substring match on `code`. */
+    list(opts: { limit: number; skip: number; search?: string }): Promise<ICoupon[]>;
+    /** Total count, optionally filtered by the same `search` as `list`. */
+    count(search?: string): Promise<number>;
+    /** Create a new coupon. Throws on duplicate code. */
+    create(data: CreateCouponInput): Promise<ICoupon>;
+    /** Patch an existing coupon by id. Returns null if not found. */
+    update(id: string, data: Partial<CreateCouponInput>): Promise<ICoupon | null>;
+    /** Hard-delete a coupon. Returns true if a row was removed. */
+    remove(id: string): Promise<boolean>;
 }
 
 // ---------- In-memory implementations (for tests + dev) ----------
@@ -453,6 +466,38 @@ export class InMemoryCouponRepo implements CouponRepo {
         return this.usages
             .filter((u) => String(u.couponId) === couponId)
             .slice(skip, skip + limit);
+    }
+    // ---------- Admin CRUD ----------
+
+    async list(opts: { limit: number; skip: number; search?: string }): Promise<ICoupon[]> {
+        const search = opts.search?.trim().toUpperCase();
+        const filtered = search
+            ? this.coupons.filter((c) => c.code.includes(search))
+            : this.coupons;
+        const sorted = [...filtered].sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        );
+        return sorted.slice(opts.skip, opts.skip + opts.limit);
+    }
+    async count(search?: string): Promise<number> {
+        const needle = search?.trim().toUpperCase();
+        if (!needle) return this.coupons.length;
+        return this.coupons.filter((c) => c.code.includes(needle)).length;
+    }
+    async update(id: string, data: Partial<CreateCouponInput>): Promise<ICoupon | null> {
+        const idx = this.coupons.findIndex((c) => String(c._id) === id);
+        if (idx === -1) return null;
+        const patch = { ...data };
+        if (typeof patch.code === "string") patch.code = this.normalize(patch.code);
+        Object.assign(this.coupons[idx], patch, { updatedAt: new Date() });
+        return this.coupons[idx];
+    }
+    async remove(id: string): Promise<boolean> {
+        const idx = this.coupons.findIndex((c) => String(c._id) === id);
+        if (idx === -1) return false;
+        this.coupons.splice(idx, 1);
+        // CouponUsage rows are intentionally orphaned — they don't block removal.
+        return true;
     }
     _clear(): void {
         this.coupons = [];
