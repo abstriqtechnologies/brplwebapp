@@ -55,7 +55,7 @@ export const POST = withRequest(
         // `next` is a UI-side concept — read it from the request URL so
         // the client can navigate to wherever the user was headed after
         // login. Default to the dashboard.
-        const nextParam = new URL(req.url).searchParams.get("next") || "/admin/dashboard";
+        const nextParam = new URL(req.url).searchParams.get("next") || "/admin";
 
         const token = await signJwt({
             sub: admin._id.toString(),
