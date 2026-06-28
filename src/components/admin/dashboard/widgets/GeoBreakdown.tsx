@@ -5,7 +5,7 @@ import {
     Bar,
     XAxis,
     YAxis,
-    Tooltip,
+    LabelList,
     CartesianGrid,
     ResponsiveContainer,
 } from "recharts";
@@ -27,7 +27,7 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                         <BarChart
                             data={data.byState}
                             layout="vertical"
-                            margin={{ top: 2, right: 4, bottom: 0, left: 0 }}
+                            margin={{ top: 2, right: 28, bottom: 0, left: 0 }}
                             barCategoryGap={4}
                         >
                             <XAxis
@@ -47,17 +47,6 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                                 axisLine={false}
                                 width={40}
                             />
-                            <Tooltip
-                                contentStyle={{
-                                    fontSize: 10,
-                                    borderRadius: 6,
-                                    padding: "4px 8px",
-                                    border: "1px solid rgba(255,255,255,0.2)",
-                                    background: "rgba(255,255,255,0.85)",
-                                    backdropFilter: "blur(12px)",
-                                }}
-                                formatter={(v: number) => [v, "Players"]}
-                            />
                             <defs>
                                 <linearGradient id="geoBar" x1="0" y1="0" x2="1" y2="0">
                                     <stop offset="0%" stopColor="#10b981" />
@@ -69,7 +58,14 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                                 fill="url(#geoBar)"
                                 radius={[0, 3, 3, 0]}
                                 barSize={10}
-                            />
+                            >
+                                <LabelList
+                                    dataKey="count"
+                                    position="right"
+                                    fontSize={10}
+                                    fill="#059669"
+                                />
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 )}
