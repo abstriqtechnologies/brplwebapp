@@ -9,7 +9,7 @@ export default defineConfig({
     test: {
         environment: "node",
         globals: false,
-        include: ["tests/**/*.test.ts"],
+        include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
         // Stub Next.js's build-time guards so service code can be loaded
         // under vitest. server-only is a no-op at test time.
         server: {
