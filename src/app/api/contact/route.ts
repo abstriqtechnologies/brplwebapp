@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         // Best-effort cache revalidation; admin list uses fresh DB reads so missing
         // the revalidate (e.g. in test contexts) is harmless.
         try {
-            revalidatePath("/admin/contact-us-leads");
+            revalidatePath("/admin");
         } catch {
             /* not running in a Next request context */
         }
