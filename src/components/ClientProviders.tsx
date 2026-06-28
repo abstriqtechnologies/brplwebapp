@@ -38,7 +38,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
                 <main className="flex-grow">{children}</main>
                 {!hideChrome && <Footer />}
             </div>
-            <ChatWidget />
+            {!hideChrome && <ChatWidget />}
         </TooltipProvider>
     );
 }
