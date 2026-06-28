@@ -5,11 +5,28 @@ import {
     Bar,
     XAxis,
     YAxis,
-    LabelList,
+    Tooltip,
     CartesianGrid,
     ResponsiveContainer,
 } from "recharts";
 import type { DashboardPayload } from "@/lib/infra/db/dashboard-aggregations";
+
+function MinimalTooltip({ active, payload }: any) {
+    if (!active || !payload?.length) return null;
+    return (
+        <span
+            style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: "#059669",
+                background: "transparent",
+                padding: 0,
+            }}
+        >
+            {payload[0].value}
+        </span>
+    );
+}
 
 export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
     return (
@@ -27,7 +44,7 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                         <BarChart
                             data={data.byState}
                             layout="vertical"
-                            margin={{ top: 2, right: 28, bottom: 0, left: 0 }}
+                            margin={{ top: 2, right: 4, bottom: 0, left: 0 }}
                             barCategoryGap={4}
                         >
                             <XAxis
@@ -47,6 +64,11 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                                 axisLine={false}
                                 width={40}
                             />
+                            <Tooltip
+                                content={<MinimalTooltip />}
+                                position={{ y: -20 }}
+                                cursor={{ fill: "transparent" }}
+                            />
                             <defs>
                                 <linearGradient id="geoBar" x1="0" y1="0" x2="1" y2="0">
                                     <stop offset="0%" stopColor="#10b981" />
@@ -58,14 +80,7 @@ export function GeoBreakdown({ data }: { data: DashboardPayload["geo"] }) {
                                 fill="url(#geoBar)"
                                 radius={[0, 3, 3, 0]}
                                 barSize={10}
-                            >
-                                <LabelList
-                                    dataKey="count"
-                                    position="right"
-                                    fontSize={10}
-                                    fill="#059669"
-                                />
-                            </Bar>
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 )}
