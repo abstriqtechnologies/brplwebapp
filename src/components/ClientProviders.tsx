@@ -9,6 +9,7 @@ import { CustomHeadScripts } from "@/components/CustomHeadScripts";
 import { CustomBodyScripts } from "@/components/CustomBodyScripts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 const CHROME_HIDDEN_PREFIXES = ["/login", "/dashboard", "/admin"];
 
@@ -37,6 +38,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
                 <main className="flex-grow">{children}</main>
                 {!hideChrome && <Footer />}
             </div>
+            <ChatWidget />
         </TooltipProvider>
     );
 }
