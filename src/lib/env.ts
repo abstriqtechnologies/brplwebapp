@@ -60,11 +60,11 @@ const schema = z.object({
     CMS_LIVE: booleanish,
 
     // Admin phone allowlist — comma-separated 10-digit Indian mobile numbers.
-    // Always present (defaults to the owner's number) so dev/staging boot
-    // without an explicit override. Empty values are treated as the default
-    // by `getAdminAllowedPhones()` to avoid locking out admins when the
-    // env var is set to "" in production.
-    ADMIN_PHONES: z.string().default("9234894293"),
+    // Optional; required in production (enforced by
+    // `assertProductionBootReadiness()`). Empty/unset values are treated as
+    // an empty allowlist by `getAdminAllowedPhones()`, which means no admin
+    // can send an OTP — safe default, no hardcoded fallbacks.
+    ADMIN_PHONES: z.string().optional(),
 
     // Security knobs (used by Phase 1)
     BRPL_CSRF_REQUIRED: booleanish,
@@ -176,6 +176,9 @@ export function assertProductionBootReadiness(): void {
     if (!env.RAZORPAY_KEY_SECRET) missing.push("RAZORPAY_KEY_SECRET");
     if (!env.RAZORPAY_WEBHOOK_SECRET) {
         missing.push("RAZORPAY_WEBHOOK_SECRET (webhooks will 400 without it)");
+    }
+    if (!env.ADMIN_PHONES || env.ADMIN_PHONES.trim() === "") {
+        missing.push("ADMIN_PHONES (no admin can receive an OTP without it)");
     }
     if (missing.length > 0) {
         throw new Error(

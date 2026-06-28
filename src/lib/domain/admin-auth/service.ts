@@ -33,22 +33,20 @@ const RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_TTL_MS = 5 * 60 * 1000;
 const OTP_TTL_SEC = OTP_TTL_MS / 1000;
 
-/** Fallback used when ADMIN_PHONES is unset or empty. */
-const DEFAULT_ADMIN_PHONE = "9234894293";
-
 // ---------- Allowlist helpers ----------
 
 /**
  * Parse `ADMIN_PHONES` into a normalized list of 10-digit Indian mobiles.
  *
- * The zod default only fires when the env var is `undefined` — if it's
- * set to "" in production, the parsed value is "" and `split(",")` would
- * produce an empty array, locking every admin out. We treat an empty
- * (or whitespace-only) value as the default to keep that from happening.
+ * Unset, empty, or whitespace-only values yield an empty list. With an
+ * empty list, every send-OTP call is silently rejected by
+ * `isAdminAllowedPhone()`, which is the safe failure mode — no one gets
+ * an OTP they shouldn't have. Production boot also asserts
+ * `ADMIN_PHONES` is set (see `assertProductionBootReadiness()`).
  */
 export function getAdminAllowedPhones(): string[] {
     const raw = (env.ADMIN_PHONES ?? "").trim();
-    if (!raw) return [DEFAULT_ADMIN_PHONE];
+    if (!raw) return [];
 
     const out: string[] = [];
     const seen = new Set<string>();
@@ -58,7 +56,7 @@ export function getAdminAllowedPhones(): string[] {
         seen.add(norm);
         out.push(norm);
     }
-    return out.length > 0 ? out : [DEFAULT_ADMIN_PHONE];
+    return out;
 }
 
 export function isAdminAllowedPhone(phone10: string): boolean {

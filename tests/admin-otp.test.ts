@@ -209,9 +209,9 @@ describe("isAdminAllowedPhone", () => {
 // =====================================================================
 
 describe("getAdminAllowedPhones", () => {
-    it("returns the single default value when ADMIN_PHONES is unset", async () => {
+    it("returns an empty list when ADMIN_PHONES is unset", async () => {
         const mod = await loadServiceWithEnv(undefined);
-        expect(mod.getAdminAllowedPhones()).toEqual(["9234894293"]);
+        expect(mod.getAdminAllowedPhones()).toEqual([]);
     });
 
     it("parses a comma-separated list of phones", async () => {
@@ -219,9 +219,9 @@ describe("getAdminAllowedPhones", () => {
         expect(mod.getAdminAllowedPhones()).toEqual(["9234894293", "9876543210", "7011223344"]);
     });
 
-    it("falls back to the default when ADMIN_PHONES is an empty string", async () => {
+    it("returns an empty list when ADMIN_PHONES is an empty string", async () => {
         const mod = await loadServiceWithEnv("");
-        expect(mod.getAdminAllowedPhones()).toEqual(["9234894293"]);
+        expect(mod.getAdminAllowedPhones()).toEqual([]);
     });
 
     it("normalizes whitespace and stray commas", async () => {
