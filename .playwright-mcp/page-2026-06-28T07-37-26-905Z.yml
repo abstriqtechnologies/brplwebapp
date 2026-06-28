@@ -1,0 +1,20 @@
+- generic [active] [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - heading "BRPL Admin" [level=1] [ref=e7]
+      - main [ref=e8]:
+        - generic [ref=e9]:
+          - img [ref=e11]
+          - heading "Admin dashboard" [level=2] [ref=e14]
+          - paragraph [ref=e15]: Admin features are coming soon. The shell is in place — sign in works, role gating works, and the dashboard route is reserved. New admin tools will be added here in subsequent specs.
+          - generic [ref=e16]:
+            - generic [ref=e17]:
+              - term [ref=e18]: Signed in as
+              - definition [ref=e19]: +91 9234894293
+            - generic [ref=e20]:
+              - term [ref=e21]: Role
+              - definition [ref=e22]: admin
+          - button "Sign out" [ref=e24] [cursor=pointer]
+  - alert [ref=e25]
