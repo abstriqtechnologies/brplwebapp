@@ -13,11 +13,11 @@ export function RoleDistribution({ data }: { data: DashboardPayload["roles"] }) 
     }));
 
     return (
-        <div className="relative rounded-xl border border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 ring-1 ring-inset ring-violet-400/20 p-3">
+        <div className="relative rounded-xl border border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 ring-1 ring-inset ring-violet-400/20 p-3 flex flex-col">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                 Roles
             </h3>
-            <div className="h-48">
+            <div className="flex-1 min-h-0">
                 {rows.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-slate-400">
                         No data

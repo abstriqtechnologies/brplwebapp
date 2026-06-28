@@ -148,7 +148,10 @@ describe("computeDashboard — populated inputs", () => {
         const ref = out.coupons.rows.find((r) => r.code === "REF5")!;
         expect(ref.usedCount).toBe(1);
         expect(ref.source).toBe("referral");
+        expect(out.coupons.topByUsage).toHaveLength(1);
         expect(out.coupons.topByUsage[0]).toEqual({ code: "WELCOME10", used: 2 });
+        // Referral coupons are excluded from topByUsage
+        expect(out.coupons.topByUsage.find((c) => c.code === "REF5")).toBeUndefined();
     });
 
     it("aggregates geo by state and city with stable ordering", () => {

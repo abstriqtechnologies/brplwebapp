@@ -155,7 +155,10 @@ function aggregateCoupons(
         .sort((a, b) => b.usedCount - a.usedCount);
     return {
         rows,
-        topByUsage: rows.slice(0, 10).map(({ code, usedCount }) => ({ code, used: usedCount })),
+        topByUsage: rows
+            .filter((r) => r.source !== "referral")
+            .slice(0, 10)
+            .map(({ code, usedCount }) => ({ code, used: usedCount })),
     };
 }
 
