@@ -7,7 +7,7 @@ import AiTicket from "@/models/AiTicket";
 
 export async function POST(req: NextRequest) {
   try {
-    const { leadId, name, phone, message } = await req.json();
+    const { leadId, name, phone, message, isGreeting } = await req.json();
 
     if (!name || !phone || !message) {
       return NextResponse.json(
@@ -18,7 +18,58 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Find or create lead
+    // Greeting requests do not save the user message to the lead's
+    // conversation history. They only generate a one-shot reply from the AI
+    // so the lead starts with a clean history for the actual chat session.
+    if (isGreeting) {
+      const contexts = await AiContext.find({ isActive: true }).lean();
+      const contextText = contexts.map((c: any) => c.content).join("\n\n");
+
+      const systemPrompt = `You are a friendly assistant for BRPL. Reply to the user with a warm, short greeting (1-2 sentences) and invite them to ask their question. Keep it concise. Do not invoke any support-agent fallback.`;
+
+      const openaiResponse = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `My name is ${name}. Please greet me.` },
+            ],
+            temperature: 0.7,
+            max_tokens: 120,
+          }),
+        }
+      );
+
+      if (!openaiResponse.ok) {
+        const errorText = await openaiResponse.text();
+        console.error("OpenAI greeting error:", errorText);
+        // Fallback greeting so the chat UI still works.
+        return NextResponse.json({
+          reply: `Hi ${name}! How can I help you today?`,
+          leadId: "",
+          ticketCreated: false,
+        });
+      }
+
+      const aiData = await openaiResponse.json();
+      const greeting = aiData.choices[0]?.message?.content?.trim()
+        || `Hi ${name}! How can I help you today?`;
+
+      return NextResponse.json({
+        reply: greeting,
+        leadId: "",
+        ticketCreated: false,
+      });
+    }
+
+    // Real chat: find or create lead
     let lead;
     if (leadId) {
       lead = await AiLead.findById(leadId);
@@ -47,7 +98,7 @@ export async function POST(req: NextRequest) {
     const contexts = await AiContext.find({ isActive: true }).lean();
     const contextText = contexts.map((c: any) => c.content).join("\n\n");
 
-    const systemPrompt = `You are a helpful assistant for BRPL. Be precise and humble. Answer based on the context provided below. If you cannot answer a user's question based on the context, reply with: "I'm sorry, I don't have enough information to answer that. Let me transfer you to a support agent who can help." Do not make up information.
+    const systemPrompt = `You are a helpful assistant for BRPL. Be precise and humble. Answer based on the context provided below. If you cannot answer a user's question based on the context, reply with EXACTLY: "I don't have enough information to answer that. Let me transfer you to a support agent who can help." Do not make up information.
 
 For simple greetings like "Hi", "Hello", "Hey", or short pleasantries, just respond warmly without invoking the support-agent fallback.
 
@@ -91,7 +142,7 @@ ${contextText || "No specific context provided yet. For general greetings, reply
     }
 
     const aiData = await openaiResponse.json();
-    const aiReply = aiData.choices[0]?.message?.content || "";
+    const aiReply = aiData.choices[0]?.message?.content?.trim() || "";
 
     // Add AI reply to conversation
     lead.conversation.push({
@@ -102,20 +153,22 @@ ${contextText || "No specific context provided yet. For general greetings, reply
 
     let ticketCreated = false;
 
-    // Check if AI couldn't answer → create ticket
-    if (
-      aiReply.includes("I'm sorry, I don't have enough information") ||
-      aiReply.includes("transfer you to a support agent")
-    ) {
-      // Update lead status
+    // Detect the explicit support-agent fallback phrase. Use a normalized
+    // substring match so minor wording variations from the model don't break
+    // the detection.
+    const needsAgent =
+      aiReply.toLowerCase().includes("transfer you to a support agent") ||
+      aiReply.toLowerCase().includes("don't have enough information to answer") ||
+      aiReply.toLowerCase().includes("do not have enough information to answer");
+
+    if (needsAgent) {
       lead.status = "escalated";
 
-      // Create ticket
       const ticket = await AiTicket.create({
         leadId: lead._id,
         name: lead.name,
         phone: lead.phone,
-        issue: message, // User's last question as issue
+        issue: message,
         status: "open",
       });
 
