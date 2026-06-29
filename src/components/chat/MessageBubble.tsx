@@ -10,38 +10,50 @@ interface MessageBubbleProps {
 export function MessageBubble({ role, message, timestamp }: MessageBubbleProps) {
   return (
     <div
-      className={`flex items-start gap-2.5 mb-3 ${
+      className={`flex items-end gap-1.5 mb-2 ${
         role === "user" ? "flex-row-reverse" : ""
       }`}
     >
       <div
-        className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${
+        className={`max-w-[78%] px-3.5 py-2 text-[13.5px] leading-relaxed shadow-sm ${
           role === "user"
-            ? "bg-blue-500"
-            : "bg-emerald-600"
+            ? "text-white rounded-2xl rounded-br-md"
+            : "bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-md"
         }`}
-      >
-        {role === "user" ? "U" : "AI"}
-      </div>
-      <div
-        className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed ${
+        style={
           role === "user"
-            ? "bg-emerald-500 text-white rounded-2xl rounded-tr-sm"
-            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm"
-        }`}
+            ? {
+                background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
+              }
+            : undefined
+        }
       >
-        <p className="whitespace-pre-wrap">{message}</p>
+        <p className="whitespace-pre-wrap break-words">{message}</p>
         <p
-          className={`text-[10px] mt-1 ${
+          className={`text-[10px] mt-0.5 flex items-center gap-1 ${
             role === "user"
-              ? "text-emerald-100"
-              : "text-gray-400 dark:text-gray-500"
+              ? "text-white/80 justify-end"
+              : "text-gray-400"
           }`}
         >
           {new Date(timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
+          {role === "user" && (
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
         </p>
       </div>
     </div>
