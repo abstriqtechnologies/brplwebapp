@@ -91,3 +91,7 @@ Run a single file: `npx vitest run tests/lib/env.test.ts`
 ## CI
 
 The `.github/workflows/ci.yml` workflow runs `format:check` → `lint` → `build` → `test` on every PR. Pre-commit hooks (Husky + lint-staged) format staged files.
+
+## Production secrets
+
+All env vars in `.env` MUST be set in Vercel Project Settings → Environment Variables. Do not commit `.env` to git; move it to `.env.local` (already gitignored).

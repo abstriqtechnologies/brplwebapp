@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "installCommand": "npm ci",
+  "outputDirectory": ".next",
+  "regions": ["bom1"],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "crons": []
+}
