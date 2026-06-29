@@ -15,10 +15,10 @@ export default async function TypesOfPartners() {
                 <div className="max-w-7xl mx-auto px-6 py-16">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
-                        {/* Brpl Sponsors Column */}
+                        {/* BRPL Sponsors Column */}
                         <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 shadow-sm">
                             <h2 className="text-3xl font-bold text-[#111a45] mb-6 border-b-4 border-yellow-400 pb-2 inline-block">
-                                Brpl Sponsors
+                                BRPL Sponsors
                             </h2>
                             <div className="space-y-6">
                                 <p className="text-lg text-slate-600">
@@ -34,10 +34,10 @@ export default async function TypesOfPartners() {
                             </div>
                         </div>
 
-                        {/* Brpl Partners Column */}
+                        {/* BRPL Partners Column */}
                         <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 shadow-sm">
                             <h2 className="text-3xl font-bold text-[#111a45] mb-6 border-b-4 border-yellow-400 pb-2 inline-block">
-                                Brpl Partners
+                                BRPL Partners
                             </h2>
                             <div className="space-y-6">
                                 <p className="text-lg text-slate-600">

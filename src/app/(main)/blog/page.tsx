@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const s = ctx.siteSettings;
     return {
         title: "Blog & News",
-        description: s.homeSeoDescription || "Latest news and articles from Brpl (Brpl).",
+        description: s.homeSeoDescription || "Latest news and articles from Beyond Reach Premier League (BRPL).",
     };
 }
 

@@ -87,7 +87,7 @@ const BlogClient = () => {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-[#111a45]/5 text-[#111a45]/40 font-semibold">
-                                            Brpl
+                                            BRPL
                                         </div>
                                     )}
                                 </div>

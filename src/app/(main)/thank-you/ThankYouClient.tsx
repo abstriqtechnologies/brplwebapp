@@ -71,7 +71,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </noscript>
             <SEO
                 title={isPayment ? "Payment Successful" : "Thank You"}
-                description={isPayment ? "Your payment was successful." : "Thank you for registering with Brpl."}
+                description={isPayment ? "Your payment was successful." : "Thank you for registering with Beyond Reach Premier League."}
             />
 
             {/* Background Elements matching Auth page style */}
@@ -92,7 +92,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <p className="text-lg text-muted-foreground">
                         {isPayment
                             ? "Your purchase has been completed. Your video is now live."
-                            : "Your account has been successfully created. We're excited to have you join the Brpl community."}
+                            : "Your account has been successfully created. We're excited to have you join the Beyond Reach Premier League community."}
                     </p>
                 </div>
 

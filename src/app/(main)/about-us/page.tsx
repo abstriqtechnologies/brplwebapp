@@ -18,7 +18,7 @@ export default async function AboutUs() {
     if (sections.length > 0) {
         return (
             <SiteContextProvider value={ctx}>
-                <SEO title="About Us" description="Learn about Brpl." />
+                <SEO title="About Us" description="Learn about Beyond Reach Premier League." />
                 <DynamicPageRenderer sections={sections} />
             </SiteContextProvider>
         );
@@ -29,7 +29,7 @@ export default async function AboutUs() {
             <div className="min-h-screen bg-gray-50">
                 <SEO
                     title="About Us"
-                    description="Learn about Brpl's mission, vision, and the team driving the future of cricket content creation."
+                    description="Learn about Beyond Reach Premier League's mission, vision, and the team driving the future of cricket content creation."
                 />
                 <PageBanner
                     pageKey="aboutUs"

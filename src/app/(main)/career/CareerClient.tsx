@@ -76,7 +76,7 @@ const CareerClient = () => {
         <div className="min-h-screen bg-gray-50 font-sans">
             <SEO
                 title="Careers"
-                description="Join the Brpl team. Explore career opportunities and help us shape the future."
+                description="Join the Beyond Reach Premier League team. Explore career opportunities and help us shape the future."
             />
             <PageBanner pageKey="careers" title="Careers" currentPage="Careers" />
 

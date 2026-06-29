@@ -33,7 +33,7 @@ export default async function PrivacyPolicy() {
             <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Privacy Policy</h1>
             <div className="space-y-6 text-sm md:text-[1.05rem] leading-relaxed text-slate-600">
                 <p>
-                    Greetings from <span className="font-bold text-slate-900">Brpl (Brpl)</span> (hereinafter referred to as the &quot;<span className="font-bold">Website</span>&quot;). The Website is owned and operated by <span className="font-bold text-slate-900">Brpl PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
+                    Greetings from <span className="font-bold text-slate-900">Beyond Reach Premier League (BRPL)</span> (hereinafter referred to as the &quot;<span className="font-bold">Website</span>&quot;). The Website is owned and operated by <span className="font-bold text-slate-900">BRPL PVT. LTD.</span>, having its registered address at Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309.
                 </p>
                 <p>
                     By accessing or using the Website through any computer, laptop, mobile phone, tablet, or any other electronic device, you expressly agree to be bound by this <Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link> (hereinafter referred to as the &quot;<Link href="/privacy-policy" className="font-bold text-blue-600 hover:underline">Privacy Policy</Link>&quot;).
@@ -129,7 +129,7 @@ export default async function PrivacyPolicy() {
 
                 <section>
                     <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">8. Contact Us</h2>
-                    <p className="text-slate-600 leading-relaxed text-[1.05rem] bg-blue-50 p-6 rounded-xl border border-blue-100">For any questions, concerns, or feedback regarding this Privacy Policy or the Website, you may contact us at: <a href="mailto:support@Brpl.net" className="text-blue-600 hover:underline font-semibold">support@Brpl.net</a></p>
+                    <p className="text-slate-600 leading-relaxed text-[1.05rem] bg-blue-50 p-6 rounded-xl border border-blue-100">For any questions, concerns, or feedback regarding this Privacy Policy or the Website, you may contact us at: <a href="mailto:support@brpl.net" className="text-blue-600 hover:underline font-semibold">support@brpl.net</a></p>
                 </section>
             </div>
         </>
@@ -138,7 +138,7 @@ export default async function PrivacyPolicy() {
     return (
         <SiteContextProvider value={ctx}>
             <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
-                <SEO title="Privacy Policy" description="Privacy Policy of Brpl (Brpl)." />
+                <SEO title="Privacy Policy" description="Privacy Policy of Beyond Reach Premier League (BRPL)." />
                 <PageBanner pageKey="privacyPolicy" title="Privacy Policy" currentPage="Privacy Policy" />
 
                 <div className="max-w-8xl mx-auto px-4 md:px-8 py-12 lg:py-16">

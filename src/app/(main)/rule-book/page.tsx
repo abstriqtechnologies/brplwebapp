@@ -38,7 +38,7 @@ export default async function RuleBook() {
             <div className="min-h-screen bg-gray-50/50 font-sans text-slate-800">
                 <SEO
                     title="Rule Book"
-                    description="Rule Book of Brpl (Brpl)."
+                    description="Rule Book of Beyond Reach Premier League (BRPL)."
                 />
                 <PageBanner pageKey="ruleBook" title="Rule Book" currentPage="Rule Book" />
 
@@ -47,7 +47,7 @@ export default async function RuleBook() {
                         {rulebookContent ? (
                             <section>
                                 <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">
-                                    {legal?.rulebook?.title || "Brpl Rule Book"}
+                                    {legal?.rulebook?.title || "BRPL Rule Book"}
                                 </h1>
                                 <SafeHtml
                                     html={decodeHtmlEntities(rulebookContent)}

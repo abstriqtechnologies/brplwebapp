@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import AiContext from "@/models/AiContext";
-import AiLead from "@/models/AiLead";
+import AiLead, { IAiLead } from "@/models/AiLead";
 import AiTicket from "@/models/AiTicket";
 
 export const runtime = "nodejs";
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     // Find existing lead by leadId, then by phone, else create
-    let lead = null;
+    let lead: IAiLead | null = null;
     if (leadId) {
       lead = await AiLead.findById(leadId);
     }
@@ -35,8 +35,14 @@ export async function POST(req: NextRequest) {
       lead.name = name;
     }
 
+    if (!lead) {
+      throw new Error("Failed to create or load lead");
+    }
+
+    const activeLead: IAiLead = lead;
+
     // Push user message
-    lead.conversation.push({ role: "user", message, timestamp: new Date() });
+    activeLead.conversation.push({ role: "user", message, timestamp: new Date() });
 
     // Build context from active AiContext entries
     const contexts = await AiContext.find({ isActive: true }).lean();
@@ -58,7 +64,7 @@ For simple greetings like "hi", "hello", "hey", just greet back warmly without e
 Context:
 ${contextText || "No context configured yet."}`;
 
-    const conversationHistory = lead.conversation.map((m: any) => ({
+    const conversationHistory = activeLead.conversation.map((m: any) => ({
       role: m.role === "ai" ? "assistant" : "user",
       content: m.message,
     }));
@@ -93,7 +99,7 @@ ${contextText || "No context configured yet."}`;
     const aiReply: string = openaiData?.choices?.[0]?.message?.content?.trim() || "";
 
     // Push AI reply
-    lead.conversation.push({ role: "ai", message: aiReply, timestamp: new Date() });
+    activeLead.conversation.push({ role: "ai", message: aiReply, timestamp: new Date() });
 
     let ticketCreated = false;
 
@@ -104,23 +110,23 @@ ${contextText || "No context configured yet."}`;
       aiReply.toLowerCase().includes("i'm sorry, i don't have");
 
     if (looksLikeEscalation && !isGreeting) {
-      lead.status = "escalated";
+      activeLead.status = "escalated";
       const ticket = await AiTicket.create({
-        leadId: lead._id,
-        name: lead.name,
-        phone: lead.phone,
+        leadId: activeLead._id,
+        name: activeLead.name,
+        phone: activeLead.phone,
         issue: message,
         status: "open",
       });
-      lead.ticketId = ticket._id;
+      activeLead.ticketId = ticket._id;
       ticketCreated = true;
     }
 
-    await lead.save();
+    await activeLead.save();
 
     return NextResponse.json({
       reply: aiReply,
-      leadId: lead._id.toString(),
+      leadId: activeLead._id.toString(),
       ticketCreated,
     });
   } catch (err) {
