@@ -38,7 +38,34 @@ export default function PageEditorClient({ pageKey }: { pageKey: string }) {
         if (res.ok && res.data?.data?.page) {
           const p = res.data.data.page;
           setPageTitle(p.title || config.label);
-          setSections(p.sections || []);
+          // Hydrate sections from registry + DB.
+          // If DB has sections, use those. If DB has fewer than registry defines,
+          // pad with registry defaults so every registry section is editable.
+          const dbSections: PageSection[] = Array.isArray(p.sections) ? p.sections : [];
+          const configSections = config.sections;
+          const merged: PageSection[] = configSections.map((sc, i) => {
+            const existing = dbSections.find((s) => s.type === sc.type && s.order === i);
+            if (existing) return existing;
+            const fallback = dbSections[i];
+            if (fallback) return fallback;
+            // Brand new section: start with default skeleton
+            return {
+              _id: `new-${sc.type}-${i}`,
+              type: sc.type,
+              order: i,
+              title: sc.label,
+              subtitle: "",
+              description: "",
+              image: "",
+              imageMobile: "",
+              videoUrl: "",
+              ctaText: "",
+              ctaLink: "",
+              data: {},
+              active: true,
+            };
+          });
+          setSections(merged);
         } else {
           setError(res.error || "Failed to load page");
         }
