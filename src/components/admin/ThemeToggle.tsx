@@ -1,7 +1,7 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme, type Theme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -20,6 +20,12 @@ const ICONS = {
     Monitor,
 } as const;
 
+/**
+ * Light/Dark/System toggle rendered next to the Logout button in the
+ * admin sidebar. Trigger uses shadcn Button size="icon" (h-10 w-10, 40x40)
+ * to match the sibling Logout button's default size (h-10) so both stay
+ * the same height in the flex row.
+ */
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme();
     const Icon = ICONS[iconForTheme(theme)];
@@ -41,7 +47,7 @@ export function ThemeToggle() {
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup
                     value={theme}
-                    onValueChange={(value) => setTheme(value as typeof theme)}
+                    onValueChange={(value) => setTheme(value as Theme)}
                 >
                     {THEME_OPTIONS.map((option) => (
                         <DropdownMenuRadioItem key={option.value} value={option.value}>
