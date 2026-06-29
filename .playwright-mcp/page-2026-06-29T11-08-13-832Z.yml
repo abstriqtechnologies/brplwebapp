@@ -1,0 +1,133 @@
+- generic [active] [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - main [ref=e92]:
+    - generic [ref=e93]:
+      - complementary [ref=e94]:
+        - generic [ref=e95]:
+          - img "Brpl" [ref=e96]
+          - button "Collapse sidebar" [ref=e97] [cursor=pointer]:
+            - img
+        - navigation [ref=e98]:
+          - link "Dashboard" [ref=e99] [cursor=pointer]:
+            - /url: /admin/dashboard
+            - img [ref=e100]
+            - generic [ref=e105]: Dashboard
+          - link "Players" [ref=e106] [cursor=pointer]:
+            - /url: /admin/players
+            - img [ref=e107]
+            - generic [ref=e112]: Players
+          - link "Coupons" [ref=e113] [cursor=pointer]:
+            - /url: /admin/coupons
+            - img [ref=e114]
+            - generic [ref=e116]: Coupons
+          - link "Referral" [ref=e117] [cursor=pointer]:
+            - /url: /admin/referrals
+            - img [ref=e118]
+            - generic [ref=e121]: Referral
+          - link "Blogs" [ref=e122] [cursor=pointer]:
+            - /url: /admin/blogs
+            - img [ref=e123]
+            - generic [ref=e126]: Blogs
+          - link "News" [ref=e127] [cursor=pointer]:
+            - /url: /admin/news
+            - img [ref=e128]
+            - generic [ref=e131]: News
+          - link "Pages" [ref=e132] [cursor=pointer]:
+            - /url: /admin/pages
+            - img [ref=e133]
+            - generic [ref=e136]: Pages
+          - link "Seo" [ref=e137] [cursor=pointer]:
+            - /url: /admin/seo
+            - img [ref=e138]
+            - generic [ref=e141]: Seo
+          - link "Legal" [ref=e142] [cursor=pointer]:
+            - /url: /admin/legal
+            - img [ref=e143]
+            - generic [ref=e146]: Legal
+          - link "AI Context" [ref=e147] [cursor=pointer]:
+            - /url: /admin/ai-context
+            - img [ref=e148]
+            - generic [ref=e158]: AI Context
+          - link "AI Leads" [ref=e159] [cursor=pointer]:
+            - /url: /admin/ai-leads
+            - img [ref=e160]
+            - generic [ref=e165]: AI Leads
+          - link "AI Tickets" [ref=e166] [cursor=pointer]:
+            - /url: /admin/ai-tickets
+            - img [ref=e167]
+            - generic [ref=e170]: AI Tickets
+        - button "Logout" [ref=e172] [cursor=pointer]:
+          - img
+          - generic [ref=e173]: Logout
+      - main [ref=e174]:
+        - main [ref=e175]:
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - link "Back to pages" [ref=e179] [cursor=pointer]:
+                - /url: /admin/pages
+                - img [ref=e180]
+              - generic [ref=e182]:
+                - heading "Home" [level=1] [ref=e183]
+                - paragraph [ref=e184]: "Editing: home"
+            - generic [ref=e185]:
+              - button "Cancel" [ref=e186] [cursor=pointer]
+              - button "Save" [ref=e187] [cursor=pointer]:
+                - img
+                - text: Save
+          - generic [ref=e189]:
+            - text: Page Title (SEO)
+            - textbox [ref=e190]: Home (Updated)
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - generic [ref=e193]: Sections
+              - button "Hero Banner" [ref=e194] [cursor=pointer]:
+                - generic [ref=e197]: Hero Banner
+              - button "Who We Are" [ref=e198] [cursor=pointer]:
+                - generic [ref=e201]: Who We Are
+              - button "Trust Bar / Stats" [ref=e202] [cursor=pointer]:
+                - generic [ref=e205]: Trust Bar / Stats
+              - button "Event Gallery" [ref=e206] [cursor=pointer]:
+                - generic [ref=e209]: Event Gallery
+              - button "Ambassadors" [ref=e210] [cursor=pointer]:
+                - generic [ref=e213]: Ambassadors
+              - button "Teams Slider" [ref=e214] [cursor=pointer]:
+                - generic [ref=e217]: Teams Slider
+              - button "Broadcasting Partners" [ref=e218] [cursor=pointer]:
+                - generic [ref=e221]: Broadcasting Partners
+            - generic [ref=e224]:
+              - generic [ref=e225]:
+                - generic [ref=e226]: Active
+                - switch [checked] [ref=e227] [cursor=pointer]
+              - generic [ref=e228]:
+                - text: Title
+                - textbox [ref=e229]: Hero Banner Updated
+              - generic [ref=e230]:
+                - text: Subtitle
+                - textbox [ref=e231]
+              - generic [ref=e232]:
+                - text: CTA Text
+                - textbox [ref=e233]
+              - generic [ref=e234]:
+                - text: CTA Link
+                - textbox [ref=e235]
+              - generic [ref=e236]:
+                - text: Background Image
+                - generic [ref=e237]:
+                  - paragraph [ref=e238]: "Max size: 50 MB. JPG, PNG or WebP recommended."
+                  - generic [ref=e240]:
+                    - img "Preview" [ref=e241]
+                    - button "Remove image" [ref=e242] [cursor=pointer]:
+                      - img [ref=e243]
+              - generic [ref=e246]:
+                - text: Mobile Image (optional)
+                - generic [ref=e247]:
+                  - paragraph [ref=e248]: "Max size: 50 MB. JPG, PNG or WebP recommended."
+                  - generic [ref=e273]:
+                    - img "Preview" [ref=e274]
+                    - button "Remove image" [ref=e275] [cursor=pointer]:
+                      - img [ref=e276]
+              - generic [ref=e260]:
+                - text: Video URL (optional — overrides image)
+                - textbox [ref=e261]
+  - alert [ref=e262]
