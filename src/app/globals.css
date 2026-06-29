@@ -288,6 +288,92 @@
     color: #111a45;
     font-weight: 700;
   }
+
+  /* Tables authored in the rich text editor (Tiptap) need to be visible
+     on three surfaces: the editor itself, public SafeHtml with `prose`
+     wrappers, and any raw HTML rendering without `prose`. The defaults
+     in browsers and the typography plugin are too subtle to clearly
+     distinguish header rows, so we add explicit borders, padding, and
+     a header background. Also handle dark mode. */
+  .tiptap-editor-wrapper table,
+  .prose table,
+  .legal-content table,
+  .rich-text table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+    margin: 1rem 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .tiptap-editor-wrapper th,
+  .tiptap-editor-wrapper td,
+  .prose th,
+  .prose td,
+  .legal-content th,
+  .legal-content td,
+  .rich-text th,
+  .rich-text td {
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    min-width: 80px;
+    vertical-align: top;
+    text-align: left;
+  }
+  .tiptap-editor-wrapper th,
+  .prose th,
+  .legal-content th,
+  .rich-text th {
+    background: #f1f5f9;
+    font-weight: 600;
+  }
+  .tiptap-editor-wrapper tbody tr:nth-child(even),
+  .prose tbody tr:nth-child(even),
+  .legal-content tbody tr:nth-child(even),
+  .rich-text tbody tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  /* Dark mode for tables on every surface */
+  .dark .tiptap-editor-wrapper table,
+  .dark .prose table,
+  .dark .legal-content table,
+  .dark .rich-text table {
+    border-color: #475569;
+  }
+  .dark .tiptap-editor-wrapper th,
+  .dark .tiptap-editor-wrapper td,
+  .dark .prose th,
+  .dark .prose td,
+  .dark .legal-content th,
+  .dark .legal-content td,
+  .dark .rich-text th,
+  .dark .rich-text td {
+    border-color: #475569;
+  }
+  .dark .tiptap-editor-wrapper th,
+  .dark .prose th,
+  .dark .legal-content th,
+  .dark .rich-text th {
+    background: #1e293b;
+    color: #e2e8f0;
+  }
+  .dark .tiptap-editor-wrapper tbody tr:nth-child(even),
+  .dark .prose tbody tr:nth-child(even),
+  .dark .legal-content tbody tr:nth-child(even),
+  .dark .rich-text tbody tr:nth-child(even) {
+    background: rgba(148, 163, 184, 0.06);
+  }
+
+  /* Tiptap uses .selectedCell on the active cell during editing so the
+     admin can see where they are. */
+  .tiptap-editor-wrapper .selectedCell {
+    background: #fef3c7 !important;
+  }
+  .dark .tiptap-editor-wrapper .selectedCell {
+    background: rgba(146, 114, 39, 0.15) !important;
+  }
 }
 
 @layer utilities {
