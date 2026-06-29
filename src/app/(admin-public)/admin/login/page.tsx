@@ -149,15 +149,10 @@ function LoginInner() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center relative p-4 bg-slate-50 dark:bg-slate-950">
-            {/* Background image */}
+            {/* Background gradient */}
             <div
                 aria-hidden
-                className="absolute inset-0 z-0 opacity-30 dark:opacity-20"
-                style={{
-                    backgroundImage: "url('/register-footer.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "top center",
-                }}
+                className="absolute inset-0 z-0 opacity-30 dark:opacity-20 bg-gradient-to-br from-slate-100 via-slate-50 to-amber-100 dark:from-slate-950 dark:via-slate-900 dark:to-amber-950"
             />
 
             {/* Back to site */}

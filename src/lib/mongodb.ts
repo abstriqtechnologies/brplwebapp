@@ -28,6 +28,8 @@ export async function connectDB(): Promise<typeof mongoose> {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
+        // eslint-disable-next-line no-console
+        console.error("[mongodb] Connection failed — verify MONGODB_URI and Atlas IP allowlist", e instanceof Error ? e.message : e);
         throw e;
     }
     return cached.conn;
