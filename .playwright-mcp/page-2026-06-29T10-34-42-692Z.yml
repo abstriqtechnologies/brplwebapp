@@ -1,0 +1,46 @@
+- generic [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - main [ref=e3]:
+    - generic [ref=e4]:
+      - link "Back to site" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - text: Back to site
+      - generic [ref=e9]:
+        - img "BRPL" [ref=e11]
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - img [ref=e48]
+            - heading "Admin Portal" [level=2] [ref=e51]
+            - paragraph [ref=e52]: Sign in to continue to administration
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - img [ref=e57]
+              - generic [ref=e59]: Mobile
+            - generic [ref=e61]:
+              - generic [ref=e62]: "2"
+              - generic [ref=e63]: Verify
+          - generic [ref=e66]:
+            - button "Change number" [ref=e67] [cursor=pointer]:
+              - img [ref=e68]
+              - text: Change number
+            - generic [ref=e70]:
+              - img [ref=e72]
+              - heading "Enter verification code" [level=1] [ref=e75]
+              - paragraph [ref=e76]:
+                - text: Sent to
+                - generic [ref=e77]: +91 9234894293
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - textbox "Digit 1" [active] [ref=e81]
+                - textbox "Digit 2" [ref=e83]
+                - textbox "Digit 3" [ref=e85]
+                - textbox "Digit 4" [ref=e87]
+              - generic [ref=e88]:
+                - generic [ref=e89]:
+                  - img [ref=e90]
+                  - text: Expires in 5:00
+                - generic [ref=e93]: Resend in 60s
+              - button "Verify & Continue" [disabled]
+  - alert [ref=e43]

@@ -1,0 +1,62 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - img "Brpl" [ref=e7]
+        - button "Collapse sidebar" [ref=e8] [cursor=pointer]:
+          - img
+      - navigation [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e11]
+          - generic [ref=e16]: Dashboard
+        - link "Players" [ref=e17] [cursor=pointer]:
+          - /url: /admin/players
+          - img [ref=e18]
+          - generic [ref=e23]: Players
+        - link "Coupons" [ref=e24] [cursor=pointer]:
+          - /url: /admin/coupons
+          - img [ref=e25]
+          - generic [ref=e27]: Coupons
+        - link "Referral" [ref=e28] [cursor=pointer]:
+          - /url: /admin/referrals
+          - img [ref=e29]
+          - generic [ref=e32]: Referral
+        - link "Blogs" [ref=e33] [cursor=pointer]:
+          - /url: /admin/blogs
+          - img [ref=e34]
+          - generic [ref=e37]: Blogs
+        - link "News" [ref=e38] [cursor=pointer]:
+          - /url: /admin/news
+          - img [ref=e39]
+          - generic [ref=e42]: News
+        - link "Pages" [ref=e43] [cursor=pointer]:
+          - /url: /admin/pages
+          - img [ref=e44]
+          - generic [ref=e47]: Pages
+        - link "Seo" [ref=e48] [cursor=pointer]:
+          - /url: /admin/seo
+          - img [ref=e49]
+          - generic [ref=e52]: Seo
+        - link "Legal" [ref=e53] [cursor=pointer]:
+          - /url: /admin/legal
+          - img [ref=e54]
+          - generic [ref=e57]: Legal
+        - link "AI Context" [ref=e58] [cursor=pointer]:
+          - /url: /admin/ai-context
+          - img [ref=e59]
+          - generic [ref=e69]: AI Context
+        - link "AI Leads" [ref=e70] [cursor=pointer]:
+          - /url: /admin/ai-leads
+          - img [ref=e71]
+          - generic [ref=e76]: AI Leads
+        - link "AI Tickets" [ref=e77] [cursor=pointer]:
+          - /url: /admin/ai-tickets
+          - img [ref=e78]
+          - generic [ref=e81]: AI Tickets
+      - button "Logout" [ref=e83] [cursor=pointer]:
+        - img
+        - generic [ref=e84]: Logout
+    - main [ref=e85]:
+      - main [ref=e86]:
+        - img [ref=e87]
