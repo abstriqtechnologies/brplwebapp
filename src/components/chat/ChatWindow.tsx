@@ -1,7 +1,7 @@
 // src/components/chat/ChatWindow.tsx
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 
@@ -16,31 +16,6 @@ interface ChatWindowProps {
   name: string;
   greetingMessage?: string;
   initialConversation?: ChatMessage[];
-}
-
-/**
- * Smooth character-by-character animation for AI messages.
- * Reveals text gradually so users get the visual feedback of a "live" reply.
- */
-function useTypingEffect(fullText: string, isTyping: boolean, speed = 18) {
-  const [displayed, setDisplayed] = useState("");
-
-  useEffect(() => {
-    if (!isTyping || !fullText) {
-      setDisplayed(fullText);
-      return;
-    }
-    setDisplayed("");
-    let i = 0;
-    const interval = setInterval(() => {
-      i += 1;
-      setDisplayed(fullText.slice(0, i));
-      if (i >= fullText.length) clearInterval(interval);
-    }, speed);
-    return () => clearInterval(interval);
-  }, [fullText, isTyping, speed]);
-
-  return displayed;
 }
 
 export function ChatWindow({ leadId, name, greetingMessage, initialConversation = [] }: ChatWindowProps) {
@@ -58,16 +33,9 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
   });
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [pendingAIMessages, setPendingAIMessages] = useState<Set<number>>(() => {
-    const s = new Set<number>();
-    if (greetingMessage) s.add(0);
-    return s;
-  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Keep a ref of the latest messages so async work in sendMessage
-  // doesn't see stale state from an earlier render (this was the cause of
-  // duplicate / out-of-order inserts).
+  // Keep ref of latest messages for async work
   const messagesRef = useRef<ChatMessage[]>(messages);
   useEffect(() => {
     messagesRef.current = messages;
@@ -75,18 +43,7 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, pendingAIMessages]);
-
-  const completeAIMessage = useCallback((idx: number, finalText: string) => {
-    setMessages((prev) =>
-      prev.map((m, i) => (i === idx ? { ...m, message: finalText } : m))
-    );
-    setPendingAIMessages((prev) => {
-      const next = new Set(prev);
-      next.delete(idx);
-      return next;
-    });
-  }, []);
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim() || isTyping) return;
@@ -97,10 +54,6 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
       timestamp: new Date(),
     };
 
-    // Use ref snapshot for the index so rapid-fire messages don't collide.
-    const userIndex = messagesRef.current.length;
-    // Use the updater form (functional setState) so concurrent sends don't
-    // clobber each other's optimistic insert.
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
@@ -132,16 +85,8 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-      setPendingAIMessages((prev) => {
-        const next = new Set(prev);
-        next.add(userIndex + 1);
-        return next;
-      });
     } catch (err) {
       console.error("Chat send error:", err);
-      // If the network request itself failed, surface a user-visible error.
-      // We deliberately do NOT also re-insert the userMessage here because
-      // the optimistic insert above already added it.
       const errorMessage: ChatMessage = {
         role: "ai",
         message: "Sorry, something went wrong. Please try again.",
@@ -194,18 +139,14 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
             <p className="text-gray-500 text-sm">How can we help you today?</p>
           </div>
         )}
-        {messages.map((msg, i) => {
-          const isTypingThis =
-            msg.role === "ai" && pendingAIMessages.has(i);
-          return (
-            <AnimatedAIMessage
-              key={i}
-              message={msg}
-              isTyping={isTypingThis}
-              onComplete={(finalText) => completeAIMessage(i, finalText)}
-            />
-          );
-        })}
+        {messages.map((msg, i) => (
+          <MessageBubble
+            key={`${i}-${msg.timestamp.getTime()}`}
+            role={msg.role}
+            message={msg.message}
+            timestamp={msg.timestamp}
+          />
+        ))}
         {isTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
@@ -249,36 +190,5 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
         </div>
       </div>
     </div>
-  );
-}
-
-function AnimatedAIMessage({
-  message,
-  isTyping,
-  onComplete,
-}: {
-  message: ChatMessage;
-  isTyping: boolean;
-  onComplete: (text: string) => void;
-}) {
-  const displayed = useTypingEffect(message.message, isTyping);
-
-  useEffect(() => {
-    if (!isTyping) return;
-    if (displayed.length >= message.message.length) {
-      onComplete(message.message);
-    }
-  }, [displayed, isTyping, message.message, onComplete]);
-
-  if (message.role === "user") {
-    return <MessageBubble role="user" message={message.message} timestamp={message.timestamp} />;
-  }
-
-  return (
-    <MessageBubble
-      role="ai"
-      message={isTyping ? displayed : message.message}
-      timestamp={message.timestamp}
-    />
   );
 }

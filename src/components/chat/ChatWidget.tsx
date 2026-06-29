@@ -106,9 +106,9 @@ export function ChatWidget() {
 
           {state === "form" && <NamePhoneForm onSubmit={handleFormSubmit} />}
 
-          {state === "chat" && leadId && (
+          {state === "chat" && (
             <ChatWindow
-              leadId={leadId}
+              leadId={leadId || ""}
               name={userName}
               greetingMessage={greetingMessage}
             />
