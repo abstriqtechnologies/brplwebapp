@@ -7,6 +7,7 @@ import { LayoutDashboard, Users, Ticket, PenSquare, LogOut, PanelLeftClose, Pane
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/admin/ThemeToggle";
 
 type NavItem = {
     label: string;
@@ -107,18 +108,36 @@ export function AdminSidebar() {
             </nav>
 
             <div className="px-2 py-3 border-t border-slate-200 dark:border-slate-800">
-                <Button
-                    variant="outline"
-                    className={cn("w-full", collapsed ? "" : "justify-start")}
-                    onClick={() => {
-                        void logout();
-                    }}
-                    title={collapsed ? "Logout" : undefined}
-                    aria-label="Logout"
-                >
-                    <LogOut className={cn("h-4 w-4", collapsed ? "" : "mr-2")} />
-                    {!collapsed && <span>Logout</span>}
-                </Button>
+                {collapsed ? (
+                    <div className="flex flex-col gap-2">
+                        <ThemeToggle />
+                        <Button
+                            variant="outline"
+                            className="w-full justify-center"
+                            onClick={() => {
+                                void logout();
+                            }}
+                            aria-label="Logout"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
+                        <Button
+                            variant="outline"
+                            className="flex-1 justify-start"
+                            onClick={() => {
+                                void logout();
+                            }}
+                            aria-label="Logout"
+                        >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Logout</span>
+                        </Button>
+                    </div>
+                )}
             </div>
         </aside>
     );
