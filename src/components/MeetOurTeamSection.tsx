@@ -17,7 +17,7 @@ const FALLBACK_TEAM: TeamMember[] = [
   {
     _id: "fallback-tm-1",
     name: "Leadership Team",
-    role: "BRPL",
+    role: "Brpl",
     image: "/artist.webp",
     bio: "Our team brings decades of experience from major cricket leagues and sports organizations across India.",
     order: 0,
@@ -25,7 +25,7 @@ const FALLBACK_TEAM: TeamMember[] = [
   {
     _id: "fallback-tm-2",
     name: "Operations Team",
-    role: "BRPL",
+    role: "Brpl",
     image: "/artist.webp",
     bio: "Working round the clock to bring the T10 dream to every corner of India.",
     order: 1,
@@ -33,7 +33,7 @@ const FALLBACK_TEAM: TeamMember[] = [
   {
     _id: "fallback-tm-3",
     name: "Coaching Team",
-    role: "BRPL",
+    role: "Brpl",
     image: "/artist.webp",
     bio: "Former cricketers and certified coaches guiding the next generation of talent.",
     order: 2,

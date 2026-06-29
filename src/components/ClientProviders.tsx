@@ -17,13 +17,6 @@ export default function ClientProviders({ children }: { children: React.ReactNod
     const pathname = usePathname() || "";
     const hideChrome = CHROME_HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-    // Defer mounting <Toaster /> until after hydration. The Radix
-    // `<ToastViewport>` uses a React portal that mounts to `document.body`,
-    // while SSR renders it inline — the resulting DOM mismatch makes React
-    // bail out to client rendering on every page, which in turn breaks
-    // server-issued auth cookies and sends /checkout into a redirect loop.
-    // Mounting client-only eliminates the mismatch with no user-visible
-    // behavior change (toasts appear one tick later).
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
 

@@ -13,6 +13,7 @@ export interface IUser extends Document {
     state?: string;
     city?: string;
     paymentStatus: "pending" | "completed";
+    Trial_status?: "pending" | "completed";
     paymentId?: string;
     orderId?: string;
     amount?: number;
@@ -34,6 +35,7 @@ const UserSchema = new Schema<IUser>(
         state: { type: String, trim: true },
         city: { type: String, trim: true },
         paymentStatus: { type: String, enum: ["pending", "completed"], default: "pending", index: true },
+        Trial_status: { type: String, enum: ["pending", "completed"], default: "pending", index: true },
         paymentId: { type: String },
         orderId: { type: String, index: true },
         amount: { type: Number },

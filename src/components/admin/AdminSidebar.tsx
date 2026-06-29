@@ -62,7 +62,7 @@ export function AdminSidebar() {
             >
                 <img
                     src="/logo.webp"
-                    alt="BRPL"
+                    alt="Brpl"
                     className={cn("object-contain", collapsed ? "h-8 w-8" : "max-w-[120px] h-auto")}
                 />
                 <Button

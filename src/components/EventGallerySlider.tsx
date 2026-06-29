@@ -15,7 +15,7 @@ import { useCollections } from "@/components/SiteContextProvider";
 const FALLBACK_EVENTS = [
     {
         _id: "fallback-1",
-        title: "BRPL Zonal Trials",
+        title: "Brpl Zonal Trials",
         image: "/artist.webp",
         date: "Upcoming",
         location: "Pan-India",
@@ -101,11 +101,11 @@ const EventGallerySlider: React.FC = () => {
                             className="text-white text-3xl md:text-4xl lg:text-[40px] font-extrabold tracking-[0.05em] mb-4"
                             style={{ fontFamily: "'Rye', serif" }}
                         >
-                            BRPL Event Gallery
+                            Brpl Event Gallery
                         </h2>
                         <div className="h-1 w-24 bg-[#FFC928] rounded-full" />
                         <p className="max-w-2xl text-center text-gray-200 text-sm md:text-base mt-4 leading-relaxed">
-                            Highlights from BRPL's nationwide cricket events — zonal trials, franchise matches, and grassroots tournaments shaping India's next generation of T10 cricketers.
+                            Highlights from Brpl's nationwide cricket events — zonal trials, franchise matches, and grassroots tournaments shaping India's next generation of T10 cricketers.
                         </p>
                         <p className="text-center text-amber-500 font-bold uppercase tracking-wider text-sm md:text-base mt-4 italic">
                             Bharat ki League, Bharatiyon ka Sapna

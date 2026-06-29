@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const FALLBACK_AMOUNT = 1499;
-const SUPPORT_EMAIL = "support@brpl.net";
+const SUPPORT_EMAIL = "support@Brpl.net";
 
 export async function GET(_req: Request) {
     try {
@@ -86,7 +86,7 @@ export async function GET(_req: Request) {
         doc.setFillColor(245, 158, 11);
         doc.rect(0, 48, pw, 2, "F");
 
-        // Try to embed the BRPL logo; fall back to text brand mark
+        // Try to embed the Brpl logo; fall back to text brand mark
         try {
             const logoPath = path.join(process.cwd(), "public", "logo.webp");
             const webpBuf = await fs.readFile(logoPath);
@@ -94,13 +94,13 @@ export async function GET(_req: Request) {
             // Logo dimensions: ~22mm wide, aspect-ratio preserved (assume square-ish)
             doc.addImage(pngBuf, "PNG", ml, 12, 22, 22);
         } catch {
-            // Fallback: amber square with "BRPL" text mark
+            // Fallback: amber square with "Brpl" text mark
             doc.setFillColor(245, 158, 11);
             doc.rect(ml, 12, 22, 22, "F");
             doc.setTextColor(15, 23, 42);
             b(true);
             doc.setFontSize(11);
-            doc.text("BRPL", ml + 11, 26, { align: "center" });
+            doc.text("Brpl", ml + 11, 26, { align: "center" });
         }
 
         doc.setTextColor(255, 255, 255);
@@ -113,7 +113,7 @@ export async function GET(_req: Request) {
         doc.text("REGISTRATION INVOICE", cx + 14, 35, { align: "center" });
 
         // ── Invoice meta ─────────────────────────────────────────────
-        const invNo = `INV-BRPL-${user._id.toString().slice(-10).toUpperCase()}`;
+        const invNo = `INV-Brpl-${user._id.toString().slice(-10).toUpperCase()}`;
         const dateStr = new Date().toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
@@ -195,7 +195,7 @@ export async function GET(_req: Request) {
         doc.setTextColor(15, 23, 42);
         b(false);
         doc.setFontSize(9);
-        doc.text("BRPL Player Registration Fee", colDesc + 4, rY + 6);
+        doc.text("Brpl Player Registration Fee", colDesc + 4, rY + 6);
         doc.text("1", colQty + 4, rY + 6);
         b(true);
         doc.text(INR(amount), amtR - 4, rY + 6, { align: "right" });
@@ -225,7 +225,7 @@ export async function GET(_req: Request) {
         b(true);
         doc.setFontSize(10);
         doc.setTextColor(15, 23, 42);
-        doc.text("Thank you for registering with BRPL!", cx, tyY, { align: "center" });
+        doc.text("Thank you for registering with Brpl!", cx, tyY, { align: "center" });
         b(false);
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
@@ -242,7 +242,7 @@ export async function GET(_req: Request) {
         doc.setTextColor(170, 170, 170);
         b(false);
         doc.setFontSize(7);
-        doc.text("Beyond Reach Premier League  -  www.brpl.net", cx, ph - 10, { align: "center" });
+        doc.text("Brpl  -  www.Brpl.net", cx, ph - 10, { align: "center" });
         doc.text(`For support, contact ${SUPPORT_EMAIL}`, cx, ph - 5, { align: "center" });
 
         const pdfBuffer = Buffer.from(doc.output("arraybuffer"));
@@ -251,7 +251,7 @@ export async function GET(_req: Request) {
             status: 200,
             headers: {
                 "Content-Type": "application/pdf",
-                "Content-Disposition": `attachment; filename="BRPL-Invoice-${safePhone}.pdf"`,
+                "Content-Disposition": `attachment; filename="Brpl-Invoice-${safePhone}.pdf"`,
             },
         });
     } catch (err) {

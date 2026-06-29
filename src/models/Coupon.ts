@@ -10,6 +10,7 @@ export interface ICoupon extends Document {
     usedCount: number;
     minOrderAmount?: number;
     active: boolean;
+    source?: "manual" | "referral";
     expiresAt?: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -25,9 +26,10 @@ const CouponSchema = new Schema<ICoupon>(
         usedCount: { type: Number, default: 0 },
         minOrderAmount: { type: Number },
         active: { type: Boolean, default: true },
+        source: { type: String, enum: ["manual", "referral"], default: "manual", index: true },
         expiresAt: { type: Date },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 const Coupon: Model<ICoupon> =

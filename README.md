@@ -1,6 +1,6 @@
-# BRPL Frontend
+# Brpl Frontend
 
-Beyond Reach Premier League — a Next.js 14 App Router project for cricket-league management. Players register via phone OTP + Razorpay payment; admins manage content, users, payments, and media through a full CMS.
+Brpl — a Next.js 14 App Router project for cricket-league management. Players register via phone OTP + Razorpay payment; admins manage content, users, payments, and media through a full CMS.
 
 ## Architecture
 
@@ -86,7 +86,7 @@ Run a single file: `npx vitest run tests/lib/env.test.ts`
 - **Environment** is validated once at boot in `@/lib/env.ts` (zod schema).
 - **Errors** are thrown as typed AppErrors and caught by `withRequest` for a consistent JSON envelope.
 - **Rate limiting** is per-instance token bucket (Redis-backed in multi-instance deployments).
-- **CSRF** is available via `BRPL_CSRF_REQUIRED=true` (double-submit cookie).
+- **CSRF** is available via `Brpl_CSRF_REQUIRED=true` (double-submit cookie).
 
 ## CI
 

@@ -109,4 +109,5 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  safelist: ["duration-[10000ms]"],
 } satisfies Config;

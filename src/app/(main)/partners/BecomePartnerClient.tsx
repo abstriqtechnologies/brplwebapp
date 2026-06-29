@@ -89,7 +89,7 @@ const BecomePartnerClient = () => {
         <div className="min-h-screen bg-gray-50">
             <SEO
                 title="Become a Partner"
-                description="Join us as a partner and grow with Beyond Reach Premier League."
+                description="Join us as a partner and grow with Brpl."
             />
             <PageBanner pageKey="becomePartner" title="Become a Partner" currentPage="Become a Partner" />
 

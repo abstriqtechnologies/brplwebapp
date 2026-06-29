@@ -34,7 +34,7 @@ export async function sendSmsOtp(mobile: string, otp: string, otpPurpose: string
 
     const senderId = env.SMS_SENDER_ID;
     const gwid = env.SMS_GWID;
-    const message = `Welcome to the Beyond Reach Premiere League powered by SMSINDIAHUB. Your OTP for ${otpPurpose} is ${otp}`;
+    const message = `Welcome to the Brpl powered by SMSINDIAHUB. Your OTP for ${otpPurpose} is ${otp}`;
     const encodedMessage = encodeURIComponent(message);
     const url = `https://cloud.smsindiahub.in/vendorsms/pushsms.aspx?APIKey=${apiKey}&msisdn=${withCountryCode}&sid=${senderId}&msg=${encodedMessage}&fl=0&dc=0&gwid=${gwid}`;
 

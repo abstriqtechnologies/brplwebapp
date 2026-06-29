@@ -60,8 +60,8 @@ const Header = () => {
             isActive: true,
             isExternal: false,
             children: [
-                { label: "BRPL Partner", path: "/partners" },
-                { label: "BRPL Sponsors", path: "/types-of-partners" },
+                { label: "Brpl Partner", path: "/partners" },
+                { label: "Brpl Sponsors", path: "/types-of-partners" },
             ],
         },
         { label: "FAQs", path: "/faqs", isActive: true, isExternal: false },
@@ -82,7 +82,7 @@ const Header = () => {
                 <Link href="/" className="flex items-center">
                     <img
                         src={settings.logoUrl || "/logo.webp"}
-                        alt="BRPL Logo"
+                        alt="Brpl Logo"
                         className="h-[80px] w-auto object-contain drop-shadow-lg"
                     />
                 </Link>
@@ -136,7 +136,7 @@ const Header = () => {
                 <Link href="/" className="flex items-center z-30 lg:hidden">
                     <img
                         src={settings.logoUrl || "/logo.webp"}
-                        alt="BRPL Logo"
+                        alt="Brpl Logo"
                         className="h-[60px] w-auto object-contain drop-shadow-lg"
                     />
                 </Link>

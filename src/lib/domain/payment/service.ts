@@ -76,7 +76,7 @@ export async function createOrder(deps: CreateOrderDeps): Promise<CreateOrderRes
     const order = await deps.razorpay.orders.create({
         amount: deps.amountPaise,
         currency: deps.currency,
-        receipt: `brpl_${deps.phone}_${Date.now()}`,
+        receipt: `Brpl_${deps.phone}_${Date.now()}`,
         notes: { phone: deps.phone, purpose: "registration" },
     });
 

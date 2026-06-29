@@ -12,7 +12,7 @@ if (!user) {
     user = await User.create({
         phone: "9999999999",
         name: "Test Player",
-        email: "test@brpl.net",
+        email: "test@Brpl.net",
         role: "batsman",
         state: "Maharashtra",
         city: "Mumbai",

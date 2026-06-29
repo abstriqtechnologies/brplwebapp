@@ -27,7 +27,7 @@ const TeamsClient = () => {
         <div className="min-h-screen bg-gray-50">
             <SEO
                 title="Our Teams"
-                description="Meet the teams competing in the Beyond Reach Premier League. Passion, skill, and dedication on full display."
+                description="Meet the teams competing in the Brpl. Passion, skill, and dedication on full display."
             />
             <PageBanner
                 pageKey="teams"

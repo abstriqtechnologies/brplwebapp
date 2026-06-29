@@ -10,7 +10,7 @@
 import { z } from "zod";
 import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
-import SitePage from "@/models/SitePage";
+import SitePage, { type SitePageKey } from "@/models/SitePage";
 import { withRequest, withAdmin } from "@/lib/api/handlers";
 import { ok } from "@/lib/api/response";
 import { BadRequestError } from "@/lib/api/errors";
@@ -99,7 +99,7 @@ export const GET = withRequest(
         const config = PAGE_REGISTRY[key];
         if (!config) throw new BadRequestError(`Unknown page key: ${key}`);
 
-        const page = await SitePage.findOne({ key }).lean();
+        const page = await SitePage.findOne({ key: key as SitePageKey }).lean();
 
         // If no DB entry yet, return registry config as template
         if (!page) {
@@ -126,6 +126,7 @@ export const PATCH = withRequest(
         const config = PAGE_REGISTRY[key];
         if (!config) throw new BadRequestError(`Unknown page key: ${key}`);
 
+        const typedKey = key as SitePageKey;
         const body = await req.json().catch(() => ({}));
         const parsed = updateSchema.safeParse(body);
         if (!parsed.success) {
@@ -147,8 +148,8 @@ export const PATCH = withRequest(
         }
 
         const page = await SitePage.findOneAndUpdate(
-            { key },
-            { $set: { ...data, key } },
+            { key: typedKey },
+            { $set: { ...data, key: typedKey } },
             { upsert: true, new: true },
         ).lean();
 

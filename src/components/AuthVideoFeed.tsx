@@ -9,31 +9,31 @@ import { useRegistrationCms } from "@/components/SiteContextProvider";
 const FALLBACK_VIDEOS = [
     {
         _id: "1",
-        title: "BRPL Launch Film",
-        thumbnail: "/banner-brpl.webp",
+        title: "Brpl Launch Film",
+        thumbnail: "/banner-Brpl.webp",
         duration: "10:24",
-        videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2FBRPL_Launch_Film.mp4"
+        videoSrc: "https://Brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2FBrpl-public%2FBrpl_Launch_Film.mp4"
     },
     {
         _id: "2",
-        title: "BRPL Highlight",
+        title: "Brpl Highlight",
         thumbnail: "/about-us.webp",
         duration: "05:12",
-        videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2FBRPL_Launch_Film.mp4"
+        videoSrc: "https://Brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2FBrpl-public%2FBrpl_Launch_Film.mp4"
     },
     {
         _id: "3",
-        title: "BRPL Teams",
+        title: "Brpl Teams",
         thumbnail: "/banner-new.webp",
         duration: "15:30",
-        videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2Fteams-video.mp4"
+        videoSrc: "https://Brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2FBrpl-public%2Fteams-video.mp4"
     },
     {
         _id: "4",
         title: "Teams Spotlight",
         thumbnail: "/banner-2.webp",
         duration: "03:45",
-        videoSrc: "https://brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2Fbrpl-public%2Fteams-video.mp4"
+        videoSrc: "https://Brpl.net/api/api/cloud-store/preview?uri=%2Fapi%2Fpublic%2FBrpl-public%2Fteams-video.mp4"
     }
 ];
 
@@ -61,7 +61,7 @@ const AuthVideoFeed = ({
               .map((v: any, idx: number) => ({
                   _id: v._id?.toString?.() || `cms-video-${idx}`,
                   title: v.title || "",
-                  thumbnail: v.thumbnail || "/banner-brpl.webp",
+                  thumbnail: v.thumbnail || "/banner-Brpl.webp",
                   duration: "",
                   videoSrc: v.url,
               }))

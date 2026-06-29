@@ -39,6 +39,7 @@ type Me = {
     state?: string;
     city?: string;
     paymentStatus?: "pending" | "completed";
+    Trial_status?: "pending" | "completed";
     profileImage?: string | null;
 };
 
@@ -86,7 +87,7 @@ export default function DashboardClient() {
                 backgroundColor: "#ffffff",
             });
             const link = document.createElement("a");
-            link.download = `BRPL-Trial-Pass-${user.phone || "player"}.png`;
+            link.download = `Brpl-Trial-Pass-${user.phone || "player"}.png`;
             link.href = dataUrl;
             link.click();
         } catch (err) {
@@ -106,7 +107,7 @@ export default function DashboardClient() {
                 throw new Error(err.error || "Failed to download invoice");
             }
             const blob = await res.blob();
-            downloadBlob(blob, `BRPL-Invoice-${user.phone || "player"}.pdf`);
+            downloadBlob(blob, `Brpl-Invoice-${user.phone || "player"}.pdf`);
         } catch (err) {
             console.error("Invoice download failed", err);
             toast({
@@ -149,7 +150,7 @@ export default function DashboardClient() {
 
                     <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <p className="text-sm uppercase tracking-widest text-white/80 mb-2">Welcome to BRPL</p>
+                            <p className="text-sm uppercase tracking-widest text-white/80 mb-2">Welcome to Brpl</p>
                             <h1 className="text-3xl sm:text-4xl font-extrabold mb-1">{user.name || "Player"}</h1>
                             <div className="flex items-center gap-2 text-white/90">
                                 <Trophy className="w-4 h-4" />
@@ -241,7 +242,7 @@ export default function DashboardClient() {
                             />
                             <ProfileCard
                                 icon={<IdCard className="w-5 h-5" />}
-                                label="BRPL ID"
+                                label="Brpl ID"
                                 value={user.id ? `#${user.id.slice(-8).toUpperCase()}` : "—"}
                                 mono
                             />
@@ -253,7 +254,7 @@ export default function DashboardClient() {
                                 <div>
                                     <h2 className="font-bold text-slate-900 dark:text-white mb-1">Registration complete</h2>
                                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                                        Your BRPL player profile is active. You&apos;ll be notified when zonal trials open in your state.
+                                        Your Brpl player profile is active. You&apos;ll be notified when zonal trials open in your state.
                                     </p>
                                 </div>
                             </div>
@@ -266,7 +267,7 @@ export default function DashboardClient() {
                                     <div>
                                         <h2 className="font-bold text-slate-900 dark:text-white mb-1">Payment invoice</h2>
                                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            Official registration receipt with BRPL logo.
+                                            Official registration receipt with Brpl logo.
                                         </p>
                                     </div>
                                 </div>

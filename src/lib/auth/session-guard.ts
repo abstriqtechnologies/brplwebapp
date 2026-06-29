@@ -1,5 +1,5 @@
 /**
- * Combined JWT + DB verification for the `brpl_auth` cookie.
+ * Combined JWT + DB verification for the `Brpl_auth` cookie.
  *
  * Use this in middleware (where we can't make full DB calls via the
  * `getAuthSession` helper, which is server-component-only) to detect stale

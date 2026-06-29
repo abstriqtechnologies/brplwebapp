@@ -19,7 +19,7 @@ import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
 import { getAdminAllowedPhones } from "@/lib/domain/admin-auth/service";
 
-const DEFAULT_EMAIL = "admin@brpl.com";
+const DEFAULT_EMAIL = "admin@Brpl.com";
 const DEFAULT_NAME = "Super Admin";
 
 let seeded = false;

@@ -7,10 +7,13 @@ export interface ISeoMeta extends Document {
     description: string;
     keywords?: string;
     ogImage?: string;
+    ogTitle?: string;
+    ogDescription?: string;
     ogType?: string;
     twitterCard?: string;
     canonical?: string;
     robots?: string;
+    customHeadScripts?: string;
     updatedAt: Date;
     createdAt: Date;
 }
@@ -22,10 +25,13 @@ const SeoMetaSchema = new Schema<ISeoMeta>(
         description: { type: String, required: true },
         keywords: { type: String },
         ogImage: { type: String },
+        ogTitle: { type: String },
+        ogDescription: { type: String },
         ogType: { type: String, default: "website" },
         twitterCard: { type: String, default: "summary_large_image" },
         canonical: { type: String },
         robots: { type: String, default: "index, follow" },
+        customHeadScripts: { type: String, default: "" },
     },
     { timestamps: true }
 );

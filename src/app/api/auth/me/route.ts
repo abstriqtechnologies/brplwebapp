@@ -30,6 +30,7 @@ export async function GET() {
                 state: user.state,
                 city: user.city,
                 paymentStatus: user.paymentStatus,
+                Trial_status: user.Trial_status ?? "pending",
                 couponId: user.couponId ? user.couponId.toString() : null,
                 couponCode: user.couponCode ?? null,
                 couponDiscount: user.couponDiscount ?? null,

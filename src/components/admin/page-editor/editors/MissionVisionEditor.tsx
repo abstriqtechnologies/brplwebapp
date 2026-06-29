@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function MissionVisionEditor({ section, onChange, defaultData }: Props) {
-  const data = { ...defaultData, section, ...(section.data || {}) };
+  const data = { ...defaultData, ...(section.data || {}) };
 
   const update = (field: string, value: any) => {
     onChange({

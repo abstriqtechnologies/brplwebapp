@@ -58,7 +58,7 @@ const NewsClient = () => {
         <>
             <SEO
                 title="News"
-                description="Latest news and updates from Beyond Reach Premier League (BRPL)."
+                description="Latest news and updates from Brpl (Brpl)."
                 url={"/news"}
             />
             <PageBanner title="News" currentPage="News" pageKey="news" />
@@ -91,7 +91,7 @@ const NewsClient = () => {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-[#111a45]/5 text-[#111a45]/40 font-semibold">
-                                            BRPL
+                                            Brpl
                                         </div>
                                     )}
                                 </div>

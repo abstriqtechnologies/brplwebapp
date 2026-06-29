@@ -22,15 +22,15 @@ interface WhoWeAreData {
 }
 
 const DEFAULT_WHO_WE_ARE: WhoWeAreData = {
-    title: "Beyond Reach Premier League",
+    title: "Brpl",
     titleHeadingLevel: "h1",
     subtitle: "India's Grassroots T10 Cricket League",
-    tagline: "\"BRPL – Bharat ki League, Bharatiyon ka Sapna\"",
+    tagline: "\"Brpl – Bharat ki League, Bharatiyon ka Sapna\"",
     description: `<p class="text-gray-400 leading-relaxed mb-4">
-                            <span class="text-white font-semibold">Beyond Reach Premier League (BRPL)</span> is India's premier <span class="text-white font-semibold">T10 tennis-ball cricket league</span>, built to give every aspiring cricketer — regardless of city, background, or contacts — a fair, structured pathway to professional cricket. Through nationwide <span class="text-white font-semibold">cricket trials</span> and open <span class="text-white font-semibold">player registration</span> across five zones, BRPL is rewriting how talent is discovered in Indian cricket.
+                            <span class="text-white font-semibold">Brpl (Brpl)</span> is India's premier <span class="text-white font-semibold">T10 tennis-ball cricket league</span>, built to give every aspiring cricketer — regardless of city, background, or contacts — a fair, structured pathway to professional cricket. Through nationwide <span class="text-white font-semibold">cricket trials</span> and open <span class="text-white font-semibold">player registration</span> across five zones, Brpl is rewriting how talent is discovered in Indian cricket.
                         </p>
                         <p class="text-gray-400 leading-relaxed mb-4">
-                            What makes BRPL different is its commitment to <span class="text-white font-semibold">grassroots access</span>. Whether you're playing gully cricket in a small town or representing your district side, BRPL's zonal trials are designed to surface raw talent that conventional scouting overlooks. Selected players join franchise teams, compete in a fast-paced T10 format, and gain real exposure to scouts, mentors, and live broadcasts.
+                            What makes Brpl different is its commitment to <span class="text-white font-semibold">grassroots access</span>. Whether you're playing gully cricket in a small town or representing your district side, Brpl's zonal trials are designed to surface raw talent that conventional scouting overlooks. Selected players join franchise teams, compete in a fast-paced T10 format, and gain real exposure to scouts, mentors, and live broadcasts.
                         </p>
                         <p class="text-gray-400 leading-relaxed">
                             Player benefits include <span class="text-white font-semibold">professional coaching, performance tracking, prize money, and scouting exposure</span> — a genuine shot at a long-term cricketing career. Every selected player represents their zone, wears their colours, and plays for a chance to inspire the next generation back home.
@@ -123,7 +123,7 @@ const WhoWeAre = () => {
                         <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#0f172a]">
                             <img
                                 src={data?.image ? getImageUrl(data.image) : "/home2.webp"}
-                                alt="About BRPL"
+                                alt="About Brpl"
                                 className="w-full h-full object-cover"
                             />
 

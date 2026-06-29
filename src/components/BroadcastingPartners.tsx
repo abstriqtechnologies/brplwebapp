@@ -70,7 +70,7 @@ const BroadcastingPartners: React.FC = () => {
         <div className="absolute inset-0 bg-[#020617]/85" />
 
         <div className="relative max-w-6xl mx-auto flex flex-col items-center">
-          {/* Section title - same format as BRPL Teams / Ambassadors */}
+          {/* Section title - same format as Brpl Teams / Ambassadors */}
           <h2
             className="text-center text-[#FFD700] text-3xl md:text-4xl lg:text-[40px] font-extrabold tracking-[0.05em] mb-2 md:mb-3"
             style={{ fontFamily: "var(--font-rye), 'Rye', serif" }}

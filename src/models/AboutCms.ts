@@ -2,7 +2,7 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 
 /**
  * Single doc collection holding all About-Us CMS content (banner,
- * about-brpl body, mission & vision, meet-our-team). Admin endpoints
+ * about-Brpl body, mission & vision, meet-our-team). Admin endpoints
  * read/write fields on this single record.
  */
 

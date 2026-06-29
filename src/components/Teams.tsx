@@ -98,7 +98,7 @@ const Teams: React.FC = () => {
             className="text-center text-[#FFD700] text-3xl md:text-4xl lg:text-[40px] font-extrabold tracking-[0.05em] mb-4"
             style={{ fontFamily: "'Rye', serif" }}
           >
-            BRPL Teams
+            Brpl Teams
           </h2>
           <p className="max-w-2xl text-center text-gray-200 text-sm md:text-base mb-4 leading-relaxed">
             Five franchise teams. Five zones. One league. Discover the squads competing in India's most accessible T10 tennis-ball cricket tournament.

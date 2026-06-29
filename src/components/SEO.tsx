@@ -18,7 +18,7 @@ interface SEOProps {
 const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }: SEOProps) => {
     const { siteSettings } = useSiteContext();
     const s = siteSettings as any;
-    const siteTitle = s.siteName || 'Beyond Reach Premier League';
+    const siteTitle = s.siteName || 'Brpl';
 
     const fallbackTitle = s.homeSeoTitle || title;
     const fallbackDescription = s.homeSeoDescription || description;
@@ -31,7 +31,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
     const [ogDescription, setOgDescription] = useState<string | null>(null);
     const [ogImage, setOgImage] = useState<string | null>(null);
     const [customBodyScripts, setCustomBodyScripts] = useState<string>("");
-    const injectedBodyRef = useRef<string>("");
+    const injectedHeadRef = useRef<string>("");
 
     useEffect(() => {
         const fetchSEO = async () => {
@@ -46,7 +46,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
                     setOgTitle(data.ogTitle?.trim() || null);
                     setOgDescription(data.ogDescription?.trim() || null);
                     setOgImage(data.ogImage?.trim() || null);
-                    setCustomBodyScripts(data.customBodyScripts?.trim() || "");
+                    setCustomBodyScripts(data.customHeadScripts?.trim() || "");
                 } else {
                     setDynamicTitle(`${fallbackTitle} | ${siteTitle}`);
                     setDynamicDesc(fallbackDescription);
@@ -54,7 +54,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
                     setOgTitle(null);
                     setOgDescription(null);
                     setOgImage(s.ogImage?.trim() || null);
-                    setCustomBodyScripts(s.customBodyScripts?.trim() || "");
+                    setCustomBodyScripts(s.customHeadScripts?.trim() || "");
                 }
             } catch {
                 setDynamicTitle(`${fallbackTitle} | ${siteTitle}`);
@@ -63,7 +63,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
                 setOgTitle(null);
                 setOgDescription(null);
                 setOgImage(s.ogImage?.trim() || null);
-                setCustomBodyScripts(s.customBodyScripts?.trim() || "");
+                setCustomBodyScripts(s.customHeadScripts?.trim() || "");
             }
         };
 
@@ -76,12 +76,12 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
 
         const existing = document.head.querySelectorAll(`[${DATA_ATTR}="true"]`);
         existing.forEach((el) => el.remove());
-        injectedBodyRef.current = "";
+        injectedHeadRef.current = "";
 
         if (!raw) return;
 
-        if (injectedBodyRef.current === raw) return;
-        injectedBodyRef.current = raw;
+        if (injectedHeadRef.current === raw) return;
+        injectedHeadRef.current = raw;
 
         const container = document.createElement("div");
         container.innerHTML = raw;
@@ -111,7 +111,7 @@ const SEO = ({ title, description, keywords, image, url, breadcrumbCurrentName }
             added.forEach((el) => {
                 if (el.parentNode) el.parentNode.removeChild(el);
             });
-            injectedBodyRef.current = "";
+            injectedHeadRef.current = "";
         };
     }, [customBodyScripts]);
 

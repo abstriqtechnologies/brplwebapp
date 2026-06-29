@@ -67,7 +67,7 @@ const schema = z.object({
     ADMIN_PHONES: z.string().optional(),
 
     // Security knobs (used by Phase 1)
-    BRPL_CSRF_REQUIRED: booleanish,
+    Brpl_CSRF_REQUIRED: booleanish,
 });
 
 export type Env = z.infer<typeof schema>;

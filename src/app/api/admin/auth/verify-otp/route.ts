@@ -9,7 +9,7 @@
  *     UnauthorizedError("Invalid OTP") for every failure mode — the
  *     wrapper renders it as a 401.
  *   - On success: issue the admin JWT (purpose: "admin"), set the
- *     brpl_admin cookie, return the redirect target the UI requested.
+ *     Brpl_admin cookie, return the redirect target the UI requested.
  *
  * The `next` query/body param mirrors the user verify-otp flow: the UI
  * forwards its post-login destination, and we echo it back so the client

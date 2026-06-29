@@ -19,5 +19,5 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 export async function staleJwtRedirect(pathname: string): Promise<never> {
-    redirect(`/login?next=${pathname}`);
+    redirect(`/login?next=${encodeURIComponent(pathname)}`);
 }

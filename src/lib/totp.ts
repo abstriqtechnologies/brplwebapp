@@ -14,6 +14,6 @@ export function verifyTotp(secret: string, code: string, window = 1): boolean {
     });
 }
 
-export function otpauthUrl(secret: string, account: string, issuer = "BRPL Admin"): string {
+export function otpauthUrl(secret: string, account: string, issuer = "Brpl Admin"): string {
     return `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(account)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;
 }

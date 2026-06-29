@@ -102,7 +102,7 @@ const Footer: React.FC = () => {
       {/* Bottom copyright bar */}
       <div className="w-full bg-black text-center py-8 text-[13px] text-white">
         <span>
-          © Copyright {new Date().getFullYear()} | All Rights Reserved by Beyond Reach Premier League
+          © Copyright {new Date().getFullYear()} | All Rights Reserved by Brpl
         </span>
       </div>
     </footer>

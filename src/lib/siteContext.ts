@@ -78,8 +78,8 @@ const CMS_LIVE = Boolean(env.CMS_LIVE);
 
 const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
     { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61584782136820", image: "/facebook.webp" },
-    { name: "Twitter", url: "https://x.com/BRPLOfficial", image: "/twiter.webp" },
-    { name: "Instagram", url: "https://www.instagram.com/brpl.t10", image: "/instagram.webp" },
+    { name: "Twitter", url: "https://x.com/BrplOfficial", image: "/twiter.webp" },
+    { name: "Instagram", url: "https://www.instagram.com/Brpl.t10", image: "/instagram.webp" },
 ];
 
 const DEFAULT_NAV_LINKS: NavbarLink[] = [
@@ -100,8 +100,8 @@ const DEFAULT_NAV_LINKS: NavbarLink[] = [
         label: "Partners",
         path: "/partners",
         children: [
-            { label: "BRPL Partner", path: "/partners" },
-            { label: "BRPL Sponsors", path: "/types-of-partners" },
+            { label: "Brpl Partner", path: "/partners" },
+            { label: "Brpl Sponsors", path: "/types-of-partners" },
         ],
     },
     { label: "FAQs", path: "/faqs" },
@@ -122,7 +122,7 @@ const DEFAULT_FOOTER_LINKS: FooterLinkGroup[] = [
         ],
     },
     {
-        heading: "BRPL - T10",
+        heading: "Brpl - T10",
         links: [
             { label: "About Us", path: "/about-us" },
             { label: "Contact Us", path: "/contact-us" },
@@ -149,12 +149,12 @@ const DEFAULT_FOOTER_LINKS: FooterLinkGroup[] = [
 function defaults(): SiteContext {
     return {
         siteSettings: {
-            siteName: "Beyond Reach Premier League",
+            siteName: "Brpl",
             logoUrl: "/logo.webp",
             faviconUrl: "/favicon.ico",
             contactPhone: "+(91) 81309 55866",
             contactPhoneSecondary: "+(91) 98215 63585",
-            contactEmail: "info@brpl.net",
+            contactEmail: "info@Brpl.net",
             contactAddress:
                 "Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309",
             whatsappNumber: "918130955866",
@@ -162,11 +162,11 @@ function defaults(): SiteContext {
             headerCtaLink: "/login",
             floatingRegisterText: "Register Now",
             floatingRegisterLink: "/login",
-            homeSeoTitle: "Beyond Reach Premier League",
+            homeSeoTitle: "Brpl",
             homeSeoDescription:
-                "BRPL is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here.",
+                "Brpl is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here.",
             homeSeoKeywords:
-                "T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League",
+                "T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, Brpl, grassroots cricket India, Brpl",
             registrationFee: 1499,
             customHeadScripts: "",
             customBodyScripts: "",

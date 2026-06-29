@@ -81,7 +81,7 @@ export interface ISiteSettings extends Document {
 
 const SiteSettingsSchema = new Schema<ISiteSettings>(
     {
-        siteName: { type: String, default: "Beyond Reach Premier League" },
+        siteName: { type: String, default: "Brpl" },
         tagline: { type: String },
         contactEmail: { type: String, lowercase: true, trim: true },
         contactPhone: { type: String, trim: true },
@@ -110,7 +110,7 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
         ogImage: { type: String },
         twitterHandle: { type: String },
 
-        homeSeoTitle: { type: String, default: "Beyond Reach Premier League" },
+        homeSeoTitle: { type: String, default: "Brpl" },
         homeSeoDescription: { type: String },
         homeSeoKeywords: { type: String },
 

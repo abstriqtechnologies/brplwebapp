@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
     Loader2,
     Tag,
@@ -10,8 +10,6 @@ import {
     MapPin,
     Trophy,
     Check,
-    ChevronDown,
-    ChevronUp,
     Swords,
     Target,
     ShieldHalf,
@@ -22,13 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { loadRazorpayScript } from "@/hooks/useRazorpayScript";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2 } from "lucide-react";
 
 type Role = "batsman" | "bowler" | "allrounder" | "wicketkeeper";
@@ -108,11 +100,13 @@ export default function CheckoutClient({
     next,
     registrationFeeRupees,
     existingUser,
+    initialCouponCode,
 }: {
     phone: string;
     next: string;
     registrationFeeRupees: number;
     existingUser: ExistingUser;
+    initialCouponCode?: string;
 }) {
     const { settings } = useSiteSettings();
     const { toast } = useToast();
@@ -128,7 +122,7 @@ export default function CheckoutClient({
 
     const [couponInput, setCouponInput] = useState("");
     const [coupon, setCoupon] = useState<CouponState>({ status: "idle" });
-    const [couponOpen, setCouponOpen] = useState(false);
+    const autoAppliedCouponRef = useRef(false);
 
     const [orderId, setOrderId] = useState<string | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
@@ -141,37 +135,59 @@ export default function CheckoutClient({
     const couponCoversAll = coupon.status === "valid" && coupon.finalAmount === 0;
 
     /* --- Coupon validation (does NOT consume) --- */
-    const applyCoupon = async () => {
-        if (!couponInput.trim()) return;
-        setCoupon({ status: "checking" });
-        try {
-            const res = await fetch("/api/payment/redeem-coupon?dryRun=1", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    code: couponInput.trim(),
-                    orderAmountRupees: registrationFeeRupees,
-                }),
-            });
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.valid) {
-                setCoupon({
-                    status: "invalid",
-                    reason: data.reason || data.error || "Invalid coupon",
+    const applyCouponCode = useCallback(
+        async (rawCode: string) => {
+            const code = rawCode.trim().toUpperCase();
+            if (!code) return;
+            setCouponInput(code);
+            setCoupon({ status: "checking" });
+            try {
+                const res = await fetch("/api/payment/redeem-coupon?dryRun=1", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        code,
+                        orderAmountRupees: registrationFeeRupees,
+                    }),
                 });
-                return;
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.valid) {
+                    setCoupon({
+                        status: "invalid",
+                        reason: data.reason || data.error || "Invalid coupon",
+                    });
+                    return;
+                }
+                const appliedCode = data.code ?? code;
+                setCouponInput(appliedCode);
+                setCoupon({
+                    status: "valid",
+                    code: appliedCode,
+                    discount: data.discount,
+                    finalAmount: data.finalAmount,
+                    couponId: data.couponId,
+                });
+            } catch {
+                setCoupon({ status: "invalid", reason: "Network error" });
             }
-            setCoupon({
-                status: "valid",
-                code: data.code ?? couponInput.trim().toUpperCase(),
-                discount: data.discount,
-                finalAmount: data.finalAmount,
-                couponId: data.couponId,
-            });
-        } catch {
-            setCoupon({ status: "invalid", reason: "Network error" });
-        }
+        },
+        [registrationFeeRupees],
+    );
+
+    const applyCoupon = async () => {
+        await applyCouponCode(couponInput);
     };
+
+    const removeCoupon = () => {
+        setCouponInput("");
+        setCoupon({ status: "idle" });
+    };
+
+    useEffect(() => {
+        if (!initialCouponCode?.trim() || autoAppliedCouponRef.current) return;
+        autoAppliedCouponRef.current = true;
+        void applyCouponCode(initialCouponCode);
+    }, [applyCouponCode, initialCouponCode]);
 
     /* --- Razorpay path --- */
     const startPayment = async () => {
@@ -245,7 +261,7 @@ export default function CheckoutClient({
                 key: payload.key,
                 amount: payload.amount,
                 currency: payload.currency,
-                name: settings?.siteName || "BRPL",
+                name: settings?.siteName || "Brpl",
                 description: "Player Registration",
                 order_id: payload.orderId,
                 prefill: { contact: phone },
@@ -446,38 +462,38 @@ export default function CheckoutClient({
             {/* Keyframes for the loader. Scoped class names so they don't
                 collide with anything global. */}
             <style>{`
-                @keyframes brpl-spin { to { transform: rotate(360deg); } }
-                @keyframes brpl-pulse {
+                @keyframes Brpl-spin { to { transform: rotate(360deg); } }
+                @keyframes Brpl-pulse {
                     0%, 100% { opacity: 0.35; transform: scale(0.85); }
                     50% { opacity: 1; transform: scale(1.1); }
                 }
-                @keyframes brpl-fade-in { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes brpl-pop-in {
+                @keyframes Brpl-fade-in { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes Brpl-pop-in {
                     0% { opacity: 0; transform: scale(0.92); }
                     100% { opacity: 1; transform: scale(1); }
                 }
-                .brpl-spin { animation: brpl-spin 0.9s linear infinite; }
-                .brpl-fade-in { animation: brpl-fade-in 0.2s ease-out; }
-                .brpl-pop-in { animation: brpl-pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+                .Brpl-spin { animation: Brpl-spin 0.9s linear infinite; }
+                .Brpl-fade-in { animation: Brpl-fade-in 0.2s ease-out; }
+                .Brpl-pop-in { animation: Brpl-pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
             `}</style>
 
             {/* Animated loader overlay. Covers the entire checkout area while
                 a long-running operation (save / verify / finish) is in flight. */}
             {busy && phase && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 backdrop-blur-md brpl-fade-in"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 backdrop-blur-md Brpl-fade-in"
                     role="status"
                     aria-live="polite"
                     aria-busy="true"
                 >
-                    <div className="relative w-full max-w-sm mx-4 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-black/40 border border-slate-200/60 dark:border-slate-800 px-8 py-9 text-center brpl-pop-in">
+                    <div className="relative w-full max-w-sm mx-4 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-black/40 border border-slate-200/60 dark:border-slate-800 px-8 py-9 text-center Brpl-pop-in">
                         {/* Triple-ring spinner: amber gradient ring + faint
                             trailing rings. Conveys motion + payment context. */}
                         <div className="relative mx-auto h-20 w-20 mb-6">
                             <div className="absolute inset-0 rounded-full border-4 border-amber-500/20" />
-                            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500 border-r-amber-400 brpl-spin" />
+                            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500 border-r-amber-400 Brpl-spin" />
                             <div
-                                className="absolute inset-2 rounded-full border-2 border-transparent border-t-amber-300/70 brpl-spin"
+                                className="absolute inset-2 rounded-full border-2 border-transparent border-t-amber-300/70 Brpl-spin"
                                 style={{ animationDuration: "1.4s", animationDirection: "reverse" }}
                             />
                             {/* Center dot */}
@@ -486,14 +502,8 @@ export default function CheckoutClient({
                             </div>
                         </div>
 
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                            {phase}
-                        </h2>
-                        {subPhase && (
-                            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-                                {subPhase}
-                            </p>
-                        )}
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">{phase}</h2>
+                        {subPhase && <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{subPhase}</p>}
 
                         {/* Cricket-ball dots row — three amber dots pulsing in
                             sequence. Subtle motion keeps the user engaged
@@ -504,7 +514,7 @@ export default function CheckoutClient({
                                     key={i}
                                     className="block h-2 w-2 rounded-full bg-amber-500"
                                     style={{
-                                        animation: "brpl-pulse 1.1s ease-in-out infinite",
+                                        animation: "Brpl-pulse 1.1s ease-in-out infinite",
                                         animationDelay: `${i * 0.18}s`,
                                     }}
                                 />
@@ -559,7 +569,9 @@ export default function CheckoutClient({
                                                 >
                                                     <Icon className="w-5 h-5" />
                                                 </span>
-                                                <span className={`text-sm font-bold ${active ? "text-amber-900 dark:text-amber-100" : "text-slate-900 dark:text-white"}`}>
+                                                <span
+                                                    className={`text-sm font-bold ${active ? "text-amber-900 dark:text-amber-100" : "text-slate-900 dark:text-white"}`}
+                                                >
                                                     {r.label}
                                                 </span>
                                                 <span className="text-[10px] text-slate-500 text-center leading-tight">
@@ -609,28 +621,25 @@ export default function CheckoutClient({
                     )}
 
                     {/* Coupon */}
-                    <section>
-                        <button
-                            type="button"
-                            aria-expanded={couponOpen}
-                            aria-controls="coupon-panel"
-                            onClick={() => setCouponOpen((o) => !o)}
-                            className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"
-                        >
+                    <section className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                             <Tag className="w-4 h-4" />
-                            Have a coupon code?
-                            {couponOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </button>
-                        {couponOpen && (
-                            <div id="coupon-panel" className="mt-3 space-y-3">
-                                <div className="flex gap-2">
-                                    <Input
-                                        placeholder="Enter code"
-                                        value={couponInput}
-                                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                        className="h-11"
-                                        disabled={coupon.status === "checking"}
-                                    />
+                            <span>Have a coupon code?</span>
+                        </div>
+                        <div id="coupon-panel" className="space-y-3">
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Enter code"
+                                    value={couponInput}
+                                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                                    className="h-11"
+                                    disabled={coupon.status === "checking" || coupon.status === "valid"}
+                                />
+                                {coupon.status === "valid" ? (
+                                    <Button type="button" variant="outline" onClick={removeCoupon}>
+                                        Remove
+                                    </Button>
+                                ) : (
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -643,20 +652,20 @@ export default function CheckoutClient({
                                             "Apply"
                                         )}
                                     </Button>
-                                </div>
-                                {coupon.status === "valid" && (
-                                    <p className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-md px-3 py-2">
-                                        Coupon <b>{coupon.code}</b> applied — ₹{coupon.discount} off. New total: ₹
-                                        {coupon.finalAmount}.
-                                    </p>
-                                )}
-                                {coupon.status === "invalid" && (
-                                    <p className="text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2">
-                                        {coupon.reason}
-                                    </p>
                                 )}
                             </div>
-                        )}
+                            {coupon.status === "valid" && (
+                                <p className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-md px-3 py-2">
+                                    Coupon <b>{coupon.code}</b> applied — ₹{coupon.discount} off. New total: ₹
+                                    {coupon.finalAmount}.
+                                </p>
+                            )}
+                            {coupon.status === "invalid" && (
+                                <p className="text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2">
+                                    {coupon.reason}
+                                </p>
+                            )}
+                        </div>
                     </section>
 
                     {/* Pay */}

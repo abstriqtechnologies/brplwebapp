@@ -1,6 +1,6 @@
 import "server-only";
 import { connectDB } from "@/lib/mongodb";
-import SitePage from "@/models/SitePage";
+import SitePage, { SITE_PAGE_KEYS } from "@/models/SitePage";
 import { PAGE_REGISTRY } from "@/lib/pageRegistry";
 
 /**
@@ -11,7 +11,9 @@ import { PAGE_REGISTRY } from "@/lib/pageRegistry";
 export async function seedPages() {
   await connectDB();
 
-  for (const [key, config] of Object.entries(PAGE_REGISTRY)) {
+  for (const key of SITE_PAGE_KEYS) {
+    const config = PAGE_REGISTRY[key];
+    if (!config) continue;
     const existing = await SitePage.findOne({ key });
     if (existing) continue;
 

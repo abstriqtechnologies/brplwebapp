@@ -407,7 +407,7 @@ describe("verifyAdminOtp", () => {
 
     const adminDoc: AdminDoc = {
         _id: "adm_1",
-        email: "admin@brpl.com",
+        email: "admin@Brpl.com",
         name: "Super Admin",
         role: "superadmin",
         active: true,

@@ -2,7 +2,7 @@
  * Cookie helpers for the three auth identities.
  *
  * Server-only. Wraps Next.js's `cookies()` API to set/get/clear the
- * `brpl_auth`, `brpl_pending`, and `brpl_admin` cookies.
+ * `Brpl_auth`, `Brpl_pending`, and `Brpl_admin` cookies.
  *
  * Every cookie is `httpOnly`, `sameSite=lax`, and scoped to `/`. The
  * `Secure` flag is set based on the actual request protocol (HTTPS), not
@@ -18,9 +18,9 @@ import "server-only";
 import { cookies, headers } from "next/headers";
 
 export const COOKIE_NAMES = {
-    AUTH: "brpl_auth",
-    PENDING: "brpl_pending",
-    ADMIN: "brpl_admin",
+    AUTH: "Brpl_auth",
+    PENDING: "Brpl_pending",
+    ADMIN: "Brpl_admin",
 } as const;
 
 /**

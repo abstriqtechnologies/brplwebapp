@@ -26,7 +26,7 @@ export const PAGE_REGISTRY: Record<string, PageConfig> = {
     label: "About Us",
     sections: [
       { type: "hero-banner", label: "Page Banner", maxItems: 1 },
-      { type: "about-text", label: "About BRPL", maxItems: 1 },
+      { type: "about-text", label: "About Brpl", maxItems: 1 },
       { type: "mission-vision", label: "Mission & Vision", maxItems: 1 },
       { type: "team-grid", label: "Meet Our Team", maxItems: 1 },
     ],

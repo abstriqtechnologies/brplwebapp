@@ -20,9 +20,9 @@ interface StoryItem {
 }
 
 const fallbackTestimonials: StoryItem[] = [
-    { _id: "1", quote: "I played district cricket 20 years ago. No one gave me a chance beyond that. BRPL is building the system I wish I had.", name: "VIJAY SINGH", role: "FORMER COACH, PUNJAB", highlight: "Coach's Perspective", order: 0 },
-    { _id: "2", quote: "I drive an auto all day. My bat is in the backseat—I hit the nets every evening. BRPL made me believe I wasn't too old or too poor.", name: "SURESH KUMAR", role: "25, TAMIL NADU", highlight: "Passion over Circumstance", order: 1 },
-    { _id: "3", quote: "I'm a night security guard. I practice with a tennis ball during my breaks. BRPL told me talent doesn't have a schedule.", name: "MOHAMMAD IRFAN", role: "28, UTTAR PRADESH", highlight: "Unstoppable Dedication", order: 2 },
+    { _id: "1", quote: "I played district cricket 20 years ago. No one gave me a chance beyond that. Brpl is building the system I wish I had.", name: "VIJAY SINGH", role: "FORMER COACH, PUNJAB", highlight: "Coach's Perspective", order: 0 },
+    { _id: "2", quote: "I drive an auto all day. My bat is in the backseat—I hit the nets every evening. Brpl made me believe I wasn't too old or too poor.", name: "SURESH KUMAR", role: "25, TAMIL NADU", highlight: "Passion over Circumstance", order: 1 },
+    { _id: "3", quote: "I'm a night security guard. I practice with a tennis ball during my breaks. Brpl told me talent doesn't have a schedule.", name: "MOHAMMAD IRFAN", role: "28, UTTAR PRADESH", highlight: "Unstoppable Dedication", order: 2 },
     { _id: "4", quote: "Playing on Live TV is a dream come true. We always play in the gully. The idea of playing in a real stadium with floodlights gives me goosebumps.", name: "AMIT YADAV", role: "FAST BOWLER, LUCKNOW", highlight: "Dream Realized", order: 3 },
     { _id: "5", quote: "India's biggest league for sure! The digital skill card feature is very cool. If you love tennis cricket, you cannot miss this.", name: "KARTHIK R.", role: "CHENNAI", highlight: "Tech Enthusiast", order: 4 },
 ];
@@ -52,7 +52,7 @@ const LivesChangedSection = () => {
     const testimonials = cmsTestimonials.length > 0 ? cmsTestimonials : fallbackTestimonials;
     const badgeText = "Player Stories";
     const titleBefore = "LIVES CHANGED BY";
-    const titleHighlight = "BRPL";
+    const titleHighlight = "Brpl";
     const subtitle = "Real stories from real players across India who found their stage.";
     const backgroundImage = "/artist.webp";
 

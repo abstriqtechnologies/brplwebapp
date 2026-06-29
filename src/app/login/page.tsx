@@ -4,15 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-    Loader2,
-    ShieldCheck,
-    KeyRound,
-    Lock,
-    ArrowLeft,
-    Check,
-    Phone,
-} from "lucide-react";
+import { Loader2, ShieldCheck, KeyRound, Lock, ArrowLeft, Check, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -39,7 +31,7 @@ export default function LoginPage() {
 
 function LoginClient() {
     const params = useSearchParams();
-    const next = params.get("next") || "/dashboard";
+    const next = safeNext(params.get("next"), "/dashboard");
     const { toast } = useToast();
 
     const [step, setStep] = useState<Step>("phone");
@@ -108,7 +100,8 @@ function LoginClient() {
                 setOtp(Array(OTP_LENGTH).fill(""));
                 return;
             }
-            const target = data.redirect || (data.paid ? next : "/checkout");
+            const checkoutNext = next.startsWith("/checkout") ? next : "";
+            const target = data.paid ? data.redirect || next : checkoutNext || data.redirect || "/checkout";
             toast({
                 title: data.paid ? "Welcome back!" : "Phone verified",
             });
@@ -168,8 +161,7 @@ function LoginClient() {
                 aria-hidden
                 className="absolute inset-0"
                 style={{
-                    background:
-                        "radial-gradient(60% 50% at 50% 30%, rgba(245,158,11,0.12) 0%, rgba(15,23,42,0) 60%)",
+                    background: "radial-gradient(60% 50% at 50% 30%, rgba(245,158,11,0.12) 0%, rgba(15,23,42,0) 60%)",
                 }}
             />
 
@@ -179,13 +171,13 @@ function LoginClient() {
                     from { opacity: 0; transform: translateY(8px); }
                     to   { opacity: 1; transform: translateY(0); }
                 }
-                .brpl-fade-up { animation: fadeUp 0.35s ease-out both; }
+                .Brpl-fade-up { animation: fadeUp 0.35s ease-out both; }
                 @keyframes wiggle {
                     0%, 100% { transform: translateX(0); }
                     25%      { transform: translateX(-3px); }
                     75%      { transform: translateX(3px); }
                 }
-                .brpl-wiggle { animation: wiggle 0.4s ease-in-out; }
+                .Brpl-wiggle { animation: wiggle 0.4s ease-in-out; }
             `}</style>
 
             <div className="relative z-10 w-full max-w-md px-4 py-12">
@@ -193,7 +185,7 @@ function LoginClient() {
                 <div className="flex justify-center mb-8">
                     <img
                         src="/logo.webp"
-                        alt="BRPL"
+                        alt="Brpl"
                         width={64}
                         height={64}
                         className="h-16 w-auto select-none drop-shadow-[0_0_30px_rgba(245,158,11,0.45)]"
@@ -204,23 +196,17 @@ function LoginClient() {
                 <div
                     key={step}
                     className={cn(
-                        "brpl-fade-up rounded-3xl shadow-2xl shadow-black/20",
+                        "Brpl-fade-up rounded-3xl shadow-2xl shadow-black/20",
                         "backdrop-blur-xl bg-white/95 dark:bg-slate-900/85",
                         "border border-white/40 dark:border-slate-700/60",
-                        "p-8 sm:p-10"
+                        "p-8 sm:p-10",
                     )}
                 >
                     <StepIndicator step={step} />
 
                     <div className="mt-7">
                         {step === "phone" && (
-                            <PhoneStep
-                                phone={phone}
-                                setPhone={setPhone}
-                                error={error}
-                                busy={busy}
-                                onSubmit={sendOtp}
-                            />
+                            <PhoneStep phone={phone} setPhone={setPhone} error={error} busy={busy} onSubmit={sendOtp} />
                         )}
                         {step === "otp" && (
                             <OtpStep
@@ -249,7 +235,7 @@ function LoginClient() {
                 {/* Footer pill */}
                 <div className="mt-6 flex justify-center">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-slate-200">
-                        <span>By continuing you agree to BRPL&apos;s</span>
+                        <span>By continuing you agree to Brpl&apos;s</span>
                         <Link
                             href="/terms-and-conditions"
                             className="text-amber-300 hover:text-amber-200 font-semibold transition-colors"
@@ -268,6 +254,13 @@ function LoginClient() {
             </div>
         </div>
     );
+}
+
+function safeNext(next: string | null, fallback: string): string {
+    if (!next) return fallback;
+    if (!next.startsWith("/")) return fallback;
+    if (next.startsWith("//")) return fallback;
+    return next;
 }
 
 /* ---------- Step indicator ---------- */
@@ -293,29 +286,24 @@ function StepIndicator({ step }: { step: Step }) {
                                     "h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors",
                                     completed && "bg-emerald-500 text-white",
                                     active && "bg-amber-500 text-white shadow-md shadow-amber-500/30",
-                                    !completed && !active &&
-                                        "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                                    !completed &&
+                                        !active &&
+                                        "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
                                 )}
                             >
-                                {completed ? (
-                                    <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                                ) : (
-                                    i + 1
-                                )}
+                                {completed ? <Check className="w-3.5 h-3.5" strokeWidth={3} /> : i + 1}
                             </div>
                             <span
                                 className={cn(
                                     "text-xs font-semibold tracking-wide transition-colors",
                                     active && "text-slate-900 dark:text-white",
                                     completed && "text-emerald-600 dark:text-emerald-400",
-                                    !active && !completed && "text-slate-400 dark:text-slate-500"
+                                    !active && !completed && "text-slate-400 dark:text-slate-500",
                                 )}
                             >
                                 {s.label}
                             </span>
-                            {i < steps.length - 1 && (
-                                <span className="mx-1 h-px w-8 bg-slate-200 dark:bg-slate-700" />
-                            )}
+                            {i < steps.length - 1 && <span className="mx-1 h-px w-8 bg-slate-200 dark:bg-slate-700" />}
                         </div>
                     );
                 })}
@@ -347,9 +335,7 @@ function PhoneStep(props: {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-4">
                     <Phone className="w-5 h-5 text-amber-600" />
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Enter your mobile
-                </h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Enter your mobile</h1>
                 <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
                     Sign in to book your slot at the box.
                 </p>
@@ -360,7 +346,7 @@ function PhoneStep(props: {
                     e.preventDefault();
                     onSubmit();
                 }}
-                className={cn("space-y-5", error && "brpl-wiggle")}
+                className={cn("space-y-5", error && "Brpl-wiggle")}
             >
                 <div>
                     <label htmlFor="phone" className="sr-only">
@@ -377,9 +363,7 @@ function PhoneStep(props: {
                             autoComplete="tel"
                             placeholder="98765 43210"
                             value={phone}
-                            onChange={(e) =>
-                                setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
-                            }
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                             maxLength={10}
                             className="h-full flex-1 border-0 bg-transparent rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 text-xl tracking-normal tabular-nums font-semibold placeholder:text-slate-300 placeholder:text-base placeholder:tracking-normal px-4"
                             required
@@ -402,11 +386,7 @@ function PhoneStep(props: {
                     disabled={busy || phone.length !== 10}
                     className="w-full h-12 rounded-full font-bold text-base text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
                 >
-                    {busy ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        "Send verification code"
-                    )}
+                    {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send verification code"}
                 </Button>
 
                 {/* Trust strip */}
@@ -475,14 +455,9 @@ function OtpStep(props: {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-3">
                     <KeyRound className="w-5 h-5 text-amber-600" />
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Enter verification code
-                </h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Enter verification code</h1>
                 <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-                    Sent to{" "}
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
-                        +91 {phone}
-                    </span>
+                    Sent to <span className="font-semibold text-slate-700 dark:text-slate-200">+91 {phone}</span>
                 </p>
             </div>
 
@@ -491,7 +466,7 @@ function OtpStep(props: {
                     e.preventDefault();
                     onSubmit();
                 }}
-                className={cn("space-y-5", error && "brpl-wiggle")}
+                className={cn("space-y-5", error && "Brpl-wiggle")}
             >
                 <div className="flex justify-center gap-2.5 sm:gap-3" onPaste={onPaste}>
                     {otp.map((d, i) => {
@@ -517,7 +492,7 @@ function OtpStep(props: {
                                         "focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 focus:shadow-lg focus:shadow-amber-500/20 focus:-translate-y-0.5",
                                         filled
                                             ? "border-emerald-500 dark:border-emerald-500/80"
-                                            : "border-slate-300 dark:border-slate-700"
+                                            : "border-slate-300 dark:border-slate-700",
                                     )}
                                     aria-label={`Digit ${i + 1}`}
                                 />
@@ -536,20 +511,14 @@ function OtpStep(props: {
                     <span
                         className={cn(
                             "inline-flex items-center gap-1.5 font-medium",
-                            otpExpiresIn > 0
-                                ? "text-slate-500 dark:text-slate-400"
-                                : "text-red-500"
+                            otpExpiresIn > 0 ? "text-slate-500 dark:text-slate-400" : "text-red-500",
                         )}
                     >
                         <Lock className="w-3.5 h-3.5" />
-                        {otpExpiresIn > 0
-                            ? `Expires in ${formatExpiry(otpExpiresIn)}`
-                            : "OTP expired"}
+                        {otpExpiresIn > 0 ? `Expires in ${formatExpiry(otpExpiresIn)}` : "OTP expired"}
                     </span>
                     {resendIn > 0 ? (
-                        <span className="text-slate-400 dark:text-slate-500 font-medium">
-                            Resend in {resendIn}s
-                        </span>
+                        <span className="text-slate-400 dark:text-slate-500 font-medium">Resend in {resendIn}s</span>
                     ) : (
                         <button
                             type="button"

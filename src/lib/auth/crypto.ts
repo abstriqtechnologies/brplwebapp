@@ -3,9 +3,9 @@
  *
  * Wraps `jose` to issue and verify JSON Web Tokens for the three cookie
  * identities in this app:
- *   - "auth"        — fully-registered user session (`brpl_auth`)
- *   - "pending_reg" — verified phone, registration not yet complete (`brpl_pending`)
- *   - "admin"       — admin user session (`brpl_admin`)
+ *   - "auth"        — fully-registered user session (`Brpl_auth`)
+ *   - "pending_reg" — verified phone, registration not yet complete (`Brpl_pending`)
+ *   - "admin"       — admin user session (`Brpl_admin`)
  *
  * Each verify* function returns `null` on any failure (expired, tampered,
  * wrong purpose, wrong secret) — never throws. This keeps call sites simple.

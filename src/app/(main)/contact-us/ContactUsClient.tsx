@@ -73,7 +73,7 @@ const ContactUsClient = () => {
         <div className="min-h-screen bg-gray-50">
             <SEO
                 title="Contact Us"
-                description="Get in touch with Beyond Reach Premier League. We are here to help you with expert guidance and support."
+                description="Get in touch with Brpl. We are here to help you with expert guidance and support."
             />
             <PageBanner pageKey="contactUs" title="Contact us" currentPage="Contact us" />
 
@@ -222,7 +222,7 @@ const ContactUsClient = () => {
                             {settings.mapEmbedUrl && (
                                 <div className="rounded-3xl overflow-hidden h-52 md:h-60 lg:h-64 bg-gray-200">
                                     <iframe
-                                        title="BRPL Office Location"
+                                        title="Brpl Office Location"
                                         src={settings.mapEmbedUrl}
                                         width="100%"
                                         height="100%"

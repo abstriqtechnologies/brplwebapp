@@ -13,6 +13,7 @@ export type AuthSession = {
     state?: string;
     city?: string;
     paymentStatus?: "pending" | "completed";
+    Trial_status?: "pending" | "completed";
     paymentId?: string;
     orderId?: string;
     amount?: number;
@@ -43,6 +44,7 @@ export async function getAuthSession(): Promise<AuthSession | null> {
         state: user.state,
         city: user.city,
         paymentStatus: user.paymentStatus,
+        Trial_status: user.Trial_status ?? "pending",
         paymentId: user.paymentId,
         orderId: user.orderId,
         amount: user.amount,

@@ -69,9 +69,9 @@ export async function verifyJwt<T = SessionPayload>(token: string): Promise<T | 
 // `isHttpsRequest` above and its twin in `auth/cookies.ts`.
 
 export const COOKIE_NAMES = {
-    AUTH: "brpl_auth",
-    PENDING: "brpl_pending",
-    ADMIN: "brpl_admin",
+    AUTH: "Brpl_auth",
+    PENDING: "Brpl_pending",
+    ADMIN: "Brpl_admin",
 } as const;
 
 /** Build a cookie-options object with the given TTL (seconds). */

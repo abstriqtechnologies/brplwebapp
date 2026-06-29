@@ -22,9 +22,9 @@ export const SECTION_REGISTRY: Record<string, SectionRegistryEntry> = {
   "who-we-are": {
     editor: dynamic(() => import("./editors/WhoWeAreEditor")),
     defaultData: {
-      title: "Beyond Reach Premier League",
+      title: "Brpl",
       subtitle: "India's Grassroots T10 Cricket League",
-      tagline: '"BRPL – Bharat ki League, Bharatiyon ka Sapna"',
+      tagline: '"Brpl – Bharat ki League, Bharatiyon ka Sapna"',
       description: "",
       image: "/home2.webp",
       videoUrl: "",
@@ -33,7 +33,7 @@ export const SECTION_REGISTRY: Record<string, SectionRegistryEntry> = {
   "about-text": {
     editor: dynamic(() => import("./editors/AboutTextEditor")),
     defaultData: {
-      title: "About BRPL",
+      title: "About Brpl",
       description: "",
       image: "/trophy image.webp",
     },
@@ -87,7 +87,7 @@ export const SECTION_REGISTRY: Record<string, SectionRegistryEntry> = {
   "event-gallery": {
     editor: dynamic(() => import("./editors/EventGalleryEditor")),
     defaultData: {
-      title: "BRPL Event Gallery",
+      title: "Brpl Event Gallery",
       subtitle: "",
       description: "",
     },
@@ -95,7 +95,7 @@ export const SECTION_REGISTRY: Record<string, SectionRegistryEntry> = {
   ambassadors: {
     editor: dynamic(() => import("./editors/AmbassadorsEditor")),
     defaultData: {
-      title: "BRPL Ambassadors",
+      title: "Brpl Ambassadors",
       subtitle: "",
       description: "",
     },
@@ -103,7 +103,7 @@ export const SECTION_REGISTRY: Record<string, SectionRegistryEntry> = {
   "teams-slider": {
     editor: dynamic(() => import("./editors/TeamsSliderEditor")),
     defaultData: {
-      title: "BRPL Teams",
+      title: "Brpl Teams",
       subtitle: "",
       description: "",
     },

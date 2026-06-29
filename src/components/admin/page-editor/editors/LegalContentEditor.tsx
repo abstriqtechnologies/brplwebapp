@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function LegalContentEditor({ section, onChange, defaultData }: Props) {
-  const data = { ...defaultData, section, ...(section.data || {}) };
+  const data = { ...defaultData, ...(section.data || {}) };
   const update = (field: string, value: any) => onChange({ ...section, data: { ...(section.data || {}), [field]: value } });
 
   return (

@@ -11,10 +11,10 @@
 export function RuleBookStaticContent() {
     return (
         <>
-        <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">BRPL Rule Book</h1>
+        <h1 className="text-3xl md:text-4xl font-bold font-display text-[#111a45] mb-8">Brpl Rule Book</h1>
         <div className="space-y-6 text-sm md:text-[1.05rem] leading-relaxed text-slate-600">
             <p>
-                The Beyond Reach Premier League (BRPL) marks a new chapter in India&apos;s cricketing evolution. It&apos;s a league designed to discover talent, inspire communities, and redefine fast-format cricket. With a strong focus on accessibility, integrity, and innovation, BRPL brings together a nationwide talent pool, zonal representation, and the electrifying pace of T10 cricket.
+                The Brpl (Brpl) marks a new chapter in India&apos;s cricketing evolution. It&apos;s a league designed to discover talent, inspire communities, and redefine fast-format cricket. With a strong focus on accessibility, integrity, and innovation, Brpl brings together a nationwide talent pool, zonal representation, and the electrifying pace of T10 cricket.
             </p>
             <p>
                 This Rule Book establishes the framework that governs every aspect of the league, from player eligibility and team formation to match regulations, disciplinary codes, and competitive standards. Every rule has been crafted to ensure transparency, fairness, and a world-class playing environment.
@@ -22,8 +22,8 @@ export function RuleBookStaticContent() {
             <p>
                 We look forward to building a league that unites players, fans, and communities under one dream: a cricketing platform truly made for every Indian.
             </p>
-            <p className="font-bold text-slate-900">Welcome to BRPL.</p>
-            <p className="italic text-slate-500">— BRPL Organising Committee</p>
+            <p className="font-bold text-slate-900">Welcome to Brpl.</p>
+            <p className="italic text-slate-500">— Brpl Organising Committee</p>
         </div>
 
         <div className="mt-12 space-y-10">
@@ -37,10 +37,10 @@ export function RuleBookStaticContent() {
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Our Identity</h3>
-                        <p className="text-slate-600 leading-relaxed">The Beyond Reach Premier League (BRPL) is a movement shaped by opportunity, accessibility, and ambition. BRPL represents every aspiring cricketer who dreams beyond limitations, every fan who believes in the power of sport, and every community that lives and breathes cricket culture. Through our zonal structure, professional pathways, and high-energy T10 format, we aim to create a league that feels authentic, relatable, and proudly rooted in India&apos;s cricketing history.</p>
+                        <p className="text-slate-600 leading-relaxed">The Brpl (Brpl) is a movement shaped by opportunity, accessibility, and ambition. Brpl represents every aspiring cricketer who dreams beyond limitations, every fan who believes in the power of sport, and every community that lives and breathes cricket culture. Through our zonal structure, professional pathways, and high-energy T10 format, we aim to create a league that feels authentic, relatable, and proudly rooted in India&apos;s cricketing history.</p>
                     </div>
                     <div>
-                        <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Core Pillars of the BRPL Identity</h3>
+                        <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Core Pillars of the Brpl Identity</h3>
                         <div className="space-y-4 pl-4 border-l-2 border-slate-100">
                             <div>
                                 <h4 className="font-bold text-slate-900 mb-1">Inclusivity &amp; Equal Opportunity</h4>
@@ -66,9 +66,9 @@ export function RuleBookStaticContent() {
             {/* Introduction */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Introduction</h2>
-                <p className="text-slate-600 mb-4 leading-relaxed">The Beyond Reach Premier League (BRPL) is India&apos;s newest T10 cricket platform dedicated to empowering grassroots talent through a professional league ecosystem. This Rulebook and Match Operations Manual establishes the standards, procedures, and regulations that govern every aspect of BRPL.</p>
-                <p className="text-slate-600 mb-4 leading-relaxed">Players entering BRPL will begin their journey through the <span className="font-bold text-slate-900">Registration and Trial process</span>, held across multiple cities during June and July 2026. Shortlisted players will advance to the <span className="font-bold text-slate-900">BRPL Auction</span>, where franchises representing India&apos;s key zones will bid to form their squads. Players selected in the auction will compete in the main BRPL Season.</p>
-                <p className="text-slate-600 leading-relaxed">Players who are not picked during the auction will still continue their journey in the BRPL ecosystem. They will join their respective <span className="font-bold text-slate-900">Zonal Talent Pools</span>, ensuring that every participant remains actively involved and retains opportunities for future seasons. Zonal matches and ongoing scouting initiatives will give these players continued exposure, skill development, and a pathway to be reconsidered in subsequent BRPL seasons.</p>
+                <p className="text-slate-600 mb-4 leading-relaxed">The Brpl (Brpl) is India&apos;s newest T10 cricket platform dedicated to empowering grassroots talent through a professional league ecosystem. This Rulebook and Match Operations Manual establishes the standards, procedures, and regulations that govern every aspect of Brpl.</p>
+                <p className="text-slate-600 mb-4 leading-relaxed">Players entering Brpl will begin their journey through the <span className="font-bold text-slate-900">Registration and Trial process</span>, held across multiple cities during June and July 2026. Shortlisted players will advance to the <span className="font-bold text-slate-900">Brpl Auction</span>, where franchises representing India&apos;s key zones will bid to form their squads. Players selected in the auction will compete in the main Brpl Season.</p>
+                <p className="text-slate-600 leading-relaxed">Players who are not picked during the auction will still continue their journey in the Brpl ecosystem. They will join their respective <span className="font-bold text-slate-900">Zonal Talent Pools</span>, ensuring that every participant remains actively involved and retains opportunities for future seasons. Zonal matches and ongoing scouting initiatives will give these players continued exposure, skill development, and a pathway to be reconsidered in subsequent Brpl seasons.</p>
             </section>
 
             {/* Match Structure */}
@@ -89,7 +89,7 @@ export function RuleBookStaticContent() {
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Squad Requirements</h3>
                         <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
-                            <li>Each BRPL franchise must register a squad comprising 16 to 20 players. (11 in the Playing XI + 5 Substitutes + 4 in the dressing room)</li>
+                            <li>Each Brpl franchise must register a squad comprising 16 to 20 players. (11 in the Playing XI + 5 Substitutes + 4 in the dressing room)</li>
                             <li>For zonals, each team can have a squad of 16 players (11 in the Playing XI + 5 Substitutes)</li>
                         </ul>
                     </div>
@@ -120,7 +120,7 @@ export function RuleBookStaticContent() {
             {/* Impact Player Rule */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Impact Player Rule</h2>
-                <p className="text-slate-600 mb-4 leading-relaxed">BRPL allows each team to use one Impact Player during the match for strategic advantage.</p>
+                <p className="text-slate-600 mb-4 leading-relaxed">Brpl allows each team to use one Impact Player during the match for strategic advantage.</p>
                 <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Key Points:</h3>
                 <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed mb-4">
                     <li>Teams must name 5 substitutes after the toss.</li>
@@ -156,11 +156,11 @@ export function RuleBookStaticContent() {
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Tournament Structure</h2>
                 <div className="space-y-6">
                     <div>
-                        <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">A. BRPL Main Tournament</h3>
+                        <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">A. Brpl Main Tournament</h3>
                         <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
-                            <li>The BRPL Season will follow a league-stage round-robin format, ensuring every team competes against all others.</li>
+                            <li>The Brpl Season will follow a league-stage round-robin format, ensuring every team competes against all others.</li>
                             <li>The top four teams based on points will qualify for the playoffs.</li>
-                            <li>30+ league matches, followed by two semifinals and one grand final, will determine the BRPL Champion.</li>
+                            <li>30+ league matches, followed by two semifinals and one grand final, will determine the Brpl Champion.</li>
                             <li>Each match will include a 10-minute innings break.</li>
                             <li>In case of a tie on points, Net Run Rate (NRR) will decide standings.</li>
                             <li>Teams will announce their squads in advance and begin training as per the official league schedule.</li>
@@ -170,14 +170,14 @@ export function RuleBookStaticContent() {
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">B. Trials</h3>
-                        <p className="text-slate-600 mb-3 leading-relaxed">The following will apply to all BRPL trial rounds for the 18–40 age category:</p>
+                        <p className="text-slate-600 mb-3 leading-relaxed">The following will apply to all Brpl trial rounds for the 18–40 age category:</p>
                         <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed mb-4">
                             <li>Players need to register themselves before the trial dates.</li>
-                            <li>Trial dates will be officially announced on the BRPL platform.</li>
+                            <li>Trial dates will be officially announced on the Brpl platform.</li>
                             <li>Trials will be conducted across India to shortlist players for the Auction round.</li>
                             <li>Wicketkeepers will be evaluated by a dedicated Selection Panel.</li>
                             <li>Players appearing for Trials will be provided with basic amenities.</li>
-                            <li>Trials will follow BRPL-approved match setup and scoring rules.</li>
+                            <li>Trials will follow Brpl-approved match setup and scoring rules.</li>
                         </ul>
                         <h4 className="font-bold text-slate-900 mb-2">Trial Format</h4>
                         <div className="pl-4 border-l-2 border-slate-100 space-y-4">
@@ -196,7 +196,7 @@ export function RuleBookStaticContent() {
                                 </ul>
                             </div>
                         </div>
-                        <p className="text-slate-600 mt-4 leading-relaxed">BRPL will compile trial results and publish the shortlisted players for Auction within 30 days of each trial.</p>
+                        <p className="text-slate-600 mt-4 leading-relaxed">Brpl will compile trial results and publish the shortlisted players for Auction within 30 days of each trial.</p>
                     </div>
                 </div>
             </section>
@@ -211,7 +211,7 @@ export function RuleBookStaticContent() {
                     <li><span className="font-bold text-slate-900">Boundary Markings:</span> Clearly visible colored boundary rope; must remain equidistant as far as possible.</li>
                     <li><span className="font-bold text-slate-900">Inner Circle (Optional):</span> 30-yard radius if implemented; rules for field placement will be communicated separately.</li>
                 </ul>
-                <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">BRPL Standard Ground Measurements</h3>
+                <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Brpl Standard Ground Measurements</h3>
                 <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed mb-6">
                     <li>Total playing area: 75 meters in diameter.</li>
                     <li>Boundary distance: 1st boundary rope at 55m for 6 runs and a second boundary rope at 75m for 8 runs.</li>
@@ -240,7 +240,7 @@ export function RuleBookStaticContent() {
                     <div>
                         <h3 className="font-bold text-slate-900 mb-1 text-lg font-display">Umpires</h3>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>Two official umpires from the BRPL Umpiring Panel will officiate each match.</li>
+                            <li>Two official umpires from the Brpl Umpiring Panel will officiate each match.</li>
                             <li>Their decisions are final except in rare cases, such as scoring errors.</li>
                         </ul>
                     </div>
@@ -251,7 +251,7 @@ export function RuleBookStaticContent() {
                     <div>
                         <h3 className="font-bold text-slate-900 mb-1 text-lg font-display">Scorer</h3>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>The official scorer will update match data through the BRPL-approved scoring system.</li>
+                            <li>The official scorer will update match data through the Brpl-approved scoring system.</li>
                             <li>The scorer&apos;s entries are treated as the official match record.</li>
                         </ul>
                     </div>
@@ -280,7 +280,7 @@ export function RuleBookStaticContent() {
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                     <li>All players must report to the venue at least 80 minutes before the scheduled start time.</li>
                     <li>The toss will be conducted 30 minutes prior to the match.</li>
-                    <li>Umpires and scorers will be appointed by the BRPL Official Panel.</li>
+                    <li>Umpires and scorers will be appointed by the Brpl Official Panel.</li>
                     <li>A designated Match Referee will supervise all match operations.</li>
                     <li>Each team must arrive with a complete match kit, including jerseys, bibs, first-aid supplies, match balls, and drinking water.</li>
                 </ul>
@@ -302,7 +302,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Ethics &amp; Integrity Unit</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li>BRPL will constitute an independent Ethics and Integrity Unit.</li>
+                    <li>Brpl will constitute an independent Ethics and Integrity Unit.</li>
                     <li>The unit will monitor all activities related to match-fixing, gambling, or unethical conduct.</li>
                     <li>An anonymous reporting channel will be provided for whistleblowers.</li>
                     <li>Attendance at the annual integrity workshop is required for all players, franchise owners, and key staff.</li>
@@ -313,7 +313,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Anti-Doping Policy</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li>BRPL enforces a strict anti-doping code aligned with international best practices.</li>
+                    <li>Brpl enforces a strict anti-doping code aligned with international best practices.</li>
                     <li>Players may be selected for random drug testing during the season.</li>
                     <li>The use of performance-enhancing drugs or banned substances will result in immediate suspension and possible expulsion.</li>
                 </ul>
@@ -343,7 +343,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Franchise &amp; Sponsorship Guidelines</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li>All franchises must comply with BRPL&apos;s branding and sponsorship guidelines.</li>
+                    <li>All franchises must comply with Brpl&apos;s branding and sponsorship guidelines.</li>
                     <li>Sponsor logos may appear on team apparel only as per league-approved placements.</li>
                     <li>Advertising of alcohol, tobacco, betting, or similar categories is strictly prohibited.</li>
                 </ul>
@@ -355,7 +355,7 @@ export function RuleBookStaticContent() {
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                     <li>Players must be available for all official media duties, interviews, and interactions.</li>
                     <li>Team owners and head coaches may be required to attend press conferences.</li>
-                    <li>Mobile live streaming must follow BRPL&apos;s broadcast rights framework and may not conflict with official coverage.</li>
+                    <li>Mobile live streaming must follow Brpl&apos;s broadcast rights framework and may not conflict with official coverage.</li>
                 </ul>
             </section>
 
@@ -363,7 +363,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Technology &amp; Data Usage</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li>Real-time score updates are mandatory through the Official BRPL App.</li>
+                    <li>Real-time score updates are mandatory through the Official Brpl App.</li>
                     <li>An approved analytics dashboard will be provided to coaches and league officials.</li>
                     <li>Unauthorized video recording, live streaming, or use of match analytics/player data is strictly forbidden.</li>
                 </ul>
@@ -373,7 +373,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Trophies &amp; Awards</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li><span className="font-bold text-slate-900">Champion&apos;s Trophy:</span> Awarded to the BRPL Season Champion team.</li>
+                    <li><span className="font-bold text-slate-900">Champion&apos;s Trophy:</span> Awarded to the Brpl Season Champion team.</li>
                     <li><span className="font-bold text-slate-900">Player of the Tournament:</span> For the most consistent all-round performer.</li>
                     <li><span className="font-bold text-slate-900">Best Batsman / Best Bowler / Fair Play Award:</span> Honouring excellence, discipline, and sportsmanship.</li>
                     <li><span className="font-bold text-slate-900">Emerging Talent Award:</span> Recognising the most promising new player during the season.</li>
@@ -385,10 +385,10 @@ export function RuleBookStaticContent() {
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Disputes &amp; Appeals</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                     <li>Any complaint or dispute must be submitted in writing within 24 hours of the incident.</li>
-                    <li>The BRPL Rules &amp; Redressal Committee will handle all standard appeals.</li>
-                    <li>Issues related to indiscipline will be directed to the BRPL Disciplinary Committee.</li>
-                    <li>Allegations of match-fixing or unethical influence will be escalated to the BRPL Ethics &amp; Integrity Committee.</li>
-                    <li>Allegations related to doping or banned substances will be reviewed by the BRPL Anti-Doping &amp; Wellness Committee.</li>
+                    <li>The Brpl Rules &amp; Redressal Committee will handle all standard appeals.</li>
+                    <li>Issues related to indiscipline will be directed to the Brpl Disciplinary Committee.</li>
+                    <li>Allegations of match-fixing or unethical influence will be escalated to the Brpl Ethics &amp; Integrity Committee.</li>
+                    <li>Allegations related to doping or banned substances will be reviewed by the Brpl Anti-Doping &amp; Wellness Committee.</li>
                     <li>All committee decisions will be final and binding.</li>
                 </ul>
             </section>
@@ -397,7 +397,7 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Governing Body &amp; Amendments</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
-                    <li>The BRPL Organising Committee has the highest governing authority over all league matters.</li>
+                    <li>The Brpl Organising Committee has the highest governing authority over all league matters.</li>
                     <li>This Rulebook is subject to review and amendment at the end of each season or as needed, after a minimum two-day written notice.</li>
                 </ul>
             </section>
@@ -407,24 +407,24 @@ export function RuleBookStaticContent() {
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">League Identity &amp; Positioning</h2>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                     <li>The league&apos;s tagline celebrates cricket as &quot;Bharat ki League, Bharat ka Sapna,&quot; a platform where any Indian with passion can aspire to play.</li>
-                    <li>BRPL retains full ownership and rights over its name, logo, branding, audiovisual content, team/player data, and all commercial assets.</li>
-                    <li>Participating franchises are custodians of BRPL&apos;s core values: Inclusivity, Community Development, Integrity, Excitement, and Sustainability.</li>
+                    <li>Brpl retains full ownership and rights over its name, logo, branding, audiovisual content, team/player data, and all commercial assets.</li>
+                    <li>Participating franchises are custodians of Brpl&apos;s core values: Inclusivity, Community Development, Integrity, Excitement, and Sustainability.</li>
                     <li>Every franchise may craft its unique identity while staying aligned with the league&apos;s mission of nurturing grassroots talent.</li>
-                    <li>All BRPL brand guidelines for logo usage and media collateral must be followed exactly as issued by the league.</li>
-                    <li>Any unauthorized reproduction, misrepresentation, or commercial exploitation of the BRPL identity will invite legal and financial repercussions.</li>
+                    <li>All Brpl brand guidelines for logo usage and media collateral must be followed exactly as issued by the league.</li>
+                    <li>Any unauthorized reproduction, misrepresentation, or commercial exploitation of the Brpl identity will invite legal and financial repercussions.</li>
                 </ul>
             </section>
 
             {/* Health, Wellness & Sportsmanship */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Health, Wellness &amp; Sportsmanship</h2>
-                <p className="text-slate-600 mb-4 leading-relaxed">BRPL acknowledges that a player&apos;s physical, mental, and emotional well-being directly impacts performance and the spirit of the game. To maintain a nurturing and safe environment:</p>
+                <p className="text-slate-600 mb-4 leading-relaxed">Brpl acknowledges that a player&apos;s physical, mental, and emotional well-being directly impacts performance and the spirit of the game. To maintain a nurturing and safe environment:</p>
                 <ul className="list-disc pl-6 space-y-3 text-slate-600 leading-relaxed">
                     <li><span className="font-bold text-slate-900">Player well-being:</span> Teams must ensure players are well-rested, hydrated, and receive access to basic medical and recovery care. Warm-ups, cooldowns, and healthy nutrition practices are strongly encouraged.</li>
                     <li><span className="font-bold text-slate-900">Mental health support:</span> A mental health resource person will be available on call to assist players with performance pressure, anxiety, or stress. All consultations will remain confidential.</li>
                     <li><span className="font-bold text-slate-900">Education sessions:</span> Workshops on anti-doping, ethics, sportsmanship, and wellness will be conducted during the season. Attendance is mandatory for all players and staff.</li>
                     <li><span className="font-bold text-slate-900">Respect for all:</span> Players, staff, spectators, and officials must maintain an atmosphere of respect. Discriminatory remarks or behaviour will have zero tolerance.</li>
-                    <li><span className="font-bold text-slate-900">Spirit of the game:</span> BRPL promotes fairness, passion, and camaraderie. We value effort, discipline, and sportsmanship.</li>
+                    <li><span className="font-bold text-slate-900">Spirit of the game:</span> Brpl promotes fairness, passion, and camaraderie. We value effort, discipline, and sportsmanship.</li>
                 </ul>
             </section>
 
@@ -443,10 +443,10 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Equipment Standards</h2>
                 <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
-                    <li><span className="font-bold text-slate-900">Ball:</span> BRPL-approved ball; no modification unless league-approved.</li>
+                    <li><span className="font-bold text-slate-900">Ball:</span> Brpl-approved ball; no modification unless league-approved.</li>
                     <li><span className="font-bold text-slate-900">Bat:</span> Any commercially available cricket bat suitable for T10 cricket.</li>
                     <li><span className="font-bold text-slate-900">Protective gear:</span> Gloves and abdomen guards are recommended; helmets and pads are optional.</li>
-                    <li><span className="font-bold text-slate-900">Team uniform:</span> All players must wear official BRPL-approved jerseys with printed names and numbers.</li>
+                    <li><span className="font-bold text-slate-900">Team uniform:</span> All players must wear official Brpl-approved jerseys with printed names and numbers.</li>
                 </ul>
             </section>
 
@@ -468,14 +468,14 @@ export function RuleBookStaticContent() {
                     <li>All venues must ensure secure entry/exit points and proper safety checks for players and spectators.</li>
                     <li>In case of emergencies (weather disruptions, medical crises, or crowd issues), the Match Referee may suspend or abandon the match after consulting with local authorities.</li>
                     <li>Venues must follow fire-safety compliance and maintain a clear evacuation plan.</li>
-                    <li>Any suspicious behaviour must be reported immediately to BRPL officials.</li>
+                    <li>Any suspicious behaviour must be reported immediately to Brpl officials.</li>
                 </ul>
             </section>
 
             {/* Match Operations Manual */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Match Operations Manual</h2>
-                <p className="text-slate-600 mb-6 leading-relaxed">The BRPL Match Operations Manual forms a crucial part of this Rulebook. The manual outlines step-by-step procedures for venue preparation, match-day execution, and responsibilities of all stakeholders involved in BRPL and its Zonal tournaments.</p>
+                <p className="text-slate-600 mb-6 leading-relaxed">The Brpl Match Operations Manual forms a crucial part of this Rulebook. The manual outlines step-by-step procedures for venue preparation, match-day execution, and responsibilities of all stakeholders involved in Brpl and its Zonal tournaments.</p>
 
                 <div className="space-y-6">
                     <div>
@@ -492,9 +492,9 @@ export function RuleBookStaticContent() {
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">B. Match Execution Protocol</h3>
                         <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
                             <li>Matches must start exactly as per the scheduled timing.</li>
-                            <li>Live scoring must be updated through the BRPL scoring system and verified by both umpires.</li>
+                            <li>Live scoring must be updated through the Brpl scoring system and verified by both umpires.</li>
                             <li>Drinks breaks are permitted only with approval from the Match Referee.</li>
-                            <li>Umpires must wear BRPL-approved uniforms and carry official signaling tools.</li>
+                            <li>Umpires must wear Brpl-approved uniforms and carry official signaling tools.</li>
                         </ul>
                     </div>
                     <div>
@@ -502,16 +502,16 @@ export function RuleBookStaticContent() {
                         <ul className="list-disc pl-6 space-y-2 text-slate-600 leading-relaxed">
                             <li>All match officials must complete and submit the official match report within 1 hour of match completion.</li>
                             <li>Teams must vacate dugout areas and provide feedback to the Venue Coordinator, if required.</li>
-                            <li>Highlight reels, scorecards, and match statistics must be uploaded to the BRPL platform within 3 hours after the match.</li>
-                            <li>Any injury reports, disciplinary matters, or code-of-conduct violations must be reported immediately to the BRPL League Office.</li>
+                            <li>Highlight reels, scorecards, and match statistics must be uploaded to the Brpl platform within 3 hours after the match.</li>
+                            <li>Any injury reports, disciplinary matters, or code-of-conduct violations must be reported immediately to the Brpl League Office.</li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">D. Roles and Responsibilities</h3>
                         <div className="pl-4 border-l-2 border-slate-100 space-y-3">
                             <div><span className="font-bold text-slate-900">Venue Coordinator:</span> <span className="text-slate-600">Responsible for all on-ground logistics, readiness, player facilities, and operational flow for the match day.</span></div>
-                            <div><span className="font-bold text-slate-900">Match Referee:</span> <span className="text-slate-600">Ensures adherence to BRPL rules and handles conduct issues.</span></div>
-                            <div><span className="font-bold text-slate-900">Umpires:</span> <span className="text-slate-600">Adjudicate all on-field events in accordance with BRPL&apos;s guidelines.</span></div>
+                            <div><span className="font-bold text-slate-900">Match Referee:</span> <span className="text-slate-600">Ensures adherence to Brpl rules and handles conduct issues.</span></div>
+                            <div><span className="font-bold text-slate-900">Umpires:</span> <span className="text-slate-600">Adjudicate all on-field events in accordance with Brpl&apos;s guidelines.</span></div>
                             <div><span className="font-bold text-slate-900">Team Manager:</span> <span className="text-slate-600">Ensures team compliance with protocols, punctual submission of documents, and coordination with league officials.</span></div>
                         </div>
                     </div>
@@ -525,12 +525,12 @@ export function RuleBookStaticContent() {
                 <div className="space-y-6">
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">1. Objective</h3>
-                        <p className="text-slate-600 leading-relaxed">The BRPL Trials Operations Manual ensures a transparent and standardized selection process for spotting cricketing talent across India. It provides operational clarity for trial organizers, coaches, selectors, scouts, and players participating in BRPL&apos;s nationwide trials.</p>
+                        <p className="text-slate-600 leading-relaxed">The Brpl Trials Operations Manual ensures a transparent and standardized selection process for spotting cricketing talent across India. It provides operational clarity for trial organizers, coaches, selectors, scouts, and players participating in Brpl&apos;s nationwide trials.</p>
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">2. Scope</h3>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>BRPL Organizing Committee</li>
+                            <li>Brpl Organizing Committee</li>
                             <li>Zonal Coordinators &amp; Trial City Heads</li>
                             <li>Selectors, Scouts &amp; Coaches</li>
                             <li>Registered Players</li>
@@ -543,16 +543,16 @@ export function RuleBookStaticContent() {
                             <div>
                                 <h4 className="font-bold text-slate-900 mb-1">3.1 Venue Setup</h4>
                                 <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                                    <li>Follow BRPL-approved field layout and safety guidelines.</li>
+                                    <li>Follow Brpl-approved field layout and safety guidelines.</li>
                                     <li>Clearly mark the pitch, boundaries, dugouts, scorer&apos;s desk, and viewing areas.</li>
                                     <li>Ensure PA system, first-aid, water stations, and shade structures are in place.</li>
-                                    <li>Install BRPL branding elements at designated points.</li>
+                                    <li>Install Brpl branding elements at designated points.</li>
                                 </ul>
                             </div>
                             <div>
                                 <h4 className="font-bold text-slate-900 mb-1">3.2 Equipment &amp; Logistics</h4>
                                 <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                                    <li>Adequate supply of BRPL match-approved cricket balls.</li>
+                                    <li>Adequate supply of Brpl match-approved cricket balls.</li>
                                     <li>Player bibs or jerseys with registration numbers.</li>
                                     <li>Score sheets, evaluation forms, cones, stumps, and timing devices.</li>
                                 </ul>
@@ -594,7 +594,7 @@ export function RuleBookStaticContent() {
                             </div>
                             <div>
                                 <h4 className="font-bold text-slate-900 mb-1">Wicketkeeping Rules</h4>
-                                <p className="text-slate-600">Wicketkeepers will be evaluated by a dedicated BRPL Selection Panel based on agility, technique, glovework, and game awareness.</p>
+                                <p className="text-slate-600">Wicketkeepers will be evaluated by a dedicated Brpl Selection Panel based on agility, technique, glovework, and game awareness.</p>
                             </div>
                         </div>
                     </div>
@@ -604,12 +604,12 @@ export function RuleBookStaticContent() {
                         <ul className="list-disc pl-6 space-y-1 text-slate-600 mb-3">
                             <li>Skill performance and statistical output</li>
                             <li>Consistency across qualification rounds</li>
-                            <li>Attitude, discipline, fitness, and adherence to BRPL values</li>
+                            <li>Attitude, discipline, fitness, and adherence to Brpl values</li>
                         </ul>
                         <p className="text-slate-600 mb-3">A player may register multiple times for a season, but may participate in only one trial per registration.</p>
                         <h4 className="font-bold text-slate-900 mb-1">Selectors Panel</h4>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>1 Head Selector (appointed by BRPL)</li>
+                            <li>1 Head Selector (appointed by Brpl)</li>
                             <li>1 Zonal/State Coordinator</li>
                             <li>1 Statistician/Scoring Official</li>
                         </ul>
@@ -618,14 +618,14 @@ export function RuleBookStaticContent() {
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">6. Code of Conduct</h3>
                         <p className="text-slate-600 mb-2">All participants must:</p>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600 mb-3">
-                            <li>Follow instructions issued by BRPL staff</li>
+                            <li>Follow instructions issued by Brpl staff</li>
                             <li>Show respect toward peers, selectors, and officials</li>
                             <li>Avoid arguments, misconduct, or abusive language</li>
                         </ul>
                         <p className="text-slate-600 mb-2">Violations may lead to:</p>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
                             <li>Immediate disqualification</li>
-                            <li>Suspension from future BRPL events</li>
+                            <li>Suspension from future Brpl events</li>
                             <li>Blacklisting, depending on severity</li>
                         </ul>
                     </div>
@@ -642,12 +642,12 @@ export function RuleBookStaticContent() {
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">8. Post-Trial Process</h3>
                         <h4 className="font-bold text-slate-900 mb-1">Result Announcement</h4>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600 mb-3">
-                            <li>Preliminary results will be announced within 7 days on BRPL&apos;s official platforms.</li>
+                            <li>Preliminary results will be announced within 7 days on Brpl&apos;s official platforms.</li>
                             <li>Selected players will receive SMS/email confirmation.</li>
                         </ul>
                         <h4 className="font-bold text-slate-900 mb-1">Next Steps</h4>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>Shortlisted players will enter the BRPL Auction pool.</li>
+                            <li>Shortlisted players will enter the Brpl Auction pool.</li>
                             <li>A background verification (age, ID, conduct) will follow.</li>
                         </ul>
                     </div>
@@ -658,15 +658,15 @@ export function RuleBookStaticContent() {
                             <li>Attendance registers</li>
                             <li>Player performance scores</li>
                             <li>Selector remarks</li>
-                            <li>Digital submission to BRPL Central Operations</li>
+                            <li>Digital submission to Brpl Central Operations</li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">10. Media &amp; Publicity</h3>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
-                            <li>Media coverage requires approval from the BRPL Media Team.</li>
+                            <li>Media coverage requires approval from the Brpl Media Team.</li>
                             <li>Only approved photos/videos may be posted publicly.</li>
-                            <li>Players must not give interviews or statements without BRPL permission.</li>
+                            <li>Players must not give interviews or statements without Brpl permission.</li>
                         </ul>
                     </div>
                 </div>
@@ -676,11 +676,11 @@ export function RuleBookStaticContent() {
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Closing Note</h2>
                 <div className="space-y-4 text-slate-600 leading-relaxed">
-                    <p>The Beyond Reach Premier League (BRPL) is more than a cricket tournament — it is a movement to make India&apos;s dream of accessible, exciting cricket a reality. This Rulebook &amp; Match Operations Manual reflects our commitment to fairness, professionalism, and opportunity for every aspiring cricketer.</p>
-                    <p>We believe excellence begins with structure and integrity. Whether you are stepping onto the field, representing a franchise, officiating a match, or supporting from the sidelines, this manual will guide your journey throughout BRPL.</p>
+                    <p>The Brpl (Brpl) is more than a cricket tournament — it is a movement to make India&apos;s dream of accessible, exciting cricket a reality. This Rulebook &amp; Match Operations Manual reflects our commitment to fairness, professionalism, and opportunity for every aspiring cricketer.</p>
+                    <p>We believe excellence begins with structure and integrity. Whether you are stepping onto the field, representing a franchise, officiating a match, or supporting from the sidelines, this manual will guide your journey throughout Brpl.</p>
                     <p>Let us uphold the spirit of the game, inspire young dreamers, and build a league that celebrates India&apos;s love for cricket proudly and passionately.</p>
                     <p className="font-bold text-[#111a45] text-lg">Let&apos;s build &quot;Bharat Ki League, Bharat Ka Sapna!&quot;</p>
-                    <p className="italic text-slate-500">— BRPL Organizing Committee</p>
+                    <p className="italic text-slate-500">— Brpl Organizing Committee</p>
                 </div>
             </section>
 
@@ -741,7 +741,7 @@ export function RuleBookStaticContent() {
                         <h3 className="font-bold text-slate-900 mb-2 text-lg font-display">Appendix E: Code of Conduct Undertaking</h3>
                         <ul className="list-disc pl-6 space-y-1 text-slate-600">
                             <li>Player&apos;s full name and team name</li>
-                            <li>Declaration of understanding and acceptance of BRPL&apos;s Code of Conduct</li>
+                            <li>Declaration of understanding and acceptance of Brpl&apos;s Code of Conduct</li>
                             <li>Agreement to uphold the league&apos;s values and fair play</li>
                             <li>Consent to disciplinary actions in case of breach</li>
                             <li>Signature of player and team manager</li>
@@ -754,18 +754,18 @@ export function RuleBookStaticContent() {
             {/* Important Notice */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Important Notice</h2>
-                <p className="text-slate-600 leading-relaxed bg-amber-50 p-6 rounded-xl border border-amber-200">This document serves as the official charter of the Beyond Reach Premier League (BRPL) and stands as the primary reference for all matters related to league governance, match regulations, operational procedures, franchise responsibilities, and player trials. The BRPL Management reserves full authority to revise, amend, or expand any provision contained herein to ensure the smooth, fair, and efficient conduct of the BRPL season, zonal tournaments, and nationwide trials, especially in situations where venue limitations or ground-specific conditions require procedural adjustments.</p>
+                <p className="text-slate-600 leading-relaxed bg-amber-50 p-6 rounded-xl border border-amber-200">This document serves as the official charter of the Brpl (Brpl) and stands as the primary reference for all matters related to league governance, match regulations, operational procedures, franchise responsibilities, and player trials. The Brpl Management reserves full authority to revise, amend, or expand any provision contained herein to ensure the smooth, fair, and efficient conduct of the Brpl season, zonal tournaments, and nationwide trials, especially in situations where venue limitations or ground-specific conditions require procedural adjustments.</p>
             </section>
 
             {/* Legal & Copyright */}
             <section>
                 <h2 className="text-2xl font-bold font-display text-[#111a45] mb-5">Legal &amp; Copyright Notice</h2>
                 <div className="space-y-4 text-slate-600 leading-relaxed bg-slate-50 p-6 rounded-xl border border-slate-200">
-                    <p>The contents of this Rulebook, including but not limited to match regulations, operational protocols, player selection frameworks, field measurements, trials guidelines, and all proprietary structures associated with the Beyond Reach Premier League (BRPL), are the exclusive intellectual property of the BRPL Management.</p>
-                    <p>Any reproduction, distribution, modification, or usage, whether partial or complete, without prior written approval from BRPL is strictly prohibited. Unauthorized usage may result in legal action under applicable intellectual property, copyright, and commercial laws.</p>
-                    <p>This document has been created solely for internal operations, franchise onboarding, official partnerships, and authorised media communication within the BRPL ecosystem. It embodies original strategic design, operational planning, and format innovation crafted specifically for BRPL&apos;s T10 cricket framework.</p>
+                    <p>The contents of this Rulebook, including but not limited to match regulations, operational protocols, player selection frameworks, field measurements, trials guidelines, and all proprietary structures associated with the Brpl (Brpl), are the exclusive intellectual property of the Brpl Management.</p>
+                    <p>Any reproduction, distribution, modification, or usage, whether partial or complete, without prior written approval from Brpl is strictly prohibited. Unauthorized usage may result in legal action under applicable intellectual property, copyright, and commercial laws.</p>
+                    <p>This document has been created solely for internal operations, franchise onboarding, official partnerships, and authorised media communication within the Brpl ecosystem. It embodies original strategic design, operational planning, and format innovation crafted specifically for Brpl&apos;s T10 cricket framework.</p>
                     <p>Professional courtesy, confidentiality, and respect for proprietary content are expected from all stakeholders.</p>
-                    <p className="font-bold text-slate-900 mt-4">&copy; Beyond Reach Premier League | All Rights Reserved — BRPL</p>
+                    <p className="font-bold text-slate-900 mt-4">&copy; Brpl | All Rights Reserved — Brpl</p>
                 </div>
             </section>
         </div>

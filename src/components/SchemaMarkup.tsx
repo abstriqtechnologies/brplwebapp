@@ -2,7 +2,7 @@
 import { Helmet } from "react-helmet-async";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-export const SITE_NAME = "Beyond Reach Premier League";
+export const SITE_NAME = "Brpl";
 export const SITE_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 /** Static path segment to breadcrumb label */
@@ -25,7 +25,7 @@ export const PATH_TO_LABEL: Record<string, string> = {
 
 export function buildBreadcrumbSchema(pathname: string, currentPageName?: string) {
     const segments = pathname.split("/").filter(Boolean);
-    const homeUrl = SITE_URL || "https://brpl.net";
+    const homeUrl = SITE_URL || "https://Brpl.net";
     const itemListElement: Array<{ "@type": string; position: number; name: string; item?: string }> = [
         { "@type": "ListItem", position: 1, name: "Home", item: `${homeUrl}/` },
     ];
@@ -71,6 +71,8 @@ export function SchemaMarkup({ organizationOnly, pathname, currentPageName, skip
     const { settings } = useSiteSettings();
 
     if (skip) return null;
+
+    const siteTitle = settings.siteName || SITE_NAME;
 
     const organizationSchema = {
         "@context": "https://schema.org",
@@ -121,6 +123,7 @@ export function SchemaMarkup({ organizationOnly, pathname, currentPageName, skip
     if (organizationOnly) {
         return (
             <Helmet>
+                <title>{siteTitle}</title>
                 <script type="application/ld+json">{JSON.stringify(organizationSchema)}</script>
                 <script type="application/ld+json">{JSON.stringify(sportsEventSchema)}</script>
             </Helmet>
@@ -132,6 +135,7 @@ export function SchemaMarkup({ organizationOnly, pathname, currentPageName, skip
 
     return (
         <Helmet>
+            <title>{siteTitle}</title>
             <script type="application/ld+json">{JSON.stringify(organizationSchema)}</script>
             <script type="application/ld+json">{JSON.stringify(sportsEventSchema)}</script>
             <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>

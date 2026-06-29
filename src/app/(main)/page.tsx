@@ -24,8 +24,8 @@ export default async function Index() {
             <SiteContextProvider value={ctx}>
                 <SEO
                     title="India's T10 Cricket League"
-                    description="BRPL is India's grassroots T10 tennis-ball cricket league."
-                    keywords="T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League"
+                    description="Brpl is India's grassroots T10 tennis-ball cricket league."
+                    keywords="T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, Brpl, grassroots cricket India, Brpl"
                 />
                 <DynamicPageRenderer sections={sections} />
             </SiteContextProvider>
@@ -37,8 +37,8 @@ export default async function Index() {
             <div className="min-h-screen bg-transparent relative flex flex-col font-sans">
                 <SEO
                     title="India's T10 Cricket League"
-                    description="BRPL is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here."
-                    keywords="T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, BRPL, grassroots cricket India, Beyond Reach Premier League"
+                    description="Brpl is India's grassroots T10 tennis-ball cricket league. Open cricket trials and player registration across all zones — your pathway to professional cricket starts here."
+                    keywords="T10 cricket league in India, cricket trials, player registration, tennis ball cricket league, Brpl, grassroots cricket India, Brpl"
                 />
                 {/* Hero Section - NOT lazy (LCP) */}
                 <Banner />

@@ -11,7 +11,7 @@ function matchesAny(pathname: string, list: string[]) {
 }
 
 async function readPending(req: NextRequest): Promise<PendingTokenPayload | null> {
-    const token = req.cookies.get("brpl_pending")?.value;
+    const token = req.cookies.get("Brpl_pending")?.value;
     if (!token) return null;
     return verifyPending(token);
 }
@@ -25,12 +25,17 @@ function safeNext(next: string | null, fallback: string): string {
 
 function redirectTo(req: NextRequest, pathname: string, search: Record<string, string>) {
     const url = req.nextUrl.clone();
-    url.pathname = pathname;
-    url.search = "";
+    const target = new URL(pathname, req.url);
+    url.pathname = target.pathname;
+    url.search = target.search;
     for (const [k, v] of Object.entries(search)) {
         url.searchParams.set(k, v);
     }
     return NextResponse.redirect(url);
+}
+
+function currentPathWithSearch(req: NextRequest): string {
+    return `${req.nextUrl.pathname}${req.nextUrl.search}`;
 }
 
 export async function middleware(req: NextRequest) {
@@ -42,7 +47,7 @@ export async function middleware(req: NextRequest) {
     // /docs/superpowers/specs/2026-06-26-registration-flow-happy-path-design.md.
     const lookup: UserLookup = async (id: string) => ({ _id: id, phone: "" });
 
-    const authResult = await verifyAuthAndUser(req.cookies.get("brpl_auth")?.value, lookup);
+    const authResult = await verifyAuthAndUser(req.cookies.get("Brpl_auth")?.value, lookup);
 
     /* --- /login --- */
     if (matchesAny(pathname, AUTH_PATHS)) {
@@ -55,7 +60,7 @@ export async function middleware(req: NextRequest) {
         }
         if (authResult.kind === "expired") {
             const res = NextResponse.next();
-            res.cookies.delete("brpl_auth");
+            res.cookies.delete("Brpl_auth");
             return res;
         }
         return NextResponse.next();
@@ -70,8 +75,8 @@ export async function middleware(req: NextRequest) {
             // Stale or expired JWT: clear the cookie and send the user to /login.
             // This breaks the loop where a stale JWT referencing a deleted user
             // bounces between /checkout and /login.
-            const res = redirectTo(req, "/login", { next: pathname });
-            res.cookies.delete("brpl_auth");
+            const res = redirectTo(req, "/login", { next: currentPathWithSearch(req) });
+            res.cookies.delete("Brpl_auth");
             return res;
         }
         const pending = await readPending(req);
@@ -81,7 +86,7 @@ export async function middleware(req: NextRequest) {
             // redirect if the user is gone.
             return NextResponse.next();
         }
-        return redirectTo(req, "/login", { next: pathname });
+        return redirectTo(req, "/login", { next: currentPathWithSearch(req) });
     }
 
     /* --- /dashboard: auth+paid only. --- */
@@ -89,7 +94,7 @@ export async function middleware(req: NextRequest) {
         if (authResult.kind !== "valid") {
             const res = redirectTo(req, "/login", { next: pathname });
             if (authResult.kind === "expired" || authResult.kind === "user_missing") {
-                res.cookies.delete("brpl_auth");
+                res.cookies.delete("Brpl_auth");
             }
             return res;
         }

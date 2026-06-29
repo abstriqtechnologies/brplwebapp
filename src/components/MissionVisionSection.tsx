@@ -60,7 +60,7 @@ const MissionVisionSection: React.FC<MissionVisionSectionProps> = ({
                                     ) : (
                                         <>
                                             <p>
-                                                For way too long, cricket has been a game for the privileged. Access to coaching, exposure, and opportunity usually decide who gets to play at the national level. At BRPL, our mission is to empower cricket players at the grassroots level and create an inclusive ecosystem.
+                                                For way too long, cricket has been a game for the privileged. Access to coaching, exposure, and opportunity usually decide who gets to play at the national level. At Brpl, our mission is to empower cricket players at the grassroots level and create an inclusive ecosystem.
                                             </p>
                                             <p>
                                                 We believe that no matter their background, every aspiring cricketer deserves a platform to shine. Our team will interact with local communities, encourage youth participation, and connect with them through local digital creators. To ensure widespread participation, we will conduct nationwide trials and discover the next generation of India's cricket stars. We promise to treat every participant fairly and provide them with equal opportunities and long-term growth.
@@ -75,13 +75,13 @@ const MissionVisionSection: React.FC<MissionVisionSectionProps> = ({
                                     ) : (
                                         <>
                                             <p>
-                                                "If they can dream it, they can achieve it." This belief lies at the heart of the Beyond Reach Premier League (BRPL). Our vision is to make BRPL the most inclusive and sustainable <b className="font-bold text-white">T10 tennis ball cricket league</b> platform in India.
+                                                "If they can dream it, they can achieve it." This belief lies at the heart of the Brpl (Brpl). Our vision is to make Brpl the most inclusive and sustainable <b className="font-bold text-white">T10 tennis ball cricket league</b> platform in India.
                                             </p>
                                             <p>
                                                 From a child playing in a village field, a youngster practicing under streetlights, to communities that live and breathe cricket, we want everyone to feel that this league belongs to them. By giving a professional platform to the underprivileged, we aim to revolutionize cricket at the grassroots. We want to see cricket thrive in local communities, schools, and small towns.
                                             </p>
                                             <p>
-                                                Our team will continuously work on improving the format and introduce exciting rules to keep the league exciting to watch. This will ensure that every season brings something new for both players and fans. Ultimately, we want BRPL to become a movement that unites India through the love of cricket.
+                                                Our team will continuously work on improving the format and introduce exciting rules to keep the league exciting to watch. This will ensure that every season brings something new for both players and fans. Ultimately, we want Brpl to become a movement that unites India through the love of cricket.
                                             </p>
                                         </>
                                     )}

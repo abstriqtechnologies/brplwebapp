@@ -18,8 +18,8 @@ interface BannerItem {
 
 const DEFAULT_BANNER: BannerItem = {
   _id: "default",
-  background: "/banner-brpl.webp",
-  videoUrl: "https://brpl-public-uploads.s3.ap-south-1.amazonaws.com/BRPL_Launch_Film.mp4",
+  background: "/banner-Brpl.webp",
+  videoUrl: "https://Brpl-public-uploads.s3.ap-south-1.amazonaws.com/Brpl_Launch_Film.mp4",
   isActive: true,
 };
 

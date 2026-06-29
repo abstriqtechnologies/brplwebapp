@@ -16,24 +16,24 @@ export const dynamic = "force-dynamic";
  * Server-side guard for /checkout.
  *
  * Allowed if ANY of:
- *   - brpl_pending cookie (OTP-verified, not registered)
- *   - brpl_auth cookie with paid:false (registered but unpaid)
+ *   - Brpl_pending cookie (OTP-verified, not registered)
+ *   - Brpl_auth cookie with paid:false (registered but unpaid)
  *
  * Disallowed:
  *   - No cookies at all → /login
- *   - brpl_auth with paid:true → /dashboard (idempotent)
+ *   - Brpl_auth with paid:true → /dashboard (idempotent)
  */
 export default async function CheckoutPage({
     searchParams,
 }: {
-    searchParams: { next?: string };
+    searchParams: { next?: string; ref?: string; coupon?: string };
 }) {
     const c = await cookies();
     const pendingToken = c.get(COOKIE_NAMES.PENDING)?.value;
     const authToken = c.get(COOKIE_NAMES.AUTH)?.value;
 
     if (!pendingToken && !authToken) {
-        redirect("/login?next=/checkout");
+        redirect(`/login?next=${encodeURIComponent(checkoutTarget(searchParams))}`);
     }
 
     // Idempotent guard: paid user landed here by mistake → dashboard.
@@ -47,7 +47,7 @@ export default async function CheckoutPage({
 
     if (pendingToken) {
         const payload = await verifyPending(pendingToken);
-        if (!payload) redirect("/login?next=/checkout");
+        if (!payload) redirect(`/login?next=${encodeURIComponent(checkoutTarget(searchParams))}`);
         phone = payload.phone;
         existingUser = await loadUser(phone);
     } else if (authToken) {
@@ -55,7 +55,7 @@ export default async function CheckoutPage({
         if (!session) {
             // Stale JWT — the cookie is valid but the user is gone. Redirect
             // to /login; the middleware clears the cookie on the next request.
-            await staleJwtRedirect("/checkout");
+            await staleJwtRedirect(checkoutTarget(searchParams));
             return null; // unreachable
         }
         if (session.paymentStatus === "completed") redirect(safeNext(searchParams.next, "/dashboard"));
@@ -77,8 +77,19 @@ export default async function CheckoutPage({
             next={safeNext(searchParams.next, "/dashboard")}
             registrationFeeRupees={REGISTRATION_AMOUNT_RUPEES}
             existingUser={existingUser}
+            initialCouponCode={searchParams.ref ?? searchParams.coupon ?? ""}
         />
     );
+}
+
+function checkoutTarget(params: { next?: string; ref?: string; coupon?: string }): string {
+    const qs = new URLSearchParams();
+    const code = params.ref ?? params.coupon;
+    if (code?.trim()) qs.set("ref", code.trim().slice(0, 64));
+    const next = safeNext(params.next, "");
+    if (next) qs.set("next", next);
+    const suffix = qs.toString();
+    return suffix ? `/checkout?${suffix}` : "/checkout";
 }
 
 function safeNext(next: string | undefined, fallback: string): string {

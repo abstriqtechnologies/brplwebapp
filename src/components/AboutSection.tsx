@@ -30,7 +30,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ imageSrc, title, descriptio
                 {/* Right Column: Text Content */}
                 <div className="w-full lg:w-1/2 space-y-6">
                     <h2 className="text-4xl md:text-5xl font-bold text-[#111a45] font-oswald tracking-tight">
-                        {title || "About BRPL"}
+                        {title || "About Brpl"}
                     </h2>
 
                     <div className="space-y-4 text-gray-600 text-lg leading-relaxed">
@@ -43,11 +43,11 @@ const AboutSection: React.FC<AboutSectionProps> = ({ imageSrc, title, descriptio
                                 </p>
 
                                 <p>
-                                    This is what we want to change with the <span className="font-bold text-black">Beyond Reach Premier League (BRPL)</span>. We bring you a fresh <b className="font-bold text-black">T10 tennis ball cricket league</b> format league that will transform how cricket is played and experienced. With nationwide trials in place, expect to see raw talent from every corner of the country. Guided by the vision "Bharat ki League, Bhartiyo ka Sapna," we have a strong focus on inclusivity, community, sustainability, and, of course, the entertainment factor.
+                                    This is what we want to change with the <span className="font-bold text-black">Brpl (Brpl)</span>. We bring you a fresh <b className="font-bold text-black">T10 tennis ball cricket league</b> format league that will transform how cricket is played and experienced. With nationwide trials in place, expect to see raw talent from every corner of the country. Guided by the vision "Bharat ki League, Bhartiyo ka Sapna," we have a strong focus on inclusivity, community, sustainability, and, of course, the entertainment factor.
                                 </p>
 
                                 <p>
-                                    Our management team has experience in major tournaments like <span className="font-bold text-black">the IPL</span> and the <span className="font-bold text-black">ICC World Cup</span>, and they will leave no stone unturned to make BRPL the biggest cricket event in the country. So when it comes to us, expect the unexpected. With six talented teams, thrilling <span className="font-bold text-black">double-header matches</span>, and unique <span className="font-bold text-black">X-Factor Rules</span>, you are in for a treat.
+                                    Our management team has experience in major tournaments like <span className="font-bold text-black">the IPL</span> and the <span className="font-bold text-black">ICC World Cup</span>, and they will leave no stone unturned to make Brpl the biggest cricket event in the country. So when it comes to us, expect the unexpected. With six talented teams, thrilling <span className="font-bold text-black">double-header matches</span>, and unique <span className="font-bold text-black">X-Factor Rules</span>, you are in for a treat.
                                 </p>
                             </>
                         )}

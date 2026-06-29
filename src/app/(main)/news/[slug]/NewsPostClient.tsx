@@ -32,7 +32,7 @@ interface NewsListItem {
     createdAt: string;
 }
 
-const SITE_NAME = "Beyond Reach Premier League";
+const SITE_NAME = "Brpl";
 const RECENT_POSTS_COUNT = 5;
 
 export default function NewsPostClient({ slug }: { slug: string }) {
@@ -224,7 +224,7 @@ export default function NewsPostClient({ slug }: { slug: string }) {
                                                                         decoding="async"
                                                                     />
                                                                 ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-[#111a45]/40 text-xs font-semibold">BRPL</div>
+                                                                    <div className="w-full h-full flex items-center justify-center text-[#111a45]/40 text-xs font-semibold">Brpl</div>
                                                                 )}
                                                             </div>
                                                             <div className="min-w-0 flex-1 flex flex-col justify-center">

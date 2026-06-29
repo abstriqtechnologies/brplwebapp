@@ -1,107 +1,81 @@
-// src/components/chat/ChatWindow.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 
-interface ChatMessage {
+interface Message {
   role: "user" | "ai";
   message: string;
-  timestamp: Date;
+  timestamp: string;
 }
 
 interface ChatWindowProps {
   leadId: string;
   name: string;
-  greetingMessage?: string;
-  initialConversation?: ChatMessage[];
+  phone: string;
+  initialMessages?: Message[];
 }
 
-export function ChatWindow({ leadId, name, greetingMessage, initialConversation = [] }: ChatWindowProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (greetingMessage) {
-      return [
-        {
-          role: "ai" as const,
-          message: greetingMessage,
-          timestamp: new Date(),
-        },
-      ];
-    }
-    return initialConversation;
-  });
+export function ChatWindow({ leadId, name, phone, initialMessages = [] }: ChatWindowProps) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Keep ref of latest messages for async work
-  const messagesRef = useRef<ChatMessage[]>(messages);
-  useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isTyping) return;
+  const send = async () => {
+    const text = input.trim();
+    if (!text || loading) return;
 
-    const userMessage: ChatMessage = {
+    const userMsg: Message = {
       role: "user",
-      message: input.trim(),
-      timestamp: new Date(),
+      message: text,
+      timestamp: new Date().toISOString(),
     };
-
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((m) => [...m, userMsg]);
     setInput("");
-    setIsTyping(true);
+    setLoading(true);
 
     try {
       const res = await fetch("/api/chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leadId,
-          name,
-          message: userMessage.message,
-        }),
+        body: JSON.stringify({ leadId, name, phone, message: text }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to get response");
+        throw new Error(data?.error || "Request failed");
       }
 
-      const aiReply = data.reply;
-      const aiMessage: ChatMessage = {
+      const aiMsg: Message = {
         role: "ai",
-        message: aiReply && aiReply.trim()
-          ? aiReply
-          : "I'm sorry, I couldn't generate a response right now.",
-        timestamp: new Date(),
+        message: data.reply || "I couldn't generate a response right now.",
+        timestamp: new Date().toISOString(),
       };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((m) => [...m, aiMsg]);
     } catch (err) {
-      console.error("Chat send error:", err);
-      const errorMessage: ChatMessage = {
+      console.error("[ChatWindow] send error:", err);
+      const errMsg: Message = {
         role: "ai",
         message: "Sorry, something went wrong. Please try again.",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((m) => [...m, errMsg]);
     } finally {
-      setIsTyping(false);
+      setLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      void send();
     }
   };
 
@@ -109,46 +83,35 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
       <div
-        className="px-5 pt-5 pb-4 text-white relative"
+        className="px-5 pt-5 pb-4 text-white"
         style={{ background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)" }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-sm font-semibold border border-white/20">
+          <div className="w-10 h-10 rounded-full bg-white/20 border border-white/20 flex items-center justify-center text-white text-sm font-semibold">
             {name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-medium text-[15px] truncate">{name}</p>
-            <div className="flex items-center gap-1.5">
+            <p className="text-white/90 text-xs flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-white rounded-full" />
-              <p className="text-white/90 text-xs">Online</p>
-            </div>
+              Online
+            </p>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 bg-white">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-white">
         {messages.length === 0 && (
           <div className="text-center mt-12 px-6">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#25D366">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
-              </svg>
-            </div>
             <p className="text-gray-900 font-medium text-sm mb-1">Hello {name}!</p>
             <p className="text-gray-500 text-sm">How can we help you today?</p>
           </div>
         )}
-        {messages.map((msg, i) => (
-          <MessageBubble
-            key={`${i}-${msg.timestamp.getTime()}`}
-            role={msg.role}
-            message={msg.message}
-            timestamp={msg.timestamp}
-          />
+        {messages.map((m, i) => (
+          <MessageBubble key={i} role={m.role} message={m.message} timestamp={new Date(m.timestamp)} />
         ))}
-        {isTyping && <TypingIndicator />}
-        <div ref={messagesEndRef} />
+        {loading && <TypingIndicator />}
       </div>
 
       {/* Input */}
@@ -158,31 +121,19 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={onKeyDown}
             placeholder="Type a message..."
-            disabled={isTyping}
-            className="flex-1 px-4 py-2.5 rounded-full border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:border-transparent focus:bg-white disabled:opacity-50 transition-all"
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 rounded-full border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:border-transparent focus:bg-white disabled:opacity-50"
           />
           <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isTyping}
+            onClick={() => void send()}
+            disabled={!input.trim() || loading}
             aria-label="Send message"
-            className="w-10 h-10 rounded-full text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-md active:scale-95 shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
-            }}
+            className="w-10 h-10 rounded-full text-white flex items-center justify-center disabled:opacity-50 shrink-0"
+            style={{ background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)" }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
