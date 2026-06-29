@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
+import { env } from "@/lib/env";
 import AiContext from "@/models/AiContext";
 import AiLead, { IAiLead } from "@/models/AiLead";
 import AiTicket from "@/models/AiTicket";
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       lowerMsg
     );
 
-    const systemPrompt = `You are a helpful assistant for Brpl. Be precise and humble. Answer based on the context provided. If you cannot answer, reply with: "I don't have that information. Let me connect you with a support agent."
+    const systemPrompt = `You are a helpful assistant for Brpl. Be precise and humble. Answer based on the context provided. If you cannot answer, reply with: "I have escalated your query to our team — they will get back to you shortly."
 
 For simple greetings like "hi", "hello", "hey", just greet back warmly without escalation.
 
@@ -73,7 +74,7 @@ ${contextText || "No context configured yet."}`;
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
@@ -106,8 +107,9 @@ ${contextText || "No context configured yet."}`;
     // Only escalate when AI says so AND it's not a simple greeting
     const looksLikeEscalation =
       aiReply.toLowerCase().includes("support agent") ||
-      aiReply.toLowerCase().includes("i don't have that information") ||
-      aiReply.toLowerCase().includes("i'm sorry, i don't have");
+      aiReply.toLowerCase().includes("our agent") ||
+      aiReply.toLowerCase().includes("our team") ||
+      aiReply.toLowerCase().includes("escalated your query");
 
     if (looksLikeEscalation && !isGreeting) {
       activeLead.status = "escalated";

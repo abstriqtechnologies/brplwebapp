@@ -66,27 +66,27 @@ export function AiTicketsClient() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Tickets</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Tickets</h1>
+          <p className="text-xs text-gray-500 mt-0.5">
             Tickets created when AI cannot resolve user queries
           </p>
         </div>
         {openCount > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium">
-            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-            {openCount} Open Ticket{openCount > 1 ? "s" : ""}
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-medium">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+            {openCount} Open
           </div>
         )}
       </div>
 
       {/* Filter */}
-      <div className="mb-4">
+      <div className="mb-3">
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:border-emerald-500"
         >
           <option value="all">All Tickets</option>
           <option value="open">Open</option>
@@ -96,59 +96,52 @@ export function AiTicketsClient() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 text-sm">Loading...</div>
       ) : tickets.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-400 text-sm">No tickets found</p>
+        <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm text-gray-400">
+          No tickets found
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Issue</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <tr className="bg-gray-100 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600">
+                <th className="text-left px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Name</th>
+                <th className="text-left px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Phone</th>
+                <th className="text-left px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Issue</th>
+                <th className="text-center px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Status</th>
+                <th className="text-right px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Date</th>
+                <th className="text-right px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody>
               {tickets.map((ticket) => (
-                <tr key={ticket._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                <tr key={ticket._id} className="hover:bg-blue-50 dark:hover:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
+                  <td className="px-2 py-1 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 font-medium whitespace-nowrap">
                     {ticket.name}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{ticket.phone}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
+                  <td className="px-2 py-1 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap font-mono">
+                    {ticket.phone}
+                  </td>
+                  <td className="px-2 py-1 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 max-w-xs truncate">
                     {ticket.issue}
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        ticket.status === "open"
-                          ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                      }`}
-                    >
-                      {ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}
-                    </span>
+                  <td className="px-2 py-1 text-center text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                    {ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-500">
+                  <td className="px-2 py-1 text-right text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap font-mono">
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-2 py-1 text-right whitespace-nowrap">
                     {ticket.status === "open" ? (
                       <button
                         onClick={() => handleResolve(ticket._id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                        className="text-emerald-700 dark:text-emerald-400 hover:underline"
                       >
-                        <CheckCircle className="w-4 h-4" />
                         Resolve
                       </button>
                     ) : (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-gray-400">
                         {ticket.resolvedBy && `by ${ticket.resolvedBy}`}
                       </span>
                     )}
@@ -162,23 +155,23 @@ export function AiTicketsClient() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
+        <div className="flex items-center justify-center gap-2 mt-3 text-xs">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+            className="px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-gray-500">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+            className="px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

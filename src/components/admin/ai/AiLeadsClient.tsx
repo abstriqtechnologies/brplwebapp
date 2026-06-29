@@ -78,30 +78,27 @@ export function AiLeadsClient() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Leads</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          View all users who have interacted with the AI chatbot
+      <div className="mb-4">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Leads</h1>
+        <p className="text-xs text-gray-500 mt-0.5">
+          All users who have interacted with the AI chatbot
         </p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search by name or phone..."
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          placeholder="Search by name or phone..."
+          className="flex-1 min-w-[200px] px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:border-emerald-500"
+        />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:border-emerald-500"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -112,44 +109,43 @@ export function AiLeadsClient() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 text-sm">Loading...</div>
       ) : leads.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-400 text-sm">No leads found</p>
+        <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-400">
+          No leads found
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Last Activity</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <tr className="bg-gray-100 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600">
+                <th className="text-left px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Name</th>
+                <th className="text-left px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Phone</th>
+                <th className="text-center px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Status</th>
+                <th className="text-right px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">Last Activity</th>
+                <th className="text-right px-2 py-1.5 font-semibold text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody>
               {leads.map((lead) => (
-                <tr key={lead._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                <tr key={lead._id} className="hover:bg-blue-50 dark:hover:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
+                  <td className="px-2 py-1 text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 font-medium whitespace-nowrap">
                     {lead.name}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{lead.phone}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] || ""}`}>
-                      {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                    </span>
+                  <td className="px-2 py-1 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap font-mono">
+                    {lead.phone}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-500">
+                  <td className="px-2 py-1 text-center text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                    {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                  </td>
+                  <td className="px-2 py-1 text-right text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap font-mono">
                     {new Date(lead.updatedAt).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-2 py-1 text-right whitespace-nowrap">
                     <button
                       onClick={() => openConversation(lead)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                      className="text-emerald-700 dark:text-emerald-400 hover:underline"
                     >
-                      <MessageSquare className="w-4 h-4" />
                       View Chat
                     </button>
                   </td>
@@ -162,23 +158,23 @@ export function AiLeadsClient() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
+        <div className="flex items-center justify-center gap-2 mt-3 text-xs">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+            className="px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-gray-500">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+            className="px-2 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

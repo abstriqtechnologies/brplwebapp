@@ -66,6 +66,11 @@ const schema = z.object({
     // can send an OTP — safe default, no hardcoded fallbacks.
     ADMIN_PHONES: z.string().optional(),
 
+    // AI Chat — OpenAI API key (required in production; optional in dev)
+    OPENAI_API_KEY: process.env.NODE_ENV === "production"
+        ? z.string().min(1, "OPENAI_API_KEY is required in production")
+        : z.string().optional(),
+
     // Security knobs (used by Phase 1)
     Brpl_CSRF_REQUIRED: booleanish,
 });
@@ -179,6 +184,9 @@ export function assertProductionBootReadiness(): void {
     }
     if (!env.ADMIN_PHONES || env.ADMIN_PHONES.trim() === "") {
         missing.push("ADMIN_PHONES (no admin can receive an OTP without it)");
+    }
+    if (!env.OPENAI_API_KEY) {
+        missing.push("OPENAI_API_KEY (AI chat will 500 without it)");
     }
     if (missing.length > 0) {
         throw new Error(

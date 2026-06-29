@@ -1,0 +1,357 @@
+- generic [active] [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e321]:
+    - banner [ref=e322]:
+      - link "Brpl Logo" [ref=e324] [cursor=pointer]:
+        - /url: /
+        - img "Brpl Logo" [ref=e325]
+      - generic [ref=e327]:
+        - generic [ref=e328]:
+          - generic [ref=e329]:
+            - img [ref=e330]
+            - link "+(91) 81309 55866" [ref=e332] [cursor=pointer]:
+              - /url: tel:+918130955866
+          - generic [ref=e334]:
+            - img [ref=e335]
+            - link "info@Brpl.net" [ref=e338] [cursor=pointer]:
+              - /url: mailto:info@Brpl.net
+        - generic [ref=e339]:
+          - link "LOGIN" [ref=e340] [cursor=pointer]:
+            - /url: /login
+            - img [ref=e341]
+            - generic [ref=e344]: LOGIN
+          - generic [ref=e346]:
+            - link "Facebook" [ref=e347] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61584782136820
+              - img "Facebook" [ref=e348]
+            - link "Twitter" [ref=e349] [cursor=pointer]:
+              - /url: https://x.com/BrplOfficial
+              - img "Twitter" [ref=e350]
+            - link "Instagram" [ref=e351] [cursor=pointer]:
+              - /url: https://www.instagram.com/Brpl.t10
+              - img "Instagram" [ref=e352]
+      - navigation [ref=e354]:
+        - link "Home" [ref=e355] [cursor=pointer]:
+          - /url: /
+          - text: Home
+        - link "About Us" [ref=e356] [cursor=pointer]:
+          - /url: /about-us
+          - text: About Us
+        - link "Teams" [ref=e357] [cursor=pointer]:
+          - /url: /teams
+          - text: Teams
+        - link "Events" [ref=e358] [cursor=pointer]:
+          - /url: /events
+          - text: Events
+        - button "Blog" [ref=e360] [cursor=pointer]:
+          - text: Blog
+          - img [ref=e361]
+        - link "Career" [ref=e363] [cursor=pointer]:
+          - /url: /career
+          - text: Career
+        - button "Partners" [ref=e365] [cursor=pointer]:
+          - text: Partners
+          - img [ref=e366]
+        - link "FAQs" [ref=e368] [cursor=pointer]:
+          - /url: /faqs
+          - text: FAQs
+        - link "Registration" [ref=e369] [cursor=pointer]:
+          - /url: /login
+          - text: Registration
+        - link "Contact Us" [ref=e370] [cursor=pointer]:
+          - /url: /contact-us
+          - text: Contact Us
+    - main [ref=e371]:
+      - generic [ref=e372]:
+        - region [ref=e374]:
+          - group [ref=e377]:
+            - generic [ref=e378]:
+              - img "Banner" [ref=e379]
+              - generic [ref=e382]:
+                - link "REGISTER NOW" [ref=e383] [cursor=pointer]:
+                  - /url: /login
+                  - button "REGISTER NOW" [ref=e384]:
+                    - generic [ref=e385]: REGISTER NOW
+                - button "PLAY VIDEO" [ref=e386] [cursor=pointer]:
+                  - img
+                  - generic [ref=e387]: PLAY VIDEO
+        - generic [ref=e390]:
+          - generic [ref=e391]:
+            - generic [ref=e394]: About The League
+            - generic [ref=e395]:
+              - heading "Brpl India's Grassroots T10 Cricket League" [level=1] [ref=e396]:
+                - text: Brpl
+                - text: India's Grassroots T10 Cricket League
+              - paragraph [ref=e397]: "\"Brpl – Bharat ki League, Bharatiyon ka Sapna\""
+            - generic [ref=e398]:
+              - paragraph [ref=e399]: Brpl (Brpl) is India's premier T10 tennis-ball cricket league, built to give every aspiring cricketer — regardless of city, background, or contacts — a fair, structured pathway to professional cricket. Through nationwide cricket trials and open player registration across five zones, Brpl is rewriting how talent is discovered in Indian cricket.
+              - paragraph [ref=e400]: What makes Brpl different is its commitment to grassroots access. Whether you're playing gully cricket in a small town or representing your district side, Brpl's zonal trials are designed to surface raw talent that conventional scouting overlooks. Selected players join franchise teams, compete in a fast-paced T10 format, and gain real exposure to scouts, mentors, and live broadcasts.
+              - paragraph [ref=e401]: Player benefits include professional coaching, performance tracking, prize money, and scouting exposure — a genuine shot at a long-term cricketing career. Every selected player represents their zone, wears their colours, and plays for a chance to inspire the next generation back home.
+            - link "Register for Trials" [ref=e403] [cursor=pointer]:
+              - /url: /login
+              - button "Register for Trials" [ref=e404]:
+                - text: Register for Trials
+                - img
+          - generic [ref=e405]:
+            - generic [ref=e406]:
+              - img "About Brpl" [ref=e407]
+              - generic [ref=e408]:
+                - heading "Connecting India's Talent" [level=3] [ref=e409]
+                - paragraph [ref=e410]: Join the revolution today.
+            - generic [ref=e412]:
+              - img [ref=e414]
+              - generic [ref=e420]:
+                - paragraph [ref=e421]: Premier League
+                - paragraph [ref=e422]: Official Partner
+        - generic [ref=e427]:
+          - generic [ref=e428]:
+            - heading "Brpl Event Gallery" [level=2] [ref=e429]
+            - paragraph [ref=e431]: Highlights from Brpl's nationwide cricket events — zonal trials, franchise matches, and grassroots tournaments shaping India's next generation of T10 cricketers.
+            - paragraph [ref=e432]: Bharat ki League, Bharatiyon ka Sapna
+          - region [ref=e433]:
+            - generic [ref=e435]:
+              - group [ref=e436]:
+                - generic [ref=e437] [cursor=pointer]:
+                  - img "Brpl Zonal Trials" [ref=e438]
+                  - generic [ref=e440]:
+                    - heading "Brpl Zonal Trials" [level=3] [ref=e441]
+                    - generic [ref=e442]:
+                      - generic [ref=e443]:
+                        - img [ref=e444]
+                        - text: Upcoming
+                      - generic [ref=e446]:
+                        - img [ref=e447]
+                        - text: Pan-India
+              - group [ref=e450]:
+                - generic [ref=e451] [cursor=pointer]:
+                  - img "Franchise Auctions" [ref=e452]
+                  - generic [ref=e454]:
+                    - heading "Franchise Auctions" [level=3] [ref=e455]
+                    - generic [ref=e456]:
+                      - generic [ref=e457]:
+                        - img [ref=e458]
+                        - text: TBA
+                      - generic [ref=e460]:
+                        - img [ref=e461]
+                        - text: Mumbai
+              - group [ref=e464]:
+                - generic [ref=e465] [cursor=pointer]:
+                  - img "T10 Season Opener" [ref=e466]
+                  - generic [ref=e468]:
+                    - heading "T10 Season Opener" [level=3] [ref=e469]
+                    - generic [ref=e470]:
+                      - generic [ref=e471]:
+                        - img [ref=e472]
+                        - text: TBA
+                      - generic [ref=e474]:
+                        - img [ref=e475]
+                        - text: Delhi NCR
+              - group [ref=e478]:
+                - generic [ref=e479] [cursor=pointer]:
+                  - img "Grassroots Showcases" [ref=e480]
+                  - generic [ref=e482]:
+                    - heading "Grassroots Showcases" [level=3] [ref=e483]
+                    - generic [ref=e484]:
+                      - generic [ref=e485]:
+                        - img [ref=e486]
+                        - text: Year-round
+                      - generic [ref=e488]:
+                        - img [ref=e489]
+                        - text: All Zones
+            - generic:
+              - button "Previous slide" [ref=e690] [cursor=pointer]:
+                - img
+                - generic [ref=e691]: Previous slide
+              - button "Next slide" [disabled]:
+                - img
+                - generic: Next slide
+          - link "View More" [ref=e495] [cursor=pointer]:
+            - /url: /events
+            - button "View More" [ref=e496]:
+              - generic [ref=e497]: View More
+              - img [ref=e498]
+        - generic [ref=e503]:
+          - generic [ref=e504]:
+            - heading "Brpl Ambassadors" [level=2] [ref=e505]
+            - paragraph [ref=e507]: Meet the cricket icons, mentors, and changemakers championing Brpl's mission to take grassroots T10 cricket to every corner of India.
+            - paragraph [ref=e508]: Bharat ki League, Bharatiyon ka Sapna
+          - region [ref=e509]:
+            - generic [ref=e511]:
+              - group [ref=e512]:
+                - link "Brpl Ambassador Brpl Ambassador Coming Soon" [ref=e513] [cursor=pointer]:
+                  - /url: /press/fallback-amb-1
+                  - generic [ref=e514]:
+                    - img "Brpl Ambassador" [ref=e516]
+                    - generic [ref=e517]:
+                      - heading "Brpl Ambassador" [level=3] [ref=e518]
+                      - paragraph [ref=e519]: Coming Soon
+              - group [ref=e520]:
+                - link "Brpl Ambassador Brpl Ambassador Coming Soon" [ref=e521] [cursor=pointer]:
+                  - /url: /press/fallback-amb-2
+                  - generic [ref=e522]:
+                    - img "Brpl Ambassador" [ref=e524]
+                    - generic [ref=e525]:
+                      - heading "Brpl Ambassador" [level=3] [ref=e526]
+                      - paragraph [ref=e527]: Coming Soon
+              - group [ref=e528]:
+                - link "Brpl Ambassador Brpl Ambassador Coming Soon" [ref=e529] [cursor=pointer]:
+                  - /url: /press/fallback-amb-3
+                  - generic [ref=e530]:
+                    - img "Brpl Ambassador" [ref=e532]
+                    - generic [ref=e533]:
+                      - heading "Brpl Ambassador" [level=3] [ref=e534]
+                      - paragraph [ref=e535]: Coming Soon
+              - group [ref=e536]:
+                - link "Brpl Ambassador Brpl Ambassador Coming Soon" [ref=e537] [cursor=pointer]:
+                  - /url: /press/fallback-amb-4
+                  - generic [ref=e538]:
+                    - img "Brpl Ambassador" [ref=e540]
+                    - generic [ref=e541]:
+                      - heading "Brpl Ambassador" [level=3] [ref=e542]
+                      - paragraph [ref=e543]: Coming Soon
+            - generic:
+              - button "Previous slide" [ref=e692] [cursor=pointer]:
+                - img
+                - generic [ref=e693]: Previous slide
+              - button "Next slide" [disabled]:
+                - img
+                - generic: Next slide
+        - generic [ref=e550]:
+          - heading "Brpl Teams" [level=2] [ref=e551]
+          - paragraph [ref=e552]: Five franchise teams. Five zones. One league. Discover the squads competing in India's most accessible T10 tennis-ball cricket tournament.
+          - paragraph [ref=e553]: Bharat ki League, Bharatiyon ka Sapna
+          - generic [ref=e555]:
+            - img "Western Heroes" [ref=e559]
+            - img "Northern Dabanggss" [ref=e561]
+            - img "Southern Lions" [ref=e563]
+            - img "North East Panthers" [ref=e565]
+            - img "Central Strikers" [ref=e557]
+        - generic [ref=e570]:
+          - heading "Proposed Broadcasting Partners" [level=2] [ref=e571]
+          - paragraph [ref=e573]: Bharat ki League, Bharatiyon ka Sapna
+          - generic [ref=e574]:
+            - generic [ref=e575]:
+              - heading "Linear TV" [level=3] [ref=e576]
+              - generic [ref=e577]:
+                - img "DD Sports" [ref=e579]
+                - img "Sony Sports Network" [ref=e581]
+                - img "Star Sports" [ref=e583]
+            - generic [ref=e584]:
+              - heading "OTT" [level=3] [ref=e585]
+              - generic [ref=e586]:
+                - img "JioHotstar" [ref=e588]
+                - img "SonyLIV" [ref=e590]
+                - img "FanCode" [ref=e592]
+    - contentinfo [ref=e593]:
+      - generic [ref=e594]:
+        - generic [ref=e595]:
+          - generic [ref=e596]:
+            - heading "Teams" [level=3] [ref=e598]
+            - list [ref=e600]:
+              - listitem [ref=e601] [cursor=pointer]:
+                - generic [ref=e602]: ●
+                - link "North East Panthers" [ref=e603]:
+                  - /url: /teams
+              - listitem [ref=e604] [cursor=pointer]:
+                - generic [ref=e605]: ●
+                - link "Central Strikers" [ref=e606]:
+                  - /url: /teams
+              - listitem [ref=e607] [cursor=pointer]:
+                - generic [ref=e608]: ●
+                - link "Western Heroes" [ref=e609]:
+                  - /url: /teams
+              - listitem [ref=e610] [cursor=pointer]:
+                - generic [ref=e611]: ●
+                - link "Northern Dabanggs" [ref=e612]:
+                  - /url: /teams
+              - listitem [ref=e613] [cursor=pointer]:
+                - generic [ref=e614]: ●
+                - link "Southern Lions" [ref=e615]:
+                  - /url: /teams
+              - listitem [ref=e616] [cursor=pointer]:
+                - generic [ref=e617]: ●
+                - link "Eastern Rhions" [ref=e618]:
+                  - /url: /teams
+          - generic [ref=e619]:
+            - heading "Brpl - T10" [level=3] [ref=e621]
+            - list [ref=e623]:
+              - listitem [ref=e624] [cursor=pointer]:
+                - generic [ref=e625]: ●
+                - link "About Us" [ref=e626]:
+                  - /url: /about-us
+              - listitem [ref=e627] [cursor=pointer]:
+                - generic [ref=e628]: ●
+                - link "Contact Us" [ref=e629]:
+                  - /url: /contact-us
+              - listitem [ref=e630] [cursor=pointer]:
+                - generic [ref=e631]: ●
+                - link "Partners" [ref=e632]:
+                  - /url: /partners
+          - generic [ref=e633]:
+            - heading "Useful Links" [level=3] [ref=e635]
+            - list [ref=e637]:
+              - listitem [ref=e638] [cursor=pointer]:
+                - generic [ref=e639]: ●
+                - link "Registration" [ref=e640]:
+                  - /url: /login
+              - listitem [ref=e641] [cursor=pointer]:
+                - generic [ref=e642]: ●
+                - link "FAQs" [ref=e643]:
+                  - /url: /faqs
+              - listitem [ref=e644] [cursor=pointer]:
+                - generic [ref=e645]: ●
+                - link "Events" [ref=e646]:
+                  - /url: /events
+          - generic [ref=e647]:
+            - heading "Contact" [level=3] [ref=e649]
+            - list [ref=e651]:
+              - listitem [ref=e652] [cursor=pointer]:
+                - generic [ref=e653]: ●
+                - link "Contact Us" [ref=e654]:
+                  - /url: /contact-us
+              - listitem [ref=e655] [cursor=pointer]:
+                - generic [ref=e656]: ●
+                - link "News" [ref=e657]:
+                  - /url: /news
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - generic [ref=e660]:
+              - text: "Phone:"
+              - link "+(91) 81309 55866" [ref=e661] [cursor=pointer]:
+                - /url: tel:+918130955866
+            - generic [ref=e662]:
+              - text: "Email:"
+              - link "info@Brpl.net" [ref=e663] [cursor=pointer]:
+                - /url: mailto:info@Brpl.net
+            - generic [ref=e664]: Address:Ground Floor, Suite G-01, Procapitus Business Park, D-247/4A, D Block, Sector 63, Noida, Uttar Pradesh 201309
+          - generic [ref=e665]:
+            - link "Facebook" [ref=e666] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61584782136820
+              - img "Facebook" [ref=e667]
+            - link "Twitter" [ref=e668] [cursor=pointer]:
+              - /url: https://x.com/BrplOfficial
+              - img "Twitter" [ref=e669]
+            - link "Instagram" [ref=e670] [cursor=pointer]:
+              - /url: https://www.instagram.com/Brpl.t10
+              - img "Instagram" [ref=e671]
+      - generic [ref=e673]: © Copyright 2026 | All Rights Reserved by Brpl
+  - alert [ref=e679]
+  - generic [ref=e682] [cursor=pointer]:
+    - img [ref=e683]
+    - generic [ref=e685]: 1 error
+    - button "Hide Errors" [ref=e686]:
+      - img [ref=e687]
+  - generic [ref=e694]:
+    - button "Close chat" [ref=e695] [cursor=pointer]:
+      - img [ref=e696]
+    - generic [ref=e699]:
+      - generic [ref=e700]:
+        - heading "Start a Conversation" [level=3] [ref=e701]
+        - paragraph [ref=e702]: Please enter your details to chat with us
+      - generic [ref=e703]:
+        - generic [ref=e704]: Your Name
+        - textbox "John Doe" [ref=e705]
+        - generic [ref=e706]: Phone Number
+        - textbox "9876543210" [ref=e707]
+        - button "Start Chat" [ref=e708] [cursor=pointer]

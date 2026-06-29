@@ -13,12 +13,14 @@ if (!URI || URI.startsWith("dev-placeholder-")) {
   process.exit(1);
 }
 
-// Ensure the URI includes a database name
+// Strip trailing slash so Mongoose doesn't default to "test"
+// when the URI has no database name. We explicitly specify the DB.
+const DB_NAME = process.env.SEED_DB || "brpl";
 if (!URI.endsWith("/")) {
   URI = URI.replace(/\/?$/, "/");
 }
 if (URI.endsWith("/")) {
-  URI = URI + "brpl";
+  URI = URI + DB_NAME;
 }
 
 console.log(`🔌 Connecting to MongoDB...`);

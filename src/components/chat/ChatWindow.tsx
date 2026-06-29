@@ -12,16 +12,56 @@ interface Message {
 
 interface ChatWindowProps {
   leadId: string;
+  setLeadId: (id: string) => void;
   name: string;
   phone: string;
-  initialMessages?: Message[];
+  onReset: () => void;
 }
 
-export function ChatWindow({ leadId, name, phone, initialMessages = [] }: ChatWindowProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+export function ChatWindow({ leadId, setLeadId, name, phone, onReset }: ChatWindowProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation history on mount
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const params = new URLSearchParams();
+        if (leadId) params.set("leadId", leadId);
+        else params.set("phone", phone);
+
+        const res = await fetch(`/api/chat/conversation?${params.toString()}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        // If we had no leadId but got one back, persist it
+        if (!leadId && data.leadId) {
+          setLeadId(data.leadId);
+        }
+
+        if (data.conversation && data.conversation.length > 0) {
+          // Normalise timestamps to ISO strings
+          const conv = data.conversation.map((m: any) => ({
+            role: m.role,
+            message: m.message,
+            timestamp: m.timestamp
+              ? new Date(m.timestamp).toISOString()
+              : new Date().toISOString(),
+          }));
+          setMessages(conv);
+        }
+      } catch (err) {
+        console.error("[ChatWindow] loadHistory error:", err);
+      } finally {
+        setHistoryLoaded(true);
+      }
+    }
+    void loadHistory();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -51,6 +91,11 @@ export function ChatWindow({ leadId, name, phone, initialMessages = [] }: ChatWi
 
       if (!res.ok) {
         throw new Error(data?.error || "Request failed");
+      }
+
+      // Persist leadId returned from server
+      if (data.leadId && data.leadId !== leadId) {
+        setLeadId(data.leadId);
       }
 
       const aiMsg: Message = {
@@ -97,15 +142,31 @@ export function ChatWindow({ leadId, name, phone, initialMessages = [] }: ChatWi
               Online
             </p>
           </div>
+          {/* Reset button — back to NamePhoneForm */}
+          <button
+            onClick={onReset}
+            aria-label="New conversation"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center shrink-0"
+            title="Start new conversation"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
         </div>
       </div>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-white">
-        {messages.length === 0 && (
+        {historyLoaded && messages.length === 0 && (
           <div className="text-center mt-12 px-6">
             <p className="text-gray-900 font-medium text-sm mb-1">Hello {name}!</p>
             <p className="text-gray-500 text-sm">How can we help you today?</p>
+          </div>
+        )}
+        {!historyLoaded && (
+          <div className="text-center mt-12">
+            <p className="text-gray-400 text-sm">Loading conversation...</p>
           </div>
         )}
         {messages.map((m, i) => (

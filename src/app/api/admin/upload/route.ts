@@ -4,8 +4,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { connectDB } from "@/lib/mongodb";
 import AdminUser from "@/models/AdminUser";
-import { getAdminCookie } from "@/lib/auth/cookies";
-import type { IAdminUser } from "@/models/AdminUser";
+import { getAdminSession } from "@/lib/jwt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,20 +12,16 @@ export const dynamic = "force-dynamic";
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"];
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
-async function adminLookup(id: string): Promise<IAdminUser | null> {
-    await connectDB();
-    const doc = await AdminUser.findById(id).lean();
-    return doc as unknown as IAdminUser | null;
-}
-
 export async function POST(req: NextRequest) {
     try {
-        // Auth check: getAdminCookie is async in this codebase
-        const cookie = await getAdminCookie();
-        if (!cookie) {
+        // Auth: verify the admin JWT from cookie and extract the admin ID
+        const session = await getAdminSession();
+        if (!session) {
             return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
-        const admin = await adminLookup(cookie);
+
+        await connectDB();
+        const admin = await AdminUser.findById(session.sub).lean();
         if (!admin) {
             return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
