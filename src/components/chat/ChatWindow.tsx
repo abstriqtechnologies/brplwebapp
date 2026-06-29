@@ -1,7 +1,7 @@
 // src/components/chat/ChatWindow.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 
@@ -45,8 +45,6 @@ function useTypingEffect(fullText: string, isTyping: boolean, speed = 18) {
 
 export function ChatWindow({ leadId, name, greetingMessage, initialConversation = [] }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    // If a greeting exists, prime the chat with an AI message already so the
-    // typing indicator plays as soon as the chat opens.
     if (greetingMessage) {
       return [
         {
@@ -60,8 +58,6 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
   });
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  // Track which AI messages still need to animate. We initialize with the
-  // greeting (if any) so the very first message also types out.
   const [pendingAIMessages, setPendingAIMessages] = useState<Set<number>>(() => {
     const s = new Set<number>();
     if (greetingMessage) s.add(0);
@@ -69,9 +65,28 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Keep a ref of the latest messages so async work in sendMessage
+  // doesn't see stale state from an earlier render (this was the cause of
+  // duplicate / out-of-order inserts).
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, pendingAIMessages]);
+
+  const completeAIMessage = useCallback((idx: number, finalText: string) => {
+    setMessages((prev) =>
+      prev.map((m, i) => (i === idx ? { ...m, message: finalText } : m))
+    );
+    setPendingAIMessages((prev) => {
+      const next = new Set(prev);
+      next.delete(idx);
+      return next;
+    });
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || isTyping) return;
@@ -82,7 +97,10 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
       timestamp: new Date(),
     };
 
-    const userIndex = messages.length;
+    // Use ref snapshot for the index so rapid-fire messages don't collide.
+    const userIndex = messagesRef.current.length;
+    // Use the updater form (functional setState) so concurrent sends don't
+    // clobber each other's optimistic insert.
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
@@ -104,14 +122,16 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
         throw new Error(data.error || "Failed to get response");
       }
 
+      const aiReply = data.reply;
       const aiMessage: ChatMessage = {
         role: "ai",
-        message: data.reply || "I'm sorry, I couldn't generate a response.",
+        message: aiReply && aiReply.trim()
+          ? aiReply
+          : "I'm sorry, I couldn't generate a response right now.",
         timestamp: new Date(),
       };
 
-      const newMessages = [...messages, userMessage, aiMessage];
-      setMessages(newMessages);
+      setMessages((prev) => [...prev, aiMessage]);
       setPendingAIMessages((prev) => {
         const next = new Set(prev);
         next.add(userIndex + 1);
@@ -119,13 +139,15 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
       });
     } catch (err) {
       console.error("Chat send error:", err);
+      // If the network request itself failed, surface a user-visible error.
+      // We deliberately do NOT also re-insert the userMessage here because
+      // the optimistic insert above already added it.
       const errorMessage: ChatMessage = {
         role: "ai",
         message: "Sorry, something went wrong. Please try again.",
         timestamp: new Date(),
       };
-      const newMessages = [...messages, userMessage, errorMessage];
-      setMessages(newMessages);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -136,17 +158,6 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
       e.preventDefault();
       sendMessage();
     }
-  };
-
-  const completeAIMessage = (idx: number, finalText: string) => {
-    setMessages((prev) =>
-      prev.map((m, i) => (i === idx ? { ...m, message: finalText } : m))
-    );
-    setPendingAIMessages((prev) => {
-      const next = new Set(prev);
-      next.delete(idx);
-      return next;
-    });
   };
 
   return (
@@ -241,11 +252,6 @@ export function ChatWindow({ leadId, name, greetingMessage, initialConversation 
   );
 }
 
-/**
- * Wrapper around MessageBubble that handles the per-message typing animation.
- * For user messages, renders the bubble as-is. For AI messages that are still
- * "pending", gradually reveals the text and calls `onComplete` when done.
- */
 function AnimatedAIMessage({
   message,
   isTyping,

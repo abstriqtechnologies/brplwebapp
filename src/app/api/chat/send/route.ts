@@ -49,8 +49,10 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `You are a helpful assistant for BRPL. Be precise and humble. Answer based on the context provided below. If you cannot answer a user's question based on the context, reply with: "I'm sorry, I don't have enough information to answer that. Let me transfer you to a support agent who can help." Do not make up information.
 
+For simple greetings like "Hi", "Hello", "Hey", or short pleasantries, just respond warmly without invoking the support-agent fallback.
+
 Context:
-${contextText || "No specific context provided."}`;
+${contextText || "No specific context provided yet. For general greetings, reply with a brief friendly hello."}`;
 
     // Build conversation history for OpenAI
     const conversationHistory = lead.conversation.map((msg: any) => ({
