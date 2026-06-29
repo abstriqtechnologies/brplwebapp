@@ -90,9 +90,12 @@ export const GET = withRequest(
         getAdminCookie,
         lookup: adminLookup,
         allowedRoles: ["superadmin"],
-    })(async ({ params }: any) => {
+    })(async ({ req }: { req: Request }) => {
         await connectDB();
-        const key = params.key.toLowerCase().trim();
+        // Next.js App Router: extract [key] from URL pathname
+        const url = new URL(req.url);
+        const segments = url.pathname.split("/").filter(Boolean);
+        const key = (segments[segments.length - 1] || "").toLowerCase().trim();
         const config = PAGE_REGISTRY[key];
         if (!config) throw new BadRequestError(`Unknown page key: ${key}`);
 
@@ -114,9 +117,12 @@ export const PATCH = withRequest(
         getAdminCookie,
         lookup: adminLookup,
         allowedRoles: ["superadmin"],
-    })(async ({ req, params }: any) => {
+    })(async ({ req }: { req: Request }) => {
         await connectDB();
-        const key = params.key.toLowerCase().trim();
+        // Next.js App Router: extract [key] from URL pathname
+        const url = new URL(req.url);
+        const segments = url.pathname.split("/").filter(Boolean);
+        const key = (segments[segments.length - 1] || "").toLowerCase().trim();
         const config = PAGE_REGISTRY[key];
         if (!config) throw new BadRequestError(`Unknown page key: ${key}`);
 
